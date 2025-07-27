@@ -1,0 +1,48 @@
+[
+  {
+    "schema_id": "employee",
+    "traits": {
+      "email": "fluffly.app@gmail.com",
+      "first_name": "fluffly",
+      "last_name": "Admin"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "fluffly.app@gmail.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$xmzfX9ECg7zwmrg4FRpdIOavLYYJ.g/ZgGQFs3R8AzErs0rG9TmzK"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "employee",
+    "traits": {
+      "email": "dankopetrovic.bgd@gmail.com",
+      "first_name": "Danko",
+      "last_name": "Petrovic"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "dankopetrovic.bgd@gmail.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$4tph7DLHJCkcj7mggYK/vuZXCkTTMywyj76G2IltYyDDqoGBal2fO"
+        }
+      }
+    }
+  }
+]

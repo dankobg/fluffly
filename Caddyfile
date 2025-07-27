@@ -1,0 +1,3 @@
+fluffly-dev.xyz {
+    reverse_proxy /auth* kratos:4433
+}

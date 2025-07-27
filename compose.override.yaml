@@ -1,0 +1,277 @@
+x-logging: &dev-logging
+  driver: "json-file"
+  options:
+    max-file: "5"
+    max-size: "10M"
+    tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+
+x-healthcheck: &dev-healthcheck
+  interval: 30s
+  timeout: 5s
+  retries: 5
+  start_interval: 200ms
+  start_period: 10s
+
+services:
+  # ----------------------------------------------------------------------------
+  # web:
+  #   environment:
+  #     - ENV=development
+  #     - WEB_PORT=${WEB_PORT:-3974}
+  #   ports:
+  #     - "${WEB_PORT:-3974}:3974"
+  #   develop:
+  #     watch:
+  #       - action: sync
+  #         x-initialSync: true
+  #         path: ./web
+  #         target: /app
+  #         ignore:
+  #           - "./web/node_modules/"
+  #       - action: rebuild
+  #         path: ./web/package.json
+  #       - action: rebuild
+  #         path: ./web/vite.config.ts
+  #       - action: rebuild
+  #         path: ./web/svelte.config.js
+  #   healthcheck:
+  #     <<: *dev-healthcheck
+  #     test:
+  #       [
+  #         "CMD",
+  #         "wget",
+  #         "--no-verbose",
+  #         "--tries=1",
+  #         "--spider",
+  #         "http://localhost:${WEB_PORT:-3974}",
+  #       ]
+  #   labels:
+  #     - traefik.enable=true
+  #     - traefik.http.routers.web.rule=Host(`fluffly-dev.xyz`)
+  #     - traefik.http.routers.web.tls=true
+  #     - traefik.http.routers.web.service=web@docker
+  #     - traefik.http.services.web.loadbalancer.server.port=3974
+  # ----------------------------------------------------------------------------
+  # fluffly:
+  #   # command: /go/bin/dlv --api-version=2 --listen=:2345 --headless --accept-multiclient --log debug "./main.go" # UNCOMMENT WHEN DEBUGGING
+  #   environment:
+  #     - ENV=development
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "${PORT:-6969}:6969"
+  #     - "${DELVE_PORT:-2345}:2345"
+  #   security_opt:
+  #     - "seccomp:unconfined"
+  #     - "apparmor:unconfined"
+  #   cap_add:
+  #     - SYS_PTRACE
+  #   logging: *dev-logging
+  #   healthcheck:
+  #     <<: *dev-healthcheck
+  #     test:
+  #       [
+  #         "CMD",
+  #         "wget",
+  #         "--no-verbose",
+  #         "--tries=1",
+  #         "--spider",
+  #         "http://localhost:${PORT:-6969}/api/v1/health/alive",
+  #       ]
+  #   develop:
+  #     watch:
+  #       - action: sync+restart
+  #         x-initialSync: true
+  #         path: ./
+  #         target: /app
+  #         ignore:
+  #           - ".vscode/"
+  #           - ".github/"
+  #           - "web/"
+  #           - "k8s/"
+  #           - "certs/"
+  #           - "docker/"
+  #           - "proto/"
+  #       - action: rebuild
+  #         path: go.mod
+  #   labels:
+  #     # Rest api
+  #     - traefik.enable=true
+  #     - traefik.http.routers.fluffly.rule=Host(`fluffly-dev.xyz`) && PathPrefix(`/api`)
+  #     - traefik.http.routers.fluffly.tls=true
+  #     - traefik.http.routers.fluffly.service=fluffly@docker
+  #     - traefik.http.services.fluffly.loadbalancer.server.port=${PORT:-6969}
+  #     # Websocket
+  #     - traefik.http.routers.fluffly-ws.rule=Host(`fluffly-dev.xyz`) && Path(`/ws`)
+  #     - traefik.http.routers.fluffly-ws.tls=true
+  #     - traefik.http.routers.fluffly-ws.service=fluffly-ws@docker
+  #     - traefik.http.services.fluffly-ws.loadbalancer.server.port=${PORT:-6969}
+  #     - traefik.http.services.fluffly-ws.loadbalancer.sticky=true
+  # ----------------------------------------------------------------------------
+  pg:
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST:-pg}
+      - POSTGRES_USER=${POSTGRES_USER:-test}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-test}
+      - POSTGRES_DB=${POSTGRES_DB:-test}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    logging: *dev-logging
+    healthcheck:
+      <<: *dev-healthcheck
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${POSTGRES_DB:-test}",
+          "-U",
+          "${POSTGRES_USER:-test}",
+        ]
+  # ----------------------------------------------------------------------------
+  # redis:
+  #   environment:
+  #     - ENV=development
+  #     - REDIS_HOST=${REDIS_HOST:-redis}
+  #     - REDIS_PORT=${REDIS_PORT:-6379}
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #   logging: *dev-logging
+  #   healthcheck:
+  #     <<: *dev-healthcheck
+  #     test: ["CMD", "redis-cli", "ping"]
+  # ----------------------------------------------------------------------------
+  kratos:
+    environment:
+      - ENV=development
+    env_file:
+      - .env
+    command: "serve --watch-courier --config /etc/config/kratos/kratos.yaml --dev"
+    ports:
+      - "${KRATOS_PUBLIC_PORT:-4433}:4433"
+      - "${KRATOS_ADMIN_PORT:-4434}:4434"
+    logging: *dev-logging
+    healthcheck:
+      <<: *dev-healthcheck
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${KRATOS_PUBLIC_PORT:-4433}/health/alive",
+        ]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kratos.rule=Host(`fluffly-dev.xyz`) && PathPrefix(`/kratos`)
+      - traefik.http.routers.kratos.tls=true
+      - traefik.http.routers.kratos.service=kratos@docker
+      - traefik.http.services.kratos.loadbalancer.server.port=4433
+      - traefik.http.middlewares.kratos-stripprefix.stripprefix.prefixes=/kratos
+      - traefik.http.middlewares.kratos-stripprefix.stripprefix.forceSlash=false
+      - traefik.http.routers.kratos.middlewares=kratos-stripprefix@docker
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  # ----------------------------------------------------------------------------
+  kratos-migrate:
+    environment:
+      - ENV=development
+    env_file:
+      - .env
+    logging: *dev-logging
+  # ----------------------------------------------------------------------------
+  keto:
+    environment:
+      - ENV=development
+    env_file:
+      - .env
+    ports:
+      - "${SERVE_READ_PORT:-4466}:4466"
+      - "${SERVE_WRITE_PORT:-4467}:4467"
+    logging: *dev-logging
+    healthcheck:
+      <<: *dev-healthcheck
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${SERVE_READ_PORT:-4466}/health/alive",
+        ]
+  # ----------------------------------------------------------------------------
+  keto-migrate:
+    environment:
+      - ENV=development
+    env_file:
+      - .env
+    logging: *dev-logging
+  # ----------------------------------------------------------------------------
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      - ENV=development
+      - MP_MAX_MESSAGES=5000
+      - MP_DATA_FILE=/data/mailpit.db
+      - MP_SMTP_AUTH_ACCEPT_ANY=1
+      - MP_SMTP_AUTH_ALLOW_INSECURE=1
+    volumes:
+      - mailpit-data:/data
+    ports:
+      - 8025:8025
+      - 1025:1025
+    networks:
+      - intranet
+    logging: *dev-logging
+    healthcheck:
+      <<: *dev-healthcheck
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:${MAILPIT_PORT:-8025}/livez",
+        ]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mailpit.rule=Host(`mail.fluffly-dev.xyz`)
+      - traefik.http.routers.mailpit.tls=true
+      - traefik.http.routers.mailpit.service=mailpit@docker
+      - traefik.http.services.mailpit.loadbalancer.server.port=8025
+  # ----------------------------------------------------------------------------
+  # traefik:
+  #   image: traefik:v3.2
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"
+  #   restart: unless-stopped
+  #   security_opt:
+  #     - no-new-privileges:true
+  #   networks:
+  #     - intranet
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./traefik/static.yaml:/etc/traefik/traefik.yaml:ro
+  #     - ./traefik/dynamic.yaml:/etc/traefik/dynamic.yaml:ro
+  #     - ./certs:/etc/certs:ro
+  #   logging: *dev-logging
+  #   healthcheck:
+  #     <<: *dev-healthcheck
+  #     test: ["CMD", "traefik", "healthcheck", "--ping"]
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.traefik=true"
+  #     - "traefik.http.routers.traefik.tls=true"
+  #     - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+  # ----------------------------------------------------------------------------
+
+volumes:
+  mailpit-data:

@@ -1,0 +1,15 @@
+meta {
+  name: Get Animal Breeds
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/types/:type/breeds
+  body: none
+  auth: inherit
+}
+
+params:path {
+  type: Barnyard
+}

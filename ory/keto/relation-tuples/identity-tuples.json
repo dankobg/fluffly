@@ -1,0 +1,32 @@
+[
+  {
+    "namespace": "Identities",
+    "object": "identities/",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customers",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Identities",
+    "object": "identities/",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "employees",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Identities",
+    "object": "identities/",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "employees",
+      "relation": "members"
+    }
+  }
+]

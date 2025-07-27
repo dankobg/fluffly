@@ -1,0 +1,163 @@
+name: ✨ Fluffly chess workflow
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+
+jobs:
+  lint:
+    name: 📏 Lint the code
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Checkout repo code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📏 Lint code with golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  test:
+    name: 🧪 Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Checkout repo code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧪 Run tests with coverage and race condition flag
+        run: go test -race -coverprofile coverage.txt -v ./...
+
+      - name: Upload test coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: ./coverage.txt
+
+  # coverage:
+  #   name: 🧪 Upload test coverage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download test coverage file
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: coverage
+  #         path: ./coverage/reports/
+
+  #     - name: Upload coverage to Codecov
+  #       uses: codecov/codecov-action@v3
+  #       with:
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         directory: ./coverage/reports/
+  #         files: ./coverage.txt
+  #         name: codecov-umbrella
+  #         verbose: true
+
+  # - name: Upload coverage to CodeClimate
+  #   uses: paambaati/codeclimate-action@v4.0.0
+  #   env:
+  #     CC_TEST_REPORTER_ID:${{ secrets.CC_TEST_REPORTER_ID }}
+  #   with:
+  #     coverageCommand: go test -coverprofile=coverage.txt -v ./...
+  #     coverageLocations: ${{github.workspace}}/coverage.txt:gocov
+  #     prefix: github.com/dankobg/fluffly
+
+  quality:
+    name: 🧪 Analyze code quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚚 Checkout repo code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+
+  publish:
+    name: 🎉 Build and deploy fluffly chess
+    runs-on: ${{ matrix.platform }}
+    needs: [lint, test]
+
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+        go-version: [1.24.x]
+
+    steps:
+      - name: 🚚 Checkout repo code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          check-latest: false
+
+      - name: 🔑 Login to GitHub container registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}
+
+      - name: 🖨️ Show image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: 📌 Publish release with GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+  # deploy:
+  #   name: 🧪 Deploy new version
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   steps:
+  #     - name: 📂 Deploy new version to VPS
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.REMOTE_HOST }}
+  #         username: ${{ secrets.REMOTE_USER }}
+  #         key: ${{ secrets.REMOTE_KEY }}
+  #         port: ${{ secrets.REMOTE_PORT }}
+  #         script: |
+  #           cd fluffly
+  #           echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+  #           rm -f .env.production
+  #           touch .env.production
+  #           chmod u+w .env.production
+  #           echo "${{ secrets.APP_ENV_PRODUCTION_SECRETS }}" | base64 -d > .env.production
+  #           git pull
+  #           docker rmi -f ghcr.io/dankobg/fluffly:latest
+  #           docker compose --env-file .env.production -f docker-compose.yaml -f docker-compose.prod.yaml pull fluffly
+  #           docker compose --env-file .env.production -f docker-compose.yaml -f docker-compose.prod.yaml stop fluffly
+  #           docker compose --env-file .env.production -f docker-compose.yaml -f docker-compose.prod.yaml rm -f fluffly
+  #           docker-compose --env-file .env.production -f docker-compose.yaml -f docker-compose.prod.yaml up -d --no-deps --force-recreate --build fluffly
+  #           docker system prune -a -f
+  #           sudo rm -f .env.production

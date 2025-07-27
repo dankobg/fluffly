@@ -1,0 +1,99 @@
+services:
+  # ----------------------------------------------------------------------------
+  # web:
+  #   build:
+  #     context: ./web
+  #     dockerfile: Dockerfile
+  #   restart: unless-stopped
+  #   networks:
+  #     - intranet
+  # ----------------------------------------------------------------------------
+  # fluffly:
+  #   build:
+  #     context: ./
+  #     dockerfile: docker/app.dockerfile
+  #   restart: unless-stopped
+  #   networks:
+  #     - intranet
+  #   depends_on:
+  #     pg:
+  #       condition: service_healthy
+  # ----------------------------------------------------------------------------
+  pg:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - intranet
+  # ----------------------------------------------------------------------------
+  # redis:
+  #   image: redis:8.0.3-alpine
+  #   restart: on-failure
+  #   # command: redis-server --include /usr/local/etc/redis/redis.conf # UNCOMMENT IF USING CUSTOM REDIS CONF
+  #   volumes:
+  #     - redis-data:/data
+  #     # - ./redis/redis.conf:/usr/local/etc/redis/redis.conf # UNCOMMENT IF USING CUSTOM REDIS CONF
+  #   networks:
+  #     - intranet
+  # ----------------------------------------------------------------------------
+  kratos:
+    image: oryd/kratos:v1.3.1
+    restart: unless-stopped
+    command: "serve --watch-courier --config /etc/config/kratos/kratos.yaml"
+    volumes:
+      - ./ory/kratos:/etc/config/kratos
+    networks:
+      - intranet
+    depends_on:
+      pg:
+        condition: service_healthy
+      kratos-migrate:
+        condition: service_completed_successfully
+  # ----------------------------------------------------------------------------
+  kratos-migrate:
+    image: oryd/kratos:v1.3.1
+    restart: on-failure
+    volumes:
+      - ./ory/kratos:/etc/config/kratos
+    command: "migrate sql --read-from-env --config /etc/config/kratos/kratos.yaml --yes"
+    networks:
+      - intranet
+    depends_on:
+      pg:
+        condition: service_healthy
+  # ----------------------------------------------------------------------------
+  keto:
+    image: oryd/keto:v0.14.0
+    restart: unless-stopped
+    volumes:
+      - ./ory/keto:/etc/config/keto
+    command: "serve -c /etc/config/keto/keto.yaml all"
+    networks:
+      - intranet
+    depends_on:
+      pg:
+        condition: service_healthy
+      keto-migrate:
+        condition: service_completed_successfully
+  # ----------------------------------------------------------------------------
+  keto-migrate:
+    image: oryd/keto:v0.14.0
+    restart: on-failure
+    volumes:
+      - ./ory/keto:/etc/config/keto
+    command: "migrate up -c /etc/config/keto/keto.yaml --yes"
+    networks:
+      - intranet
+    depends_on:
+      pg:
+        condition: service_healthy
+  # ----------------------------------------------------------------------------
+
+volumes:
+  pg-data:
+  # redis-data:
+
+networks:
+  intranet:
+    driver: bridge

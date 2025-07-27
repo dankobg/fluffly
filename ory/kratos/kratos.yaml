@@ -1,0 +1,243 @@
+version: v1.3.1
+
+dsn: postgres://test:test@pg:5432/test?sslmode=disable&max_conns=20&max_idle_conns=4
+
+serve:
+  public:
+    base_url: http://localhost:4433/
+    cors:
+      enabled: true
+      debug: true
+      allow_credentials: true
+      options_passthrough: true
+      max_age: 0
+      allowed_origins:
+        - http://localhost:3974
+        - https://fluffly-dev.xyz
+      allowed_methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+        - HEAD
+      allowed_headers:
+        - Content-Type
+        - Authorization
+        - Cookie
+        - Origin
+        - X-Session-Token
+        - Accept
+      exposed_headers:
+        - Content-Type
+        - Set-Cookie
+        - Accept
+  admin:
+    base_url: http://localhost:4434/
+
+selfservice:
+  default_browser_return_url: http://localhost:3974
+  allowed_return_urls:
+    - http://localhost:3974
+    - http://localhost:3974/dashboard
+    - http://localhost:3974/auth/login
+  methods:
+    password:
+      enabled: true
+      config:
+        haveibeenpwned_host: api.pwnedpasswords.com
+        haveibeenpwned_enabled: true
+        max_breaches: 0
+        ignore_network_errors: true
+        min_password_length: 8
+        identifier_similarity_check_enabled: true
+    profile:
+      enabled: true
+    link:
+      enabled: true
+      config:
+        lifespan: 15m
+    code:
+      enabled: true
+      config:
+        lifespan: 15m
+    totp:
+      enabled: true
+      config:
+        issuer: fluffly-dev.xyz
+    lookup_secret:
+      enabled: true
+    oidc:
+      enabled: true
+      config:
+        base_redirect_uri: http://localhost:4433/
+
+  flows:
+    error:
+      ui_url: http://localhost:3974/error
+    settings:
+      ui_url: http://localhost:3974/dashboard/account
+      privileged_session_max_age: 1m
+      required_aal: highest_available
+    recovery:
+      enabled: true
+      ui_url: http://localhost:3974/auth/recovery
+      use: code
+      after:
+        default_browser_return_url: http://localhost:3974/auth/login
+        hooks:
+          - hook: revoke_active_sessions
+    verification:
+      enabled: true
+      ui_url: http://localhost:3974/auth/verification
+      use: code
+      after:
+        default_browser_return_url: http://localhost:3974/auth/login
+    logout:
+      after:
+        default_browser_return_url: http://localhost:3974
+    login:
+      ui_url: http://localhost:3974/auth/login
+      lifespan: 10m
+      after:
+        password:
+          hooks:
+            - hook: require_verified_address
+        oidc:
+          default_browser_return_url: http://localhost:3974
+    registration:
+      enable_legacy_one_step: true
+      ui_url: http://localhost:3974/auth/registration
+      lifespan: 10m
+      after:
+        default_browser_return_url: http://localhost:3974/auth/login
+        password:
+          default_browser_return_url: http://localhost:3974/auth/login
+          hooks:
+            - hook: web_hook
+              config:
+                method: POST
+                url: http://host.docker.internal:6969/api/v1/webhooks/kratos/registration_after_password
+                body: file:///etc/config/kratos/hooks/registration.after.password.jsonnet
+                response:
+                  ignore: false
+                  parse: false
+                auth:
+                  type: api_key
+                  config:
+                    in: header
+                    name: Authorization
+                    value: v3Ry_s3Cr3t_tExT_kr4t0s
+        oidc:
+          default_browser_return_url: http://localhost:3974
+          hooks:
+            - hook: web_hook
+              config:
+                method: POST
+                url: http://host.docker.internal:6969/api/v1/webhooks/kratos/registration_after_oidc
+                body: file:///etc/config/kratos/hooks/registration.after.oidc.jsonnet
+                response:
+                  ignore: false
+                  parse: false
+                auth:
+                  type: api_key
+                  config:
+                    in: header
+                    name: Authorization
+                    value: v3Ry_s3Cr3t_tExT_kr4t0s
+
+secrets:
+  cookie:
+    - v3Ry_s3Cr3t_tExT
+
+session:
+  whoami:
+    required_aal: aal1
+  lifespan: 24h
+  cookie:
+    domain: localhost
+    same_site: Lax
+    path: /
+
+hashers:
+  argon2:
+    parallelism: 1
+    memory: 128MB
+    iterations: 1
+    salt_length: 16
+    key_length: 32
+
+identity:
+  default_schema_id: customer
+  schemas:
+    - id: customer
+      url: file:///etc/config/kratos/schemas/customer.identity.schema.json
+    - id: employee
+      url: file:///etc/config/kratos/schemas/employee.identity.schema.json
+
+courier:
+  message_retries: 5
+  smtp:
+    connection_uri: smtp://mailpit:1025?disable_starttls=true
+    from_name: fluffly
+    from_address: fluffly@fluffly.xyz
+  # template_override_path: /etc/config/kratos/courier-templates
+  # templates:
+  #   verification:
+  #     valid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/verification/valid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/verification/valid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/verification/valid/email.body.plaintext.tmpl
+  #     invalid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/verification/invalid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/verification/invalid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/verification/invalid/email.body.plaintext.tmpl
+  #   recovery:
+  #     valid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/recovery/valid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/recovery/valid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/recovery/valid/email.body.plaintext.tmpl
+  #     invalid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/recovery/invalid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/recovery/invalid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/recovery/invalid/email.body.plaintext.tmpl
+  #   recovery_code:
+  #     valid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/recovery_code/valid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/recovery_code/valid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/recovery_code/valid/email.body.plaintext.tmpl
+  #     invalid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/recovery_code/invalid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/recovery_code/invalid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/recovery_code/invalid/email.body.plaintext.tmpl
+  #   verification_code:
+  #     valid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/verification_code/valid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/verification_code/valid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/verification_code/valid/email.body.plaintext.tmpl
+  #     invalid:
+  #       email:
+  #         subject: file:///etc/config/kratos/courier-templates/verification_code/invalid/email.subject.tmpl
+  #         body:
+  #           html: file:///etc/config/kratos/courier-templates/verification_code/invalid/email.body.tmpl
+  #           plaintext: file:///etc/config/kratos/courier-templates/verification_code/invalid/email.body.plaintext.tmpl
+
+log:
+  level: debug
+  format: json
+  leak_sensitive_values: true

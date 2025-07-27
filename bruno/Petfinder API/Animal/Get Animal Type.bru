@@ -1,0 +1,15 @@
+meta {
+  name: Get Animal Type
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/types/:type
+  body: none
+  auth: inherit
+}
+
+params:path {
+  type: cat
+}

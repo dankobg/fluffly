@@ -1,0 +1,48 @@
+[
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "test@test.com",
+      "first_name": "Test",
+      "last_name": "Test"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "test@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$4tph7DLHJCkcj7mggYK/vuZXCkTTMywyj76G2IltYyDDqoGBal2fO"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "aleksandar.bogdanov@bancaintesa.rs",
+      "first_name": "Test",
+      "last_name": "Test"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "aleksandar.bogdanov@bancaintesa.rs",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$aYqPuHSbrGvnlMNRHwgGG.2mavzT.Y/s5Jb7IkmGTjsIGN.epgcWa"
+        }
+      }
+    }
+  }
+]
