@@ -1,6 +1,7 @@
 package server
 
 import (
+	"html/template"
 	"log/slog"
 
 	"github.com/dankobg/fluffly/auth/keto"
@@ -14,13 +15,14 @@ import (
 // var _ api.StrictServerInterface = (*ApiHandler)(nil)
 
 type ApiHandler struct {
-	Cfg       *config.Config
-	Log       *slog.Logger
-	Kratos    *kratos.Client
-	Keto      *keto.Client
-	Rdb       *redis.Client
-	persistor persistence.Persistor
-	Mailer    mailer.Mailer
+	Cfg        *config.Config
+	Log        *slog.Logger
+	Kratos     *kratos.Client
+	Keto       *keto.Client
+	Rdb        *redis.Client
+	persistor  persistence.Persistor
+	Mailer     mailer.Mailer
+	openapiTpl *template.Template
 }
 
 func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor) *ApiHandler {
@@ -32,4 +34,8 @@ func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto
 		persistor: p,
 		Mailer:    mailer,
 	}
+}
+
+func (a *ApiHandler) SetOpenapiTemplates(tpl *template.Template) {
+	a.openapiTpl = tpl
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"expvar"
+	"html/template"
 	"net/http"
 	"net/http/pprof"
 
@@ -47,18 +48,38 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	// @TODO: add rate limit mw
 
 	mux.HandleFunc("GET /api/v1/lol", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("lol route"))
 	})
 
 	mux.HandleFunc("POST /api/v1/webhooks/kratos/registration_after_password", a.registrationAfterPassword)
 	mux.HandleFunc("POST /api/v1/webhooks/kratos/registration_after_oidc", a.registrationAfterOidc)
 
-	oapiSchema, err := api.GetSwagger()
+	openapi, err := api.GetSwagger()
 	if err != nil {
-		panic("error loading swagger spec: " + err.Error())
+		panic("error loading openapi spec: " + err.Error())
 	}
-	oapiSchema.Servers = nil
+	openapi.Servers = nil
+
+	openapiB, err := openapi.MarshalJSON()
+	if err != nil {
+		panic("failed to marshal oapi schema to json: " + err.Error())
+	}
+	openapiTpl, err := template.ParseFS(data.MustTemplatesFS(), "openapi/*")
+	if err != nil {
+		panic("failed to parse openapi templates: " + err.Error())
+	}
+	a.SetOpenapiTemplates(openapiTpl)
+
+	mux.HandleFunc("GET /spec", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(openapiB)
+	})
+	mux.HandleFunc("GET /docs/rapidoc", a.openapiRapidocPage)
+	mux.HandleFunc("GET /docs/redoc", a.openapiRedocPage)
+	mux.HandleFunc("GET /docs/stoplight", a.openapiStoplightPage)
+	mux.HandleFunc("GET /docs/swagger", a.openapiSwaggerPage)
 
 	apiSrv := api.NewStrictHandler(a, make([]api.StrictMiddlewareFunc, 0))
 	oapiHandler := api.HandlerFromMuxWithBaseURL(apiSrv, mux, "/api/v1")

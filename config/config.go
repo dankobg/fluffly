@@ -29,6 +29,7 @@ type Fluffly struct {
 	Port            int    `koanf:"port"`
 	BaseURL         string `koanf:"base_url"`
 	WebsiteURL      string `koanf:"website_url"`
+	OpenapiSpecURL  string `koanf:"openapi_spec_url"`
 	KratosPublicURL string `koanf:"kratos_public_url"`
 	KratosAdminURL  string `koanf:"kratos_admin_url"`
 	KratosAPIKey    string `koanf:"kratos_api_key"`

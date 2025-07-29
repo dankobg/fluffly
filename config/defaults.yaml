@@ -3,6 +3,7 @@ host: localhost
 port: 6969
 base_url: http://localhost:6969
 website_url: http://localhost:3974
+openapi_spec_url: http://localhost:6969/spec
 kratos_public_url: http://localhost:4433
 kratos_admin_url: http://localhost:4434
 kratos_api_key: v3Ry_s3Cr3t_tExT_kr4t0s
