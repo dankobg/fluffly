@@ -9,21 +9,55 @@ create table "user" (
   primary key ("id")
 );
 
+create table "country" (
+  "id" bigint not null generated always as identity,
+  "name" text not null,
+  "iso_code" varchar(3) not null,
+  primary key ("id"),
+  constraint "uq_country_name" unique ("name"),
+  constraint "uq_country_iso_code" unique ("iso_code")
+);
+
+create table "address" (
+  "id" bigint not null generated always as identity,
+  "country_id" bigint,
+  "unit_number" varchar(255),
+  "street_number" varchar(255),
+  "address_line_1" varchar(255),
+  "address_line_2" varchar(255),
+  "city" varchar(255),
+  "region" varchar(255),
+  "postal_code" varchar(50),
+  "lat" decimal(9, 6),
+  "lng" decimal(9, 6),
+  "note" text,
+  primary key ("id"),
+  constraint "fk_address_country_id_country" foreign key ("country_id") references "country" ("id") on delete cascade
+);
+
+create table "contact" (
+  "id" bigint not null generated always as identity,
+  "user_id" uuid,
+  "organization_id" bigint,
+  "address_id" bigint not null,
+  "phone" varchar(30) not null,
+  "email" text not null,
+  "created_at" timestamptz not null default now(),
+  "updated_at" timestamptz not null default now(),
+  primary key ("id"),
+  constraint "fk_contact_address_id_animal" foreign key ("address_id") references "address" ("id") on delete cascade,
+  constraint "fk_contact_user_or_organization_present" check (
+    (user_id is not null and organization_id is null) or
+    (user_id is null and organization_id is not null)
+  )
+);
+
 create table "animal_type" (
   "id" bigint not null generated always as identity,
   "name" varchar(100) not null unique,
   primary key ("id")
 );
 
--- create table "animal_breed" (
--- "id" bigint not null generated always as identity,
--- "animal_type_id" bigint not null references animal_types(id) on delete cascade,
--- "primary" varchar(255) not null,
--- "secondary" varchar(255) not null,
--- "mixed" boolean not null,
--- unique(animal_type_id, name),
--- primary key ("id")
--- );
 create table "breed" (
   "id" bigint not null generated always as identity,
   "animal_type_id" bigint not null,
@@ -44,15 +78,8 @@ create table "animal_species" (
 
 create table "organization" (
   "id" bigint not null generated always as identity,
+  "contact_id" bigint not null,
   "name" varchar(255) not null,
-  "email" varchar(255) not null,
-  "phone" varchar(50) not null,
-  "address1" varchar(255),
-  "address2" varchar(255),
-  "city" varchar(255),
-  "state" varchar(10),
-  "postcode" varchar(20),
-  "country" varchar(10),
   "url" text,
   "website" text,
   "mission_statement" text,
@@ -64,19 +91,20 @@ create table "organization" (
   "youtube" text,
   "instagram" text,
   "pinterest" text,
-  primary key ("id")
+  primary key ("id"),
+  constraint "fk_organization_contact_id_contact" foreign key ("contact_id") references "contact" ("id") on delete cascade
 );
 
 create table "organization_hour" (
   "id" bigint not null generated always as identity,
   "organization_id" bigint,
-  "monday" text,
-  "tuesday" text,
-  "wednesday" text,
-  "thursday" text,
-  "friday" text,
-  "saturday" text,
-  "sunday" text,
+  "monday" varchar(30),
+  "tuesday" varchar(30),
+  "wednesday" varchar(30),
+  "thursday" varchar(30),
+  "friday" varchar(30),
+  "saturday" varchar(30),
+  "sunday" varchar(30),
   primary key ("id"),
   constraint fk_organization_hour_organization_id_organization foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
@@ -94,30 +122,29 @@ create table "organization_photo" (
 
 create table "animal" (
   "id" bigint not null generated always as identity,
-  "user_id" uuid,
-  "organization_id" bigint,
-  "name" varchar not null,
+  "contact_id" bigint not null,
+  "name" varchar(255) not null,
   "type_id" bigint not null,
   "breed_id" bigint not null,
   "species_id" bigint not null,
   "gender" gender,
   "hermaphrodite" boolean not null default false,
-  "age" varchar not null,
-  "coat_length" varchar,
-  "size" varchar not null,
-  "image_url" varchar not null,
+  "age" varchar(20) not null,
+  "coat_length" varchar(30),
+  "size" varchar(30) not null,
+  "image_url" text not null,
   "description" text,
   "adopted" boolean not null,
-  "status" varchar(50),
+  "status" varchar(30),
   "status_changed_at" timestamptz,
   "distance" varchar,
   adopted_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key ("id"),
-  constraint "fk_animal_user_id_user" foreign key ("user_id") references "user" ("id") on delete cascade,
-  constraint "fk_animal_organization_id_user" foreign key ("organization_id") references "organization" ("id") on delete set null
-
+  constraint "fk_animal_contact_id_contact" foreign key ("contact_id") references "contact" ("id") on delete cascade
+  
+  -- @TODO: handle properties unique for each species
   -- -- attributes
   -- spayed_neutered boolean default false,
   -- house_trained boolean default false,
@@ -150,22 +177,10 @@ create table user_animal_like (
   constraint "fk_user_animal_like_animal_id_user" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
-create table "contact" (
-  "id" bigint not null generated always as identity,
-  "animal_id" bigint,
-  "address_id" bigint not null,
-  "phone" varchar not null,
-  "email" varchar not null,
-  "created_at" timestamptz not null default now(),
-  "updated_at" timestamptz not null default now(),
-  primary key ("id"),
-  constraint "fk_contact_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
-);
-
 create table "tag" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "name" text,
+  "name" varchar(255),
   primary key ("id"),
   constraint "fk_tag_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
@@ -173,7 +188,7 @@ create table "tag" (
 create table "color" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "color" varchar not null,
+  "color" varchar(255) not null,
   primary key ("id"),
   constraint "fk_color_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
@@ -181,10 +196,10 @@ create table "color" (
 create table "microchip" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "number" varchar not null,
-  "brand" varchar,
-  "description" varchar,
-  "location" varchar,
+  "number" varchar(30) not null,
+  "brand" varchar(255),
+  "description" text,
+  "location" varchar(100),
   primary key ("id"),
   constraint "uq_microchip_animal" unique ("animal_id"),
   constraint "fk_microchip_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
@@ -219,29 +234,6 @@ create table "adoption" (
   primary key ("id"),
   constraint "fk_adoption_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade,
   constraint "fk_adoption_user_id_animal" foreign key ("user_id") references "user" ("id") on delete set null
-);
-
-create table "address" (
-  "id" bigint not null generated always as identity,
-  "country_id" bigint,
-  "unit_number" varchar(255),
-  "street_number" varchar(255),
-  "address_line_1" varchar(255),
-  "address_line_2" varchar(255),
-  "city" varchar(255),
-  "region" varchar(255),
-  "postal_code" varchar(20),
-  "lat" decimal(9, 6),
-  "lng" decimal(9, 6),
-  "note" text,
-  primary key ("id")
-);
-
-create table "country" (
-  "id" bigint not null generated always as identity,
-  "name" text not null,
-  "iso_code" varchar(3) not null,
-  primary key ("id")
 );
 -- +goose StatementEnd
 
