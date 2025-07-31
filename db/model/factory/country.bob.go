@@ -6,7 +6,9 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -34,13 +36,25 @@ func (mods CountryModSlice) Apply(ctx context.Context, n *CountryTemplate) {
 // CountryTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type CountryTemplate struct {
-	ID      func() int64
-	Name    func() string
-	IsoCode func() string
+	ID        func() int64
+	Name      func() string
+	IsoCode   func() string
+	CreatedAt func() time.Time
+	UpdatedAt func() time.Time
 
+	r countryR
 	f *Factory
 
 	alreadyPersisted bool
+}
+
+type countryR struct {
+	Addresses []*countryRAddressesR
+}
+
+type countryRAddressesR struct {
+	number int
+	o      *AddressTemplate
 }
 
 // Apply mods to the CountryTemplate
@@ -52,7 +66,20 @@ func (o *CountryTemplate) Apply(ctx context.Context, mods ...CountryMod) {
 
 // setModelRels creates and sets the relationships on *models.Country
 // according to the relationships in the template. Nothing is inserted into the db
-func (t CountryTemplate) setModelRels(o *models.Country) {}
+func (t CountryTemplate) setModelRels(o *models.Country) {
+	if t.r.Addresses != nil {
+		rel := models.AddressSlice{}
+		for _, r := range t.r.Addresses {
+			related := r.o.BuildMany(r.number)
+			for _, rel := range related {
+				rel.CountryID = null.From(o.ID) // h2
+				rel.R.Country = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Addresses = rel
+	}
+}
 
 // BuildSetter returns an *models.CountrySetter
 // this does nothing with the relationship templates
@@ -66,6 +93,14 @@ func (o CountryTemplate) BuildSetter() *models.CountrySetter {
 	if o.IsoCode != nil {
 		val := o.IsoCode()
 		m.IsoCode = omit.From(val)
+	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
 	}
 
 	return m
@@ -97,6 +132,12 @@ func (o CountryTemplate) Build() *models.Country {
 	}
 	if o.IsoCode != nil {
 		m.IsoCode = o.IsoCode()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -133,6 +174,26 @@ func ensureCreatableCountry(m *models.CountrySetter) {
 // any required relationship should have already exist on the model
 func (o *CountryTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Country) error {
 	var err error
+
+	isAddressesDone, _ := countryRelAddressesCtx.Value(ctx)
+	if !isAddressesDone && o.r.Addresses != nil {
+		ctx = countryRelAddressesCtx.WithValue(ctx, true)
+		for _, r := range o.r.Addresses {
+			if r.o.alreadyPersisted {
+				m.R.Addresses = append(m.R.Addresses, r.o.Build())
+			} else {
+				rel0, err := r.o.CreateMany(ctx, exec, r.number)
+				if err != nil {
+					return err
+				}
+
+				err = m.AttachAddresses(ctx, exec, rel0...)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	return err
 }
@@ -229,6 +290,8 @@ func (m countryMods) RandomizeAllColumns(f *faker.Faker) CountryMod {
 		CountryMods.RandomID(f),
 		CountryMods.RandomName(f),
 		CountryMods.RandomIsoCode(f),
+		CountryMods.RandomCreatedAt(f),
+		CountryMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -325,11 +388,121 @@ func (m countryMods) RandomIsoCode(f *faker.Faker) CountryMod {
 	})
 }
 
+// Set the model columns to this value
+func (m countryMods) CreatedAt(val time.Time) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m countryMods) CreatedAtFunc(f func() time.Time) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m countryMods) UnsetCreatedAt() CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m countryMods) RandomCreatedAt(f *faker.Faker) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m countryMods) UpdatedAt(val time.Time) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m countryMods) UpdatedAtFunc(f func() time.Time) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m countryMods) UnsetUpdatedAt() CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m countryMods) RandomUpdatedAt(f *faker.Faker) CountryMod {
+	return CountryModFunc(func(_ context.Context, o *CountryTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
 func (m countryMods) WithParentsCascading() CountryMod {
 	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
 		if isDone, _ := countryWithParentsCascadingCtx.Value(ctx); isDone {
 			return
 		}
 		ctx = countryWithParentsCascadingCtx.WithValue(ctx, true)
+	})
+}
+
+func (m countryMods) WithAddresses(number int, related *AddressTemplate) CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		o.r.Addresses = []*countryRAddressesR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m countryMods) WithNewAddresses(number int, mods ...AddressMod) CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		related := o.f.NewAddressWithContext(ctx, mods...)
+		m.WithAddresses(number, related).Apply(ctx, o)
+	})
+}
+
+func (m countryMods) AddAddresses(number int, related *AddressTemplate) CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		o.r.Addresses = append(o.r.Addresses, &countryRAddressesR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m countryMods) AddNewAddresses(number int, mods ...AddressMod) CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		related := o.f.NewAddressWithContext(ctx, mods...)
+		m.AddAddresses(number, related).Apply(ctx, o)
+	})
+}
+
+func (m countryMods) AddExistingAddresses(existingModels ...*models.Address) CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		for _, em := range existingModels {
+			o.r.Addresses = append(o.r.Addresses, &countryRAddressesR{
+				o: o.f.FromExistingAddress(em),
+			})
+		}
+	})
+}
+
+func (m countryMods) WithoutAddresses() CountryMod {
+	return CountryModFunc(func(ctx context.Context, o *CountryTemplate) {
+		o.r.Addresses = nil
 	})
 }

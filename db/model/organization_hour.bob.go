@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
@@ -33,6 +35,8 @@ type OrganizationHour struct {
 	Friday         null.Val[string] `db:"friday" `
 	Saturday       null.Val[string] `db:"saturday" `
 	Sunday         null.Val[string] `db:"sunday" `
+	CreatedAt      time.Time        `db:"created_at" `
+	UpdatedAt      time.Time        `db:"updated_at" `
 
 	R organizationHourR `db:"-" `
 }
@@ -62,6 +66,8 @@ type organizationHourColumnNames struct {
 	Friday         string
 	Saturday       string
 	Sunday         string
+	CreatedAt      string
+	UpdatedAt      string
 }
 
 var OrganizationHourColumns = buildOrganizationHourColumns("organization_hour")
@@ -77,6 +83,8 @@ type organizationHourColumns struct {
 	Friday         psql.Expression
 	Saturday       psql.Expression
 	Sunday         psql.Expression
+	CreatedAt      psql.Expression
+	UpdatedAt      psql.Expression
 }
 
 func (c organizationHourColumns) Alias() string {
@@ -99,6 +107,8 @@ func buildOrganizationHourColumns(alias string) organizationHourColumns {
 		Friday:         psql.Quote(alias, "friday"),
 		Saturday:       psql.Quote(alias, "saturday"),
 		Sunday:         psql.Quote(alias, "sunday"),
+		CreatedAt:      psql.Quote(alias, "created_at"),
+		UpdatedAt:      psql.Quote(alias, "updated_at"),
 	}
 }
 
@@ -112,6 +122,8 @@ type organizationHourWhere[Q psql.Filterable] struct {
 	Friday         psql.WhereNullMod[Q, string]
 	Saturday       psql.WhereNullMod[Q, string]
 	Sunday         psql.WhereNullMod[Q, string]
+	CreatedAt      psql.WhereMod[Q, time.Time]
+	UpdatedAt      psql.WhereMod[Q, time.Time]
 }
 
 func (organizationHourWhere[Q]) AliasedAs(alias string) organizationHourWhere[Q] {
@@ -129,6 +141,8 @@ func buildOrganizationHourWhere[Q psql.Filterable](cols organizationHourColumns)
 		Friday:         psql.WhereNull[Q, string](cols.Friday),
 		Saturday:       psql.WhereNull[Q, string](cols.Saturday),
 		Sunday:         psql.WhereNull[Q, string](cols.Sunday),
+		CreatedAt:      psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:      psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -157,10 +171,12 @@ type OrganizationHourSetter struct {
 	Friday         omitnull.Val[string] `db:"friday" `
 	Saturday       omitnull.Val[string] `db:"saturday" `
 	Sunday         omitnull.Val[string] `db:"sunday" `
+	CreatedAt      omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt      omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s OrganizationHourSetter) SetColumns() []string {
-	vals := make([]string, 0, 8)
+	vals := make([]string, 0, 10)
 	if !s.OrganizationID.IsUnset() {
 		vals = append(vals, "organization_id")
 	}
@@ -184,6 +200,12 @@ func (s OrganizationHourSetter) SetColumns() []string {
 	}
 	if !s.Sunday.IsUnset() {
 		vals = append(vals, "sunday")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -213,6 +235,12 @@ func (s OrganizationHourSetter) Overwrite(t *OrganizationHour) {
 	if !s.Sunday.IsUnset() {
 		t.Sunday = s.Sunday.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *OrganizationHourSetter) Apply(q *dialect.InsertQuery) {
@@ -221,7 +249,7 @@ func (s *OrganizationHourSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 8)
+		vals := make([]bob.Expression, 10)
 		if !s.OrganizationID.IsUnset() {
 			vals[0] = psql.Arg(s.OrganizationID.MustGetNull())
 		} else {
@@ -270,6 +298,18 @@ func (s *OrganizationHourSetter) Apply(q *dialect.InsertQuery) {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[8] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[8] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[9] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[9] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -279,7 +319,7 @@ func (s OrganizationHourSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s OrganizationHourSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 8)
+	exprs := make([]bob.Expression, 0, 10)
 
 	if !s.OrganizationID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -334,6 +374,20 @@ func (s OrganizationHourSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "sunday")...),
 			psql.Arg(s.Sunday),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

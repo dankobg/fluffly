@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
@@ -24,9 +26,11 @@ import (
 
 // Tag is an object representing the database table.
 type Tag struct {
-	ID       int64            `db:"id,pk,generated" `
-	AnimalID null.Val[int64]  `db:"animal_id" `
-	Name     null.Val[string] `db:"name" `
+	ID        int64            `db:"id,pk,generated" `
+	AnimalID  null.Val[int64]  `db:"animal_id" `
+	Name      null.Val[string] `db:"name" `
+	CreatedAt time.Time        `db:"created_at" `
+	UpdatedAt time.Time        `db:"updated_at" `
 
 	R tagR `db:"-" `
 }
@@ -47,9 +51,11 @@ type tagR struct {
 }
 
 type tagColumnNames struct {
-	ID       string
-	AnimalID string
-	Name     string
+	ID        string
+	AnimalID  string
+	Name      string
+	CreatedAt string
+	UpdatedAt string
 }
 
 var TagColumns = buildTagColumns("tag")
@@ -59,6 +65,8 @@ type tagColumns struct {
 	ID         psql.Expression
 	AnimalID   psql.Expression
 	Name       psql.Expression
+	CreatedAt  psql.Expression
+	UpdatedAt  psql.Expression
 }
 
 func (c tagColumns) Alias() string {
@@ -75,13 +83,17 @@ func buildTagColumns(alias string) tagColumns {
 		ID:         psql.Quote(alias, "id"),
 		AnimalID:   psql.Quote(alias, "animal_id"),
 		Name:       psql.Quote(alias, "name"),
+		CreatedAt:  psql.Quote(alias, "created_at"),
+		UpdatedAt:  psql.Quote(alias, "updated_at"),
 	}
 }
 
 type tagWhere[Q psql.Filterable] struct {
-	ID       psql.WhereMod[Q, int64]
-	AnimalID psql.WhereNullMod[Q, int64]
-	Name     psql.WhereNullMod[Q, string]
+	ID        psql.WhereMod[Q, int64]
+	AnimalID  psql.WhereNullMod[Q, int64]
+	Name      psql.WhereNullMod[Q, string]
+	CreatedAt psql.WhereMod[Q, time.Time]
+	UpdatedAt psql.WhereMod[Q, time.Time]
 }
 
 func (tagWhere[Q]) AliasedAs(alias string) tagWhere[Q] {
@@ -90,9 +102,11 @@ func (tagWhere[Q]) AliasedAs(alias string) tagWhere[Q] {
 
 func buildTagWhere[Q psql.Filterable](cols tagColumns) tagWhere[Q] {
 	return tagWhere[Q]{
-		ID:       psql.Where[Q, int64](cols.ID),
-		AnimalID: psql.WhereNull[Q, int64](cols.AnimalID),
-		Name:     psql.WhereNull[Q, string](cols.Name),
+		ID:        psql.Where[Q, int64](cols.ID),
+		AnimalID:  psql.WhereNull[Q, int64](cols.AnimalID),
+		Name:      psql.WhereNull[Q, string](cols.Name),
+		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -113,17 +127,25 @@ type tagErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type TagSetter struct {
-	AnimalID omitnull.Val[int64]  `db:"animal_id" `
-	Name     omitnull.Val[string] `db:"name" `
+	AnimalID  omitnull.Val[int64]  `db:"animal_id" `
+	Name      omitnull.Val[string] `db:"name" `
+	CreatedAt omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s TagSetter) SetColumns() []string {
-	vals := make([]string, 0, 2)
+	vals := make([]string, 0, 4)
 	if !s.AnimalID.IsUnset() {
 		vals = append(vals, "animal_id")
 	}
 	if !s.Name.IsUnset() {
 		vals = append(vals, "name")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -135,6 +157,12 @@ func (s TagSetter) Overwrite(t *Tag) {
 	if !s.Name.IsUnset() {
 		t.Name = s.Name.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *TagSetter) Apply(q *dialect.InsertQuery) {
@@ -143,7 +171,7 @@ func (s *TagSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 2)
+		vals := make([]bob.Expression, 4)
 		if !s.AnimalID.IsUnset() {
 			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
 		} else {
@@ -156,6 +184,18 @@ func (s *TagSetter) Apply(q *dialect.InsertQuery) {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[2] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[2] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[3] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[3] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -165,7 +205,7 @@ func (s TagSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s TagSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 2)
+	exprs := make([]bob.Expression, 0, 4)
 
 	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -178,6 +218,20 @@ func (s TagSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "name")...),
 			psql.Arg(s.Name),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

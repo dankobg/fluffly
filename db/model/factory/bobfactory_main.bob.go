@@ -70,6 +70,16 @@ func (f *Factory) FromExistingAddress(m *models.Address) *AddressTemplate {
 	o.Lat = func() null.Val[decimal.Decimal] { return m.Lat }
 	o.LNG = func() null.Val[decimal.Decimal] { return m.LNG }
 	o.Note = func() null.Val[string] { return m.Note }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
+
+	ctx := context.Background()
+	if m.R.Country != nil {
+		AddressMods.WithExistingCountry(m.R.Country).Apply(ctx, o)
+	}
+	if len(m.R.Contacts) > 0 {
+		AddressMods.AddExistingContacts(m.R.Contacts...).Apply(ctx, o)
+	}
 
 	return o
 }
@@ -99,6 +109,8 @@ func (f *Factory) FromExistingAdoption(m *models.Adoption) *AdoptionTemplate {
 	o.AdoptedAt = func() time.Time { return m.AdoptedAt }
 	o.ReturnedAt = func() null.Val[time.Time] { return m.ReturnedAt }
 	o.Notes = func() null.Val[string] { return m.Notes }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -131,12 +143,11 @@ func (f *Factory) FromExistingAnimal(m *models.Animal) *AnimalTemplate {
 	o := &AnimalTemplate{f: f, alreadyPersisted: true}
 
 	o.ID = func() int64 { return m.ID }
-	o.UserID = func() null.Val[uuid.UUID] { return m.UserID }
-	o.OrganizationID = func() null.Val[int64] { return m.OrganizationID }
-	o.Name = func() string { return m.Name }
+	o.ContactID = func() int64 { return m.ContactID }
 	o.TypeID = func() int64 { return m.TypeID }
 	o.BreedID = func() int64 { return m.BreedID }
 	o.SpeciesID = func() int64 { return m.SpeciesID }
+	o.Name = func() string { return m.Name }
 	o.Gender = func() null.Val[Gender] { return m.Gender }
 	o.Hermaphrodite = func() bool { return m.Hermaphrodite }
 	o.Age = func() string { return m.Age }
@@ -144,10 +155,9 @@ func (f *Factory) FromExistingAnimal(m *models.Animal) *AnimalTemplate {
 	o.Size = func() string { return m.Size }
 	o.ImageURL = func() string { return m.ImageURL }
 	o.Description = func() null.Val[string] { return m.Description }
-	o.Adopted = func() bool { return m.Adopted }
+	o.Distance = func() null.Val[string] { return m.Distance }
 	o.Status = func() null.Val[string] { return m.Status }
 	o.StatusChangedAt = func() null.Val[time.Time] { return m.StatusChangedAt }
-	o.Distance = func() null.Val[string] { return m.Distance }
 	o.AdoptedAt = func() null.Val[time.Time] { return m.AdoptedAt }
 	o.CreatedAt = func() time.Time { return m.CreatedAt }
 	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
@@ -156,11 +166,8 @@ func (f *Factory) FromExistingAnimal(m *models.Animal) *AnimalTemplate {
 	if len(m.R.Adoptions) > 0 {
 		AnimalMods.AddExistingAdoptions(m.R.Adoptions...).Apply(ctx, o)
 	}
-	if m.R.Organization != nil {
-		AnimalMods.WithExistingOrganization(m.R.Organization).Apply(ctx, o)
-	}
-	if m.R.User != nil {
-		AnimalMods.WithExistingUser(m.R.User).Apply(ctx, o)
+	if m.R.Contact != nil {
+		AnimalMods.WithExistingContact(m.R.Contact).Apply(ctx, o)
 	}
 	if len(m.R.AnimalBreeds) > 0 {
 		AnimalMods.AddExistingAnimalBreeds(m.R.AnimalBreeds...).Apply(ctx, o)
@@ -173,9 +180,6 @@ func (f *Factory) FromExistingAnimal(m *models.Animal) *AnimalTemplate {
 	}
 	if len(m.R.Colors) > 0 {
 		AnimalMods.AddExistingColors(m.R.Colors...).Apply(ctx, o)
-	}
-	if len(m.R.Contacts) > 0 {
-		AnimalMods.AddExistingContacts(m.R.Contacts...).Apply(ctx, o)
 	}
 	if m.R.Microchip != nil {
 		AnimalMods.WithExistingMicrochip(m.R.Microchip).Apply(ctx, o)
@@ -212,6 +216,8 @@ func (f *Factory) FromExistingAnimalBreed(m *models.AnimalBreed) *AnimalBreedTem
 	o.AnimalID = func() int64 { return m.AnimalID }
 	o.BreedID = func() int64 { return m.BreedID }
 	o.Primary = func() bool { return m.Primary }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -249,6 +255,8 @@ func (f *Factory) FromExistingAnimalPhoto(m *models.AnimalPhoto) *AnimalPhotoTem
 	o.Medium = func() null.Val[string] { return m.Medium }
 	o.Large = func() null.Val[string] { return m.Large }
 	o.Full = func() null.Val[string] { return m.Full }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -280,6 +288,8 @@ func (f *Factory) FromExistingAnimalSpecy(m *models.AnimalSpecy) *AnimalSpecyTem
 	o.ID = func() int64 { return m.ID }
 	o.AnimalTypeID = func() int64 { return m.AnimalTypeID }
 	o.Name = func() string { return m.Name }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.AnimalType != nil {
@@ -310,6 +320,8 @@ func (f *Factory) FromExistingAnimalType(m *models.AnimalType) *AnimalTypeTempla
 
 	o.ID = func() int64 { return m.ID }
 	o.Name = func() string { return m.Name }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if len(m.R.AnimalSpecies) > 0 {
@@ -344,6 +356,8 @@ func (f *Factory) FromExistingAnimalVideo(m *models.AnimalVideo) *AnimalVideoTem
 	o.ID = func() int64 { return m.ID }
 	o.AnimalID = func() null.Val[int64] { return m.AnimalID }
 	o.URL = func() null.Val[string] { return m.URL }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -375,6 +389,8 @@ func (f *Factory) FromExistingBreed(m *models.Breed) *BreedTemplate {
 	o.ID = func() int64 { return m.ID }
 	o.AnimalTypeID = func() int64 { return m.AnimalTypeID }
 	o.Name = func() string { return m.Name }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if len(m.R.AnimalBreeds) > 0 {
@@ -409,6 +425,8 @@ func (f *Factory) FromExistingColor(m *models.Color) *ColorTemplate {
 	o.ID = func() int64 { return m.ID }
 	o.AnimalID = func() null.Val[int64] { return m.AnimalID }
 	o.Color = func() string { return m.Color }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -438,7 +456,8 @@ func (f *Factory) FromExistingContact(m *models.Contact) *ContactTemplate {
 	o := &ContactTemplate{f: f, alreadyPersisted: true}
 
 	o.ID = func() int64 { return m.ID }
-	o.AnimalID = func() null.Val[int64] { return m.AnimalID }
+	o.UserID = func() null.Val[uuid.UUID] { return m.UserID }
+	o.OrganizationID = func() null.Val[int64] { return m.OrganizationID }
 	o.AddressID = func() int64 { return m.AddressID }
 	o.Phone = func() string { return m.Phone }
 	o.Email = func() string { return m.Email }
@@ -446,8 +465,14 @@ func (f *Factory) FromExistingContact(m *models.Contact) *ContactTemplate {
 	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
-	if m.R.Animal != nil {
-		ContactMods.WithExistingAnimal(m.R.Animal).Apply(ctx, o)
+	if len(m.R.Animals) > 0 {
+		ContactMods.AddExistingAnimals(m.R.Animals...).Apply(ctx, o)
+	}
+	if m.R.Address != nil {
+		ContactMods.WithExistingAddress(m.R.Address).Apply(ctx, o)
+	}
+	if len(m.R.Organizations) > 0 {
+		ContactMods.AddExistingOrganizations(m.R.Organizations...).Apply(ctx, o)
 	}
 
 	return o
@@ -475,6 +500,13 @@ func (f *Factory) FromExistingCountry(m *models.Country) *CountryTemplate {
 	o.ID = func() int64 { return m.ID }
 	o.Name = func() string { return m.Name }
 	o.IsoCode = func() string { return m.IsoCode }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
+
+	ctx := context.Background()
+	if len(m.R.Addresses) > 0 {
+		CountryMods.AddExistingAddresses(m.R.Addresses...).Apply(ctx, o)
+	}
 
 	return o
 }
@@ -504,6 +536,8 @@ func (f *Factory) FromExistingMicrochip(m *models.Microchip) *MicrochipTemplate 
 	o.Brand = func() null.Val[string] { return m.Brand }
 	o.Description = func() null.Val[string] { return m.Description }
 	o.Location = func() null.Val[string] { return m.Location }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -533,16 +567,8 @@ func (f *Factory) FromExistingOrganization(m *models.Organization) *Organization
 	o := &OrganizationTemplate{f: f, alreadyPersisted: true}
 
 	o.ID = func() int64 { return m.ID }
+	o.ContactID = func() int64 { return m.ContactID }
 	o.Name = func() string { return m.Name }
-	o.Email = func() string { return m.Email }
-	o.Phone = func() string { return m.Phone }
-	o.Address1 = func() null.Val[string] { return m.Address1 }
-	o.Address2 = func() null.Val[string] { return m.Address2 }
-	o.City = func() null.Val[string] { return m.City }
-	o.State = func() null.Val[string] { return m.State }
-	o.Postcode = func() null.Val[string] { return m.Postcode }
-	o.Country = func() null.Val[string] { return m.Country }
-	o.URL = func() null.Val[string] { return m.URL }
 	o.Website = func() null.Val[string] { return m.Website }
 	o.MissionStatement = func() null.Val[string] { return m.MissionStatement }
 	o.AdoptionPolicy = func() null.Val[string] { return m.AdoptionPolicy }
@@ -553,10 +579,12 @@ func (f *Factory) FromExistingOrganization(m *models.Organization) *Organization
 	o.Youtube = func() null.Val[string] { return m.Youtube }
 	o.Instagram = func() null.Val[string] { return m.Instagram }
 	o.Pinterest = func() null.Val[string] { return m.Pinterest }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
-	if len(m.R.Animals) > 0 {
-		OrganizationMods.AddExistingAnimals(m.R.Animals...).Apply(ctx, o)
+	if m.R.Contact != nil {
+		OrganizationMods.WithExistingContact(m.R.Contact).Apply(ctx, o)
 	}
 	if len(m.R.OrganizationHours) > 0 {
 		OrganizationMods.AddExistingOrganizationHours(m.R.OrganizationHours...).Apply(ctx, o)
@@ -596,6 +624,8 @@ func (f *Factory) FromExistingOrganizationHour(m *models.OrganizationHour) *Orga
 	o.Friday = func() null.Val[string] { return m.Friday }
 	o.Saturday = func() null.Val[string] { return m.Saturday }
 	o.Sunday = func() null.Val[string] { return m.Sunday }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Organization != nil {
@@ -630,6 +660,8 @@ func (f *Factory) FromExistingOrganizationPhoto(m *models.OrganizationPhoto) *Or
 	o.Medium = func() null.Val[string] { return m.Medium }
 	o.Large = func() null.Val[string] { return m.Large }
 	o.Full = func() null.Val[string] { return m.Full }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Organization != nil {
@@ -661,6 +693,8 @@ func (f *Factory) FromExistingTag(m *models.Tag) *TagTemplate {
 	o.ID = func() int64 { return m.ID }
 	o.AnimalID = func() null.Val[int64] { return m.AnimalID }
 	o.Name = func() null.Val[string] { return m.Name }
+	o.CreatedAt = func() time.Time { return m.CreatedAt }
+	o.UpdatedAt = func() time.Time { return m.UpdatedAt }
 
 	ctx := context.Background()
 	if m.R.Animal != nil {
@@ -696,9 +730,6 @@ func (f *Factory) FromExistingUser(m *models.User) *UserTemplate {
 	ctx := context.Background()
 	if len(m.R.Adoptions) > 0 {
 		UserMods.AddExistingAdoptions(m.R.Adoptions...).Apply(ctx, o)
-	}
-	if len(m.R.Animals) > 0 {
-		UserMods.AddExistingAnimals(m.R.Animals...).Apply(ctx, o)
 	}
 	if len(m.R.UserAnimalLikes) > 0 {
 		UserMods.AddExistingUserAnimalLikes(m.R.UserAnimalLikes...).Apply(ctx, o)

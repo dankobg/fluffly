@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/omit"
 	"github.com/stephenafamo/bob"
@@ -23,9 +24,11 @@ import (
 
 // AnimalBreed is an object representing the database table.
 type AnimalBreed struct {
-	AnimalID int64 `db:"animal_id,pk" `
-	BreedID  int64 `db:"breed_id,pk" `
-	Primary  bool  `db:"primary" `
+	AnimalID  int64     `db:"animal_id,pk" `
+	BreedID   int64     `db:"breed_id,pk" `
+	Primary   bool      `db:"primary" `
+	CreatedAt time.Time `db:"created_at" `
+	UpdatedAt time.Time `db:"updated_at" `
 
 	R animalBreedR `db:"-" `
 }
@@ -47,9 +50,11 @@ type animalBreedR struct {
 }
 
 type animalBreedColumnNames struct {
-	AnimalID string
-	BreedID  string
-	Primary  string
+	AnimalID  string
+	BreedID   string
+	Primary   string
+	CreatedAt string
+	UpdatedAt string
 }
 
 var AnimalBreedColumns = buildAnimalBreedColumns("animal_breed")
@@ -59,6 +64,8 @@ type animalBreedColumns struct {
 	AnimalID   psql.Expression
 	BreedID    psql.Expression
 	Primary    psql.Expression
+	CreatedAt  psql.Expression
+	UpdatedAt  psql.Expression
 }
 
 func (c animalBreedColumns) Alias() string {
@@ -75,13 +82,17 @@ func buildAnimalBreedColumns(alias string) animalBreedColumns {
 		AnimalID:   psql.Quote(alias, "animal_id"),
 		BreedID:    psql.Quote(alias, "breed_id"),
 		Primary:    psql.Quote(alias, "primary"),
+		CreatedAt:  psql.Quote(alias, "created_at"),
+		UpdatedAt:  psql.Quote(alias, "updated_at"),
 	}
 }
 
 type animalBreedWhere[Q psql.Filterable] struct {
-	AnimalID psql.WhereMod[Q, int64]
-	BreedID  psql.WhereMod[Q, int64]
-	Primary  psql.WhereMod[Q, bool]
+	AnimalID  psql.WhereMod[Q, int64]
+	BreedID   psql.WhereMod[Q, int64]
+	Primary   psql.WhereMod[Q, bool]
+	CreatedAt psql.WhereMod[Q, time.Time]
+	UpdatedAt psql.WhereMod[Q, time.Time]
 }
 
 func (animalBreedWhere[Q]) AliasedAs(alias string) animalBreedWhere[Q] {
@@ -90,9 +101,11 @@ func (animalBreedWhere[Q]) AliasedAs(alias string) animalBreedWhere[Q] {
 
 func buildAnimalBreedWhere[Q psql.Filterable](cols animalBreedColumns) animalBreedWhere[Q] {
 	return animalBreedWhere[Q]{
-		AnimalID: psql.Where[Q, int64](cols.AnimalID),
-		BreedID:  psql.Where[Q, int64](cols.BreedID),
-		Primary:  psql.Where[Q, bool](cols.Primary),
+		AnimalID:  psql.Where[Q, int64](cols.AnimalID),
+		BreedID:   psql.Where[Q, int64](cols.BreedID),
+		Primary:   psql.Where[Q, bool](cols.Primary),
+		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -113,13 +126,15 @@ type animalBreedErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AnimalBreedSetter struct {
-	AnimalID omit.Val[int64] `db:"animal_id,pk" `
-	BreedID  omit.Val[int64] `db:"breed_id,pk" `
-	Primary  omit.Val[bool]  `db:"primary" `
+	AnimalID  omit.Val[int64]     `db:"animal_id,pk" `
+	BreedID   omit.Val[int64]     `db:"breed_id,pk" `
+	Primary   omit.Val[bool]      `db:"primary" `
+	CreatedAt omit.Val[time.Time] `db:"created_at" `
+	UpdatedAt omit.Val[time.Time] `db:"updated_at" `
 }
 
 func (s AnimalBreedSetter) SetColumns() []string {
-	vals := make([]string, 0, 3)
+	vals := make([]string, 0, 5)
 	if s.AnimalID.IsValue() {
 		vals = append(vals, "animal_id")
 	}
@@ -128,6 +143,12 @@ func (s AnimalBreedSetter) SetColumns() []string {
 	}
 	if s.Primary.IsValue() {
 		vals = append(vals, "primary")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -142,6 +163,12 @@ func (s AnimalBreedSetter) Overwrite(t *AnimalBreed) {
 	if s.Primary.IsValue() {
 		t.Primary = s.Primary.MustGet()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *AnimalBreedSetter) Apply(q *dialect.InsertQuery) {
@@ -150,7 +177,7 @@ func (s *AnimalBreedSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 3)
+		vals := make([]bob.Expression, 5)
 		if s.AnimalID.IsValue() {
 			vals[0] = psql.Arg(s.AnimalID.MustGet())
 		} else {
@@ -169,6 +196,18 @@ func (s *AnimalBreedSetter) Apply(q *dialect.InsertQuery) {
 			vals[2] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[3] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[3] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[4] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[4] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -178,7 +217,7 @@ func (s AnimalBreedSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s AnimalBreedSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 3)
+	exprs := make([]bob.Expression, 0, 5)
 
 	if s.AnimalID.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -198,6 +237,20 @@ func (s AnimalBreedSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "primary")...),
 			psql.Arg(s.Primary),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

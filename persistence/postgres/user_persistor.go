@@ -30,8 +30,8 @@ func (p *PgUserPersistor) Create(ctx context.Context, in model.UserSetter) (mode
 	return *insertedUser, nil
 }
 
-func (p *PgUserPersistor) Update(ctx context.Context, in model.UserSetter) (model.User, error) {
-	updatedUser, err := model.Users.Update(in.UpdateMod(), model.UpdateWhere.Users.ID.EQ(in.ID.GetOrZero())).One(ctx, p.db)
+func (p *PgUserPersistor) Update(ctx context.Context, userID uuid.UUID, in model.UserSetter) (model.User, error) {
+	updatedUser, err := model.Users.Update(in.UpdateMod(), model.UpdateWhere.Users.ID.EQ(userID)).One(ctx, p.db)
 	if err != nil {
 		return model.User{}, fmt.Errorf("failed to update a user: %w", err)
 	}

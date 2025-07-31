@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
@@ -30,6 +32,8 @@ type OrganizationPhoto struct {
 	Medium         null.Val[string] `db:"medium" `
 	Large          null.Val[string] `db:"large" `
 	Full           null.Val[string] `db:"full" `
+	CreatedAt      time.Time        `db:"created_at" `
+	UpdatedAt      time.Time        `db:"updated_at" `
 
 	R organizationPhotoR `db:"-" `
 }
@@ -56,6 +60,8 @@ type organizationPhotoColumnNames struct {
 	Medium         string
 	Large          string
 	Full           string
+	CreatedAt      string
+	UpdatedAt      string
 }
 
 var OrganizationPhotoColumns = buildOrganizationPhotoColumns("organization_photo")
@@ -68,6 +74,8 @@ type organizationPhotoColumns struct {
 	Medium         psql.Expression
 	Large          psql.Expression
 	Full           psql.Expression
+	CreatedAt      psql.Expression
+	UpdatedAt      psql.Expression
 }
 
 func (c organizationPhotoColumns) Alias() string {
@@ -87,6 +95,8 @@ func buildOrganizationPhotoColumns(alias string) organizationPhotoColumns {
 		Medium:         psql.Quote(alias, "medium"),
 		Large:          psql.Quote(alias, "large"),
 		Full:           psql.Quote(alias, "full"),
+		CreatedAt:      psql.Quote(alias, "created_at"),
+		UpdatedAt:      psql.Quote(alias, "updated_at"),
 	}
 }
 
@@ -97,6 +107,8 @@ type organizationPhotoWhere[Q psql.Filterable] struct {
 	Medium         psql.WhereNullMod[Q, string]
 	Large          psql.WhereNullMod[Q, string]
 	Full           psql.WhereNullMod[Q, string]
+	CreatedAt      psql.WhereMod[Q, time.Time]
+	UpdatedAt      psql.WhereMod[Q, time.Time]
 }
 
 func (organizationPhotoWhere[Q]) AliasedAs(alias string) organizationPhotoWhere[Q] {
@@ -111,6 +123,8 @@ func buildOrganizationPhotoWhere[Q psql.Filterable](cols organizationPhotoColumn
 		Medium:         psql.WhereNull[Q, string](cols.Medium),
 		Large:          psql.WhereNull[Q, string](cols.Large),
 		Full:           psql.WhereNull[Q, string](cols.Full),
+		CreatedAt:      psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:      psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -136,10 +150,12 @@ type OrganizationPhotoSetter struct {
 	Medium         omitnull.Val[string] `db:"medium" `
 	Large          omitnull.Val[string] `db:"large" `
 	Full           omitnull.Val[string] `db:"full" `
+	CreatedAt      omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt      omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s OrganizationPhotoSetter) SetColumns() []string {
-	vals := make([]string, 0, 5)
+	vals := make([]string, 0, 7)
 	if !s.OrganizationID.IsUnset() {
 		vals = append(vals, "organization_id")
 	}
@@ -154,6 +170,12 @@ func (s OrganizationPhotoSetter) SetColumns() []string {
 	}
 	if !s.Full.IsUnset() {
 		vals = append(vals, "full")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -174,6 +196,12 @@ func (s OrganizationPhotoSetter) Overwrite(t *OrganizationPhoto) {
 	if !s.Full.IsUnset() {
 		t.Full = s.Full.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *OrganizationPhotoSetter) Apply(q *dialect.InsertQuery) {
@@ -182,7 +210,7 @@ func (s *OrganizationPhotoSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 5)
+		vals := make([]bob.Expression, 7)
 		if !s.OrganizationID.IsUnset() {
 			vals[0] = psql.Arg(s.OrganizationID.MustGetNull())
 		} else {
@@ -213,6 +241,18 @@ func (s *OrganizationPhotoSetter) Apply(q *dialect.InsertQuery) {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[5] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[5] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[6] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[6] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -222,7 +262,7 @@ func (s OrganizationPhotoSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s OrganizationPhotoSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 5)
+	exprs := make([]bob.Expression, 0, 7)
 
 	if !s.OrganizationID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -256,6 +296,20 @@ func (s OrganizationPhotoSetter) Expressions(prefix ...string) []bob.Expression 
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "full")...),
 			psql.Arg(s.Full),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

@@ -12,7 +12,6 @@ import (
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
-	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
@@ -28,12 +27,11 @@ import (
 // Animal is an object representing the database table.
 type Animal struct {
 	ID              int64               `db:"id,pk,generated" `
-	UserID          null.Val[uuid.UUID] `db:"user_id" `
-	OrganizationID  null.Val[int64]     `db:"organization_id" `
-	Name            string              `db:"name" `
+	ContactID       int64               `db:"contact_id" `
 	TypeID          int64               `db:"type_id" `
 	BreedID         int64               `db:"breed_id" `
 	SpeciesID       int64               `db:"species_id" `
+	Name            string              `db:"name" `
 	Gender          null.Val[Gender]    `db:"gender" `
 	Hermaphrodite   bool                `db:"hermaphrodite" `
 	Age             string              `db:"age" `
@@ -41,10 +39,9 @@ type Animal struct {
 	Size            string              `db:"size" `
 	ImageURL        string              `db:"image_url" `
 	Description     null.Val[string]    `db:"description" `
-	Adopted         bool                `db:"adopted" `
+	Distance        null.Val[string]    `db:"distance" `
 	Status          null.Val[string]    `db:"status" `
 	StatusChangedAt null.Val[time.Time] `db:"status_changed_at" `
-	Distance        null.Val[string]    `db:"distance" `
 	AdoptedAt       null.Val[time.Time] `db:"adopted_at" `
 	CreatedAt       time.Time           `db:"created_at" `
 	UpdatedAt       time.Time           `db:"updated_at" `
@@ -65,13 +62,11 @@ type AnimalsQuery = *psql.ViewQuery[*Animal, AnimalSlice]
 // animalR is where relationships are stored.
 type animalR struct {
 	Adoptions       AdoptionSlice       // adoption.fk_adoption_animal_id_animal
-	Organization    *Organization       // animal.fk_animal_organization_id_user
-	User            *User               // animal.fk_animal_user_id_user
+	Contact         *Contact            // animal.fk_animal_contact_id_contact
 	AnimalBreeds    AnimalBreedSlice    // animal_breed.fk_animal_breed_animal_id_animal
 	AnimalPhotos    AnimalPhotoSlice    // animal_photo.fk_animal_photo_animal_id_animal
 	AnimalVideos    AnimalVideoSlice    // animal_video.fk_animal_video_animal_id_animal
 	Colors          ColorSlice          // color.fk_color_animal_id_animal
-	Contacts        ContactSlice        // contact.fk_contact_animal_id_animal
 	Microchip       *Microchip          // microchip.fk_microchip_animal
 	Tags            TagSlice            // tag.fk_tag_animal_id_animal
 	UserAnimalLikes UserAnimalLikeSlice // user_animal_like.fk_user_animal_like_animal_id_user
@@ -79,12 +74,11 @@ type animalR struct {
 
 type animalColumnNames struct {
 	ID              string
-	UserID          string
-	OrganizationID  string
-	Name            string
+	ContactID       string
 	TypeID          string
 	BreedID         string
 	SpeciesID       string
+	Name            string
 	Gender          string
 	Hermaphrodite   string
 	Age             string
@@ -92,10 +86,9 @@ type animalColumnNames struct {
 	Size            string
 	ImageURL        string
 	Description     string
-	Adopted         string
+	Distance        string
 	Status          string
 	StatusChangedAt string
-	Distance        string
 	AdoptedAt       string
 	CreatedAt       string
 	UpdatedAt       string
@@ -106,12 +99,11 @@ var AnimalColumns = buildAnimalColumns("animal")
 type animalColumns struct {
 	tableAlias      string
 	ID              psql.Expression
-	UserID          psql.Expression
-	OrganizationID  psql.Expression
-	Name            psql.Expression
+	ContactID       psql.Expression
 	TypeID          psql.Expression
 	BreedID         psql.Expression
 	SpeciesID       psql.Expression
+	Name            psql.Expression
 	Gender          psql.Expression
 	Hermaphrodite   psql.Expression
 	Age             psql.Expression
@@ -119,10 +111,9 @@ type animalColumns struct {
 	Size            psql.Expression
 	ImageURL        psql.Expression
 	Description     psql.Expression
-	Adopted         psql.Expression
+	Distance        psql.Expression
 	Status          psql.Expression
 	StatusChangedAt psql.Expression
-	Distance        psql.Expression
 	AdoptedAt       psql.Expression
 	CreatedAt       psql.Expression
 	UpdatedAt       psql.Expression
@@ -140,12 +131,11 @@ func buildAnimalColumns(alias string) animalColumns {
 	return animalColumns{
 		tableAlias:      alias,
 		ID:              psql.Quote(alias, "id"),
-		UserID:          psql.Quote(alias, "user_id"),
-		OrganizationID:  psql.Quote(alias, "organization_id"),
-		Name:            psql.Quote(alias, "name"),
+		ContactID:       psql.Quote(alias, "contact_id"),
 		TypeID:          psql.Quote(alias, "type_id"),
 		BreedID:         psql.Quote(alias, "breed_id"),
 		SpeciesID:       psql.Quote(alias, "species_id"),
+		Name:            psql.Quote(alias, "name"),
 		Gender:          psql.Quote(alias, "gender"),
 		Hermaphrodite:   psql.Quote(alias, "hermaphrodite"),
 		Age:             psql.Quote(alias, "age"),
@@ -153,10 +143,9 @@ func buildAnimalColumns(alias string) animalColumns {
 		Size:            psql.Quote(alias, "size"),
 		ImageURL:        psql.Quote(alias, "image_url"),
 		Description:     psql.Quote(alias, "description"),
-		Adopted:         psql.Quote(alias, "adopted"),
+		Distance:        psql.Quote(alias, "distance"),
 		Status:          psql.Quote(alias, "status"),
 		StatusChangedAt: psql.Quote(alias, "status_changed_at"),
-		Distance:        psql.Quote(alias, "distance"),
 		AdoptedAt:       psql.Quote(alias, "adopted_at"),
 		CreatedAt:       psql.Quote(alias, "created_at"),
 		UpdatedAt:       psql.Quote(alias, "updated_at"),
@@ -165,12 +154,11 @@ func buildAnimalColumns(alias string) animalColumns {
 
 type animalWhere[Q psql.Filterable] struct {
 	ID              psql.WhereMod[Q, int64]
-	UserID          psql.WhereNullMod[Q, uuid.UUID]
-	OrganizationID  psql.WhereNullMod[Q, int64]
-	Name            psql.WhereMod[Q, string]
+	ContactID       psql.WhereMod[Q, int64]
 	TypeID          psql.WhereMod[Q, int64]
 	BreedID         psql.WhereMod[Q, int64]
 	SpeciesID       psql.WhereMod[Q, int64]
+	Name            psql.WhereMod[Q, string]
 	Gender          psql.WhereNullMod[Q, Gender]
 	Hermaphrodite   psql.WhereMod[Q, bool]
 	Age             psql.WhereMod[Q, string]
@@ -178,10 +166,9 @@ type animalWhere[Q psql.Filterable] struct {
 	Size            psql.WhereMod[Q, string]
 	ImageURL        psql.WhereMod[Q, string]
 	Description     psql.WhereNullMod[Q, string]
-	Adopted         psql.WhereMod[Q, bool]
+	Distance        psql.WhereNullMod[Q, string]
 	Status          psql.WhereNullMod[Q, string]
 	StatusChangedAt psql.WhereNullMod[Q, time.Time]
-	Distance        psql.WhereNullMod[Q, string]
 	AdoptedAt       psql.WhereNullMod[Q, time.Time]
 	CreatedAt       psql.WhereMod[Q, time.Time]
 	UpdatedAt       psql.WhereMod[Q, time.Time]
@@ -194,12 +181,11 @@ func (animalWhere[Q]) AliasedAs(alias string) animalWhere[Q] {
 func buildAnimalWhere[Q psql.Filterable](cols animalColumns) animalWhere[Q] {
 	return animalWhere[Q]{
 		ID:              psql.Where[Q, int64](cols.ID),
-		UserID:          psql.WhereNull[Q, uuid.UUID](cols.UserID),
-		OrganizationID:  psql.WhereNull[Q, int64](cols.OrganizationID),
-		Name:            psql.Where[Q, string](cols.Name),
+		ContactID:       psql.Where[Q, int64](cols.ContactID),
 		TypeID:          psql.Where[Q, int64](cols.TypeID),
 		BreedID:         psql.Where[Q, int64](cols.BreedID),
 		SpeciesID:       psql.Where[Q, int64](cols.SpeciesID),
+		Name:            psql.Where[Q, string](cols.Name),
 		Gender:          psql.WhereNull[Q, Gender](cols.Gender),
 		Hermaphrodite:   psql.Where[Q, bool](cols.Hermaphrodite),
 		Age:             psql.Where[Q, string](cols.Age),
@@ -207,10 +193,9 @@ func buildAnimalWhere[Q psql.Filterable](cols animalColumns) animalWhere[Q] {
 		Size:            psql.Where[Q, string](cols.Size),
 		ImageURL:        psql.Where[Q, string](cols.ImageURL),
 		Description:     psql.WhereNull[Q, string](cols.Description),
-		Adopted:         psql.Where[Q, bool](cols.Adopted),
+		Distance:        psql.WhereNull[Q, string](cols.Distance),
 		Status:          psql.WhereNull[Q, string](cols.Status),
 		StatusChangedAt: psql.WhereNull[Q, time.Time](cols.StatusChangedAt),
-		Distance:        psql.WhereNull[Q, string](cols.Distance),
 		AdoptedAt:       psql.WhereNull[Q, time.Time](cols.AdoptedAt),
 		CreatedAt:       psql.Where[Q, time.Time](cols.CreatedAt),
 		UpdatedAt:       psql.Where[Q, time.Time](cols.UpdatedAt),
@@ -234,12 +219,11 @@ type animalErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AnimalSetter struct {
-	UserID          omitnull.Val[uuid.UUID] `db:"user_id" `
-	OrganizationID  omitnull.Val[int64]     `db:"organization_id" `
-	Name            omit.Val[string]        `db:"name" `
+	ContactID       omit.Val[int64]         `db:"contact_id" `
 	TypeID          omit.Val[int64]         `db:"type_id" `
 	BreedID         omit.Val[int64]         `db:"breed_id" `
 	SpeciesID       omit.Val[int64]         `db:"species_id" `
+	Name            omit.Val[string]        `db:"name" `
 	Gender          omitnull.Val[Gender]    `db:"gender" `
 	Hermaphrodite   omit.Val[bool]          `db:"hermaphrodite" `
 	Age             omit.Val[string]        `db:"age" `
@@ -247,25 +231,18 @@ type AnimalSetter struct {
 	Size            omit.Val[string]        `db:"size" `
 	ImageURL        omit.Val[string]        `db:"image_url" `
 	Description     omitnull.Val[string]    `db:"description" `
-	Adopted         omit.Val[bool]          `db:"adopted" `
+	Distance        omitnull.Val[string]    `db:"distance" `
 	Status          omitnull.Val[string]    `db:"status" `
 	StatusChangedAt omitnull.Val[time.Time] `db:"status_changed_at" `
-	Distance        omitnull.Val[string]    `db:"distance" `
 	AdoptedAt       omitnull.Val[time.Time] `db:"adopted_at" `
 	CreatedAt       omit.Val[time.Time]     `db:"created_at" `
 	UpdatedAt       omit.Val[time.Time]     `db:"updated_at" `
 }
 
 func (s AnimalSetter) SetColumns() []string {
-	vals := make([]string, 0, 20)
-	if !s.UserID.IsUnset() {
-		vals = append(vals, "user_id")
-	}
-	if !s.OrganizationID.IsUnset() {
-		vals = append(vals, "organization_id")
-	}
-	if s.Name.IsValue() {
-		vals = append(vals, "name")
+	vals := make([]string, 0, 18)
+	if s.ContactID.IsValue() {
+		vals = append(vals, "contact_id")
 	}
 	if s.TypeID.IsValue() {
 		vals = append(vals, "type_id")
@@ -275,6 +252,9 @@ func (s AnimalSetter) SetColumns() []string {
 	}
 	if s.SpeciesID.IsValue() {
 		vals = append(vals, "species_id")
+	}
+	if s.Name.IsValue() {
+		vals = append(vals, "name")
 	}
 	if !s.Gender.IsUnset() {
 		vals = append(vals, "gender")
@@ -297,17 +277,14 @@ func (s AnimalSetter) SetColumns() []string {
 	if !s.Description.IsUnset() {
 		vals = append(vals, "description")
 	}
-	if s.Adopted.IsValue() {
-		vals = append(vals, "adopted")
+	if !s.Distance.IsUnset() {
+		vals = append(vals, "distance")
 	}
 	if !s.Status.IsUnset() {
 		vals = append(vals, "status")
 	}
 	if !s.StatusChangedAt.IsUnset() {
 		vals = append(vals, "status_changed_at")
-	}
-	if !s.Distance.IsUnset() {
-		vals = append(vals, "distance")
 	}
 	if !s.AdoptedAt.IsUnset() {
 		vals = append(vals, "adopted_at")
@@ -322,14 +299,8 @@ func (s AnimalSetter) SetColumns() []string {
 }
 
 func (s AnimalSetter) Overwrite(t *Animal) {
-	if !s.UserID.IsUnset() {
-		t.UserID = s.UserID.MustGetNull()
-	}
-	if !s.OrganizationID.IsUnset() {
-		t.OrganizationID = s.OrganizationID.MustGetNull()
-	}
-	if s.Name.IsValue() {
-		t.Name = s.Name.MustGet()
+	if s.ContactID.IsValue() {
+		t.ContactID = s.ContactID.MustGet()
 	}
 	if s.TypeID.IsValue() {
 		t.TypeID = s.TypeID.MustGet()
@@ -339,6 +310,9 @@ func (s AnimalSetter) Overwrite(t *Animal) {
 	}
 	if s.SpeciesID.IsValue() {
 		t.SpeciesID = s.SpeciesID.MustGet()
+	}
+	if s.Name.IsValue() {
+		t.Name = s.Name.MustGet()
 	}
 	if !s.Gender.IsUnset() {
 		t.Gender = s.Gender.MustGetNull()
@@ -361,17 +335,14 @@ func (s AnimalSetter) Overwrite(t *Animal) {
 	if !s.Description.IsUnset() {
 		t.Description = s.Description.MustGetNull()
 	}
-	if s.Adopted.IsValue() {
-		t.Adopted = s.Adopted.MustGet()
+	if !s.Distance.IsUnset() {
+		t.Distance = s.Distance.MustGetNull()
 	}
 	if !s.Status.IsUnset() {
 		t.Status = s.Status.MustGetNull()
 	}
 	if !s.StatusChangedAt.IsUnset() {
 		t.StatusChangedAt = s.StatusChangedAt.MustGetNull()
-	}
-	if !s.Distance.IsUnset() {
-		t.Distance = s.Distance.MustGetNull()
 	}
 	if !s.AdoptedAt.IsUnset() {
 		t.AdoptedAt = s.AdoptedAt.MustGetNull()
@@ -390,125 +361,113 @@ func (s *AnimalSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 20)
-		if !s.UserID.IsUnset() {
-			vals[0] = psql.Arg(s.UserID.MustGetNull())
+		vals := make([]bob.Expression, 18)
+		if s.ContactID.IsValue() {
+			vals[0] = psql.Arg(s.ContactID.MustGet())
 		} else {
 			vals[0] = psql.Raw("DEFAULT")
 		}
 
-		if !s.OrganizationID.IsUnset() {
-			vals[1] = psql.Arg(s.OrganizationID.MustGetNull())
+		if s.TypeID.IsValue() {
+			vals[1] = psql.Arg(s.TypeID.MustGet())
 		} else {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
-		if s.Name.IsValue() {
-			vals[2] = psql.Arg(s.Name.MustGet())
+		if s.BreedID.IsValue() {
+			vals[2] = psql.Arg(s.BreedID.MustGet())
 		} else {
 			vals[2] = psql.Raw("DEFAULT")
 		}
 
-		if s.TypeID.IsValue() {
-			vals[3] = psql.Arg(s.TypeID.MustGet())
+		if s.SpeciesID.IsValue() {
+			vals[3] = psql.Arg(s.SpeciesID.MustGet())
 		} else {
 			vals[3] = psql.Raw("DEFAULT")
 		}
 
-		if s.BreedID.IsValue() {
-			vals[4] = psql.Arg(s.BreedID.MustGet())
+		if s.Name.IsValue() {
+			vals[4] = psql.Arg(s.Name.MustGet())
 		} else {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
-		if s.SpeciesID.IsValue() {
-			vals[5] = psql.Arg(s.SpeciesID.MustGet())
+		if !s.Gender.IsUnset() {
+			vals[5] = psql.Arg(s.Gender.MustGetNull())
 		} else {
 			vals[5] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Gender.IsUnset() {
-			vals[6] = psql.Arg(s.Gender.MustGetNull())
+		if s.Hermaphrodite.IsValue() {
+			vals[6] = psql.Arg(s.Hermaphrodite.MustGet())
 		} else {
 			vals[6] = psql.Raw("DEFAULT")
 		}
 
-		if s.Hermaphrodite.IsValue() {
-			vals[7] = psql.Arg(s.Hermaphrodite.MustGet())
+		if s.Age.IsValue() {
+			vals[7] = psql.Arg(s.Age.MustGet())
 		} else {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
-		if s.Age.IsValue() {
-			vals[8] = psql.Arg(s.Age.MustGet())
+		if !s.CoatLength.IsUnset() {
+			vals[8] = psql.Arg(s.CoatLength.MustGetNull())
 		} else {
 			vals[8] = psql.Raw("DEFAULT")
 		}
 
-		if !s.CoatLength.IsUnset() {
-			vals[9] = psql.Arg(s.CoatLength.MustGetNull())
+		if s.Size.IsValue() {
+			vals[9] = psql.Arg(s.Size.MustGet())
 		} else {
 			vals[9] = psql.Raw("DEFAULT")
 		}
 
-		if s.Size.IsValue() {
-			vals[10] = psql.Arg(s.Size.MustGet())
+		if s.ImageURL.IsValue() {
+			vals[10] = psql.Arg(s.ImageURL.MustGet())
 		} else {
 			vals[10] = psql.Raw("DEFAULT")
 		}
 
-		if s.ImageURL.IsValue() {
-			vals[11] = psql.Arg(s.ImageURL.MustGet())
+		if !s.Description.IsUnset() {
+			vals[11] = psql.Arg(s.Description.MustGetNull())
 		} else {
 			vals[11] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Description.IsUnset() {
-			vals[12] = psql.Arg(s.Description.MustGetNull())
+		if !s.Distance.IsUnset() {
+			vals[12] = psql.Arg(s.Distance.MustGetNull())
 		} else {
 			vals[12] = psql.Raw("DEFAULT")
 		}
 
-		if s.Adopted.IsValue() {
-			vals[13] = psql.Arg(s.Adopted.MustGet())
+		if !s.Status.IsUnset() {
+			vals[13] = psql.Arg(s.Status.MustGetNull())
 		} else {
 			vals[13] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Status.IsUnset() {
-			vals[14] = psql.Arg(s.Status.MustGetNull())
+		if !s.StatusChangedAt.IsUnset() {
+			vals[14] = psql.Arg(s.StatusChangedAt.MustGetNull())
 		} else {
 			vals[14] = psql.Raw("DEFAULT")
 		}
 
-		if !s.StatusChangedAt.IsUnset() {
-			vals[15] = psql.Arg(s.StatusChangedAt.MustGetNull())
+		if !s.AdoptedAt.IsUnset() {
+			vals[15] = psql.Arg(s.AdoptedAt.MustGetNull())
 		} else {
 			vals[15] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Distance.IsUnset() {
-			vals[16] = psql.Arg(s.Distance.MustGetNull())
+		if s.CreatedAt.IsValue() {
+			vals[16] = psql.Arg(s.CreatedAt.MustGet())
 		} else {
 			vals[16] = psql.Raw("DEFAULT")
 		}
 
-		if !s.AdoptedAt.IsUnset() {
-			vals[17] = psql.Arg(s.AdoptedAt.MustGetNull())
+		if s.UpdatedAt.IsValue() {
+			vals[17] = psql.Arg(s.UpdatedAt.MustGet())
 		} else {
 			vals[17] = psql.Raw("DEFAULT")
-		}
-
-		if s.CreatedAt.IsValue() {
-			vals[18] = psql.Arg(s.CreatedAt.MustGet())
-		} else {
-			vals[18] = psql.Raw("DEFAULT")
-		}
-
-		if s.UpdatedAt.IsValue() {
-			vals[19] = psql.Arg(s.UpdatedAt.MustGet())
-		} else {
-			vals[19] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -520,26 +479,12 @@ func (s AnimalSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s AnimalSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 20)
+	exprs := make([]bob.Expression, 0, 18)
 
-	if !s.UserID.IsUnset() {
+	if s.ContactID.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "user_id")...),
-			psql.Arg(s.UserID),
-		}})
-	}
-
-	if !s.OrganizationID.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "organization_id")...),
-			psql.Arg(s.OrganizationID),
-		}})
-	}
-
-	if s.Name.IsValue() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "name")...),
-			psql.Arg(s.Name),
+			psql.Quote(append(prefix, "contact_id")...),
+			psql.Arg(s.ContactID),
 		}})
 	}
 
@@ -561,6 +506,13 @@ func (s AnimalSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "species_id")...),
 			psql.Arg(s.SpeciesID),
+		}})
+	}
+
+	if s.Name.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "name")...),
+			psql.Arg(s.Name),
 		}})
 	}
 
@@ -613,10 +565,10 @@ func (s AnimalSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
-	if s.Adopted.IsValue() {
+	if !s.Distance.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "adopted")...),
-			psql.Arg(s.Adopted),
+			psql.Quote(append(prefix, "distance")...),
+			psql.Arg(s.Distance),
 		}})
 	}
 
@@ -631,13 +583,6 @@ func (s AnimalSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "status_changed_at")...),
 			psql.Arg(s.StatusChangedAt),
-		}})
-	}
-
-	if !s.Distance.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "distance")...),
-			psql.Arg(s.Distance),
 		}})
 	}
 
@@ -891,13 +836,11 @@ func (o AnimalSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 type animalJoins[Q dialect.Joinable] struct {
 	typ             string
 	Adoptions       modAs[Q, adoptionColumns]
-	Organization    modAs[Q, organizationColumns]
-	User            modAs[Q, userColumns]
+	Contact         modAs[Q, contactColumns]
 	AnimalBreeds    modAs[Q, animalBreedColumns]
 	AnimalPhotos    modAs[Q, animalPhotoColumns]
 	AnimalVideos    modAs[Q, animalVideoColumns]
 	Colors          modAs[Q, colorColumns]
-	Contacts        modAs[Q, contactColumns]
 	Microchip       modAs[Q, microchipColumns]
 	Tags            modAs[Q, tagColumns]
 	UserAnimalLikes modAs[Q, userAnimalLikeColumns]
@@ -924,28 +867,14 @@ func buildAnimalJoins[Q dialect.Joinable](cols animalColumns, typ string) animal
 				return mods
 			},
 		},
-		Organization: modAs[Q, organizationColumns]{
-			c: OrganizationColumns,
-			f: func(to organizationColumns) bob.Mod[Q] {
+		Contact: modAs[Q, contactColumns]{
+			c: ContactColumns,
+			f: func(to contactColumns) bob.Mod[Q] {
 				mods := make(mods.QueryMods[Q], 0, 1)
 
 				{
-					mods = append(mods, dialect.Join[Q](typ, Organizations.Name().As(to.Alias())).On(
-						to.ID.EQ(cols.OrganizationID),
-					))
-				}
-
-				return mods
-			},
-		},
-		User: modAs[Q, userColumns]{
-			c: UserColumns,
-			f: func(to userColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, Users.Name().As(to.Alias())).On(
-						to.ID.EQ(cols.UserID),
+					mods = append(mods, dialect.Join[Q](typ, Contacts.Name().As(to.Alias())).On(
+						to.ID.EQ(cols.ContactID),
 					))
 				}
 
@@ -1001,20 +930,6 @@ func buildAnimalJoins[Q dialect.Joinable](cols animalColumns, typ string) animal
 
 				{
 					mods = append(mods, dialect.Join[Q](typ, Colors.Name().As(to.Alias())).On(
-						to.AnimalID.EQ(cols.ID),
-					))
-				}
-
-				return mods
-			},
-		},
-		Contacts: modAs[Q, contactColumns]{
-			c: ContactColumns,
-			f: func(to contactColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, Contacts.Name().As(to.Alias())).On(
 						to.AnimalID.EQ(cols.ID),
 					))
 				}
@@ -1088,45 +1003,24 @@ func (os AnimalSlice) Adoptions(mods ...bob.Mod[*dialect.SelectQuery]) Adoptions
 	)...)
 }
 
-// Organization starts a query for related objects on organization
-func (o *Animal) Organization(mods ...bob.Mod[*dialect.SelectQuery]) OrganizationsQuery {
-	return Organizations.Query(append(mods,
-		sm.Where(OrganizationColumns.ID.EQ(psql.Arg(o.OrganizationID))),
+// Contact starts a query for related objects on contact
+func (o *Animal) Contact(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	return Contacts.Query(append(mods,
+		sm.Where(ContactColumns.ID.EQ(psql.Arg(o.ContactID))),
 	)...)
 }
 
-func (os AnimalSlice) Organization(mods ...bob.Mod[*dialect.SelectQuery]) OrganizationsQuery {
-	pkOrganizationID := make(pgtypes.Array[null.Val[int64]], len(os))
+func (os AnimalSlice) Contact(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	pkContactID := make(pgtypes.Array[int64], len(os))
 	for i, o := range os {
-		pkOrganizationID[i] = o.OrganizationID
+		pkContactID[i] = o.ContactID
 	}
 	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkOrganizationID), "bigint[]")),
+		psql.F("unnest", psql.Cast(psql.Arg(pkContactID), "bigint[]")),
 	))
 
-	return Organizations.Query(append(mods,
-		sm.Where(psql.Group(OrganizationColumns.ID).OP("IN", PKArgExpr)),
-	)...)
-}
-
-// User starts a query for related objects on user
-func (o *Animal) User(mods ...bob.Mod[*dialect.SelectQuery]) UsersQuery {
-	return Users.Query(append(mods,
-		sm.Where(UserColumns.ID.EQ(psql.Arg(o.UserID))),
-	)...)
-}
-
-func (os AnimalSlice) User(mods ...bob.Mod[*dialect.SelectQuery]) UsersQuery {
-	pkUserID := make(pgtypes.Array[null.Val[uuid.UUID]], len(os))
-	for i, o := range os {
-		pkUserID[i] = o.UserID
-	}
-	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkUserID), "uuid[]")),
-	))
-
-	return Users.Query(append(mods,
-		sm.Where(psql.Group(UserColumns.ID).OP("IN", PKArgExpr)),
+	return Contacts.Query(append(mods,
+		sm.Where(psql.Group(ContactColumns.ID).OP("IN", PKArgExpr)),
 	)...)
 }
 
@@ -1214,27 +1108,6 @@ func (os AnimalSlice) Colors(mods ...bob.Mod[*dialect.SelectQuery]) ColorsQuery 
 	)...)
 }
 
-// Contacts starts a query for related objects on contact
-func (o *Animal) Contacts(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
-	return Contacts.Query(append(mods,
-		sm.Where(ContactColumns.AnimalID.EQ(psql.Arg(o.ID))),
-	)...)
-}
-
-func (os AnimalSlice) Contacts(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
-	pkID := make(pgtypes.Array[int64], len(os))
-	for i, o := range os {
-		pkID[i] = o.ID
-	}
-	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkID), "bigint[]")),
-	))
-
-	return Contacts.Query(append(mods,
-		sm.Where(psql.Group(ContactColumns.AnimalID).OP("IN", PKArgExpr)),
-	)...)
-}
-
 // Microchip starts a query for related objects on microchip
 func (o *Animal) Microchip(mods ...bob.Mod[*dialect.SelectQuery]) MicrochipsQuery {
 	return Microchips.Query(append(mods,
@@ -1318,25 +1191,13 @@ func (o *Animal) Preload(name string, retrieved any) error {
 			}
 		}
 		return nil
-	case "Organization":
-		rel, ok := retrieved.(*Organization)
+	case "Contact":
+		rel, ok := retrieved.(*Contact)
 		if !ok {
 			return fmt.Errorf("animal cannot load %T as %q", retrieved, name)
 		}
 
-		o.R.Organization = rel
-
-		if rel != nil {
-			rel.R.Animals = AnimalSlice{o}
-		}
-		return nil
-	case "User":
-		rel, ok := retrieved.(*User)
-		if !ok {
-			return fmt.Errorf("animal cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.User = rel
+		o.R.Contact = rel
 
 		if rel != nil {
 			rel.R.Animals = AnimalSlice{o}
@@ -1398,20 +1259,6 @@ func (o *Animal) Preload(name string, retrieved any) error {
 			}
 		}
 		return nil
-	case "Contacts":
-		rels, ok := retrieved.(ContactSlice)
-		if !ok {
-			return fmt.Errorf("animal cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.Contacts = rels
-
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Animal = o
-			}
-		}
-		return nil
 	case "Microchip":
 		rel, ok := retrieved.(*Microchip)
 		if !ok {
@@ -1458,46 +1305,28 @@ func (o *Animal) Preload(name string, retrieved any) error {
 }
 
 type animalPreloader struct {
-	Organization func(...psql.PreloadOption) psql.Preloader
-	User         func(...psql.PreloadOption) psql.Preloader
-	Microchip    func(...psql.PreloadOption) psql.Preloader
+	Contact   func(...psql.PreloadOption) psql.Preloader
+	Microchip func(...psql.PreloadOption) psql.Preloader
 }
 
 func buildAnimalPreloader() animalPreloader {
 	return animalPreloader{
-		Organization: func(opts ...psql.PreloadOption) psql.Preloader {
-			return psql.Preload[*Organization, OrganizationSlice](orm.Relationship{
-				Name: "Organization",
+		Contact: func(opts ...psql.PreloadOption) psql.Preloader {
+			return psql.Preload[*Contact, ContactSlice](orm.Relationship{
+				Name: "Contact",
 				Sides: []orm.RelSide{
 					{
 						From: TableNames.Animals,
-						To:   TableNames.Organizations,
+						To:   TableNames.Contacts,
 						FromColumns: []string{
-							ColumnNames.Animals.OrganizationID,
+							ColumnNames.Animals.ContactID,
 						},
 						ToColumns: []string{
-							ColumnNames.Organizations.ID,
+							ColumnNames.Contacts.ID,
 						},
 					},
 				},
-			}, Organizations.Columns().Names(), opts...)
-		},
-		User: func(opts ...psql.PreloadOption) psql.Preloader {
-			return psql.Preload[*User, UserSlice](orm.Relationship{
-				Name: "User",
-				Sides: []orm.RelSide{
-					{
-						From: TableNames.Animals,
-						To:   TableNames.Users,
-						FromColumns: []string{
-							ColumnNames.Animals.UserID,
-						},
-						ToColumns: []string{
-							ColumnNames.Users.ID,
-						},
-					},
-				},
-			}, Users.Columns().Names(), opts...)
+			}, Contacts.Columns().Names(), opts...)
 		},
 		Microchip: func(opts ...psql.PreloadOption) psql.Preloader {
 			return psql.Preload[*Microchip, MicrochipSlice](orm.Relationship{
@@ -1521,13 +1350,11 @@ func buildAnimalPreloader() animalPreloader {
 
 type animalThenLoader[Q orm.Loadable] struct {
 	Adoptions       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	Organization    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	User            func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Contact         func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	AnimalBreeds    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	AnimalPhotos    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	AnimalVideos    func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	Colors          func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	Contacts        func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	Microchip       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	Tags            func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	UserAnimalLikes func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
@@ -1537,11 +1364,8 @@ func buildAnimalThenLoader[Q orm.Loadable]() animalThenLoader[Q] {
 	type AdoptionsLoadInterface interface {
 		LoadAdoptions(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
-	type OrganizationLoadInterface interface {
-		LoadOrganization(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
-	type UserLoadInterface interface {
-		LoadUser(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	type ContactLoadInterface interface {
+		LoadContact(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 	type AnimalBreedsLoadInterface interface {
 		LoadAnimalBreeds(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
@@ -1554,9 +1378,6 @@ func buildAnimalThenLoader[Q orm.Loadable]() animalThenLoader[Q] {
 	}
 	type ColorsLoadInterface interface {
 		LoadColors(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
-	type ContactsLoadInterface interface {
-		LoadContacts(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 	type MicrochipLoadInterface interface {
 		LoadMicrochip(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
@@ -1575,16 +1396,10 @@ func buildAnimalThenLoader[Q orm.Loadable]() animalThenLoader[Q] {
 				return retrieved.LoadAdoptions(ctx, exec, mods...)
 			},
 		),
-		Organization: thenLoadBuilder[Q](
-			"Organization",
-			func(ctx context.Context, exec bob.Executor, retrieved OrganizationLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadOrganization(ctx, exec, mods...)
-			},
-		),
-		User: thenLoadBuilder[Q](
-			"User",
-			func(ctx context.Context, exec bob.Executor, retrieved UserLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadUser(ctx, exec, mods...)
+		Contact: thenLoadBuilder[Q](
+			"Contact",
+			func(ctx context.Context, exec bob.Executor, retrieved ContactLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadContact(ctx, exec, mods...)
 			},
 		),
 		AnimalBreeds: thenLoadBuilder[Q](
@@ -1609,12 +1424,6 @@ func buildAnimalThenLoader[Q orm.Loadable]() animalThenLoader[Q] {
 			"Colors",
 			func(ctx context.Context, exec bob.Executor, retrieved ColorsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
 				return retrieved.LoadColors(ctx, exec, mods...)
-			},
-		),
-		Contacts: thenLoadBuilder[Q](
-			"Contacts",
-			func(ctx context.Context, exec bob.Executor, retrieved ContactsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadContacts(ctx, exec, mods...)
 			},
 		),
 		Microchip: thenLoadBuilder[Q](
@@ -1694,101 +1503,47 @@ func (os AnimalSlice) LoadAdoptions(ctx context.Context, exec bob.Executor, mods
 	return nil
 }
 
-// LoadOrganization loads the animal's Organization into the .R struct
-func (o *Animal) LoadOrganization(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadContact loads the animal's Contact into the .R struct
+func (o *Animal) LoadContact(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if o == nil {
 		return nil
 	}
 
 	// Reset the relationship
-	o.R.Organization = nil
+	o.R.Contact = nil
 
-	related, err := o.Organization(mods...).One(ctx, exec)
+	related, err := o.Contact(mods...).One(ctx, exec)
 	if err != nil {
 		return err
 	}
 
 	related.R.Animals = AnimalSlice{o}
 
-	o.R.Organization = related
+	o.R.Contact = related
 	return nil
 }
 
-// LoadOrganization loads the animal's Organization into the .R struct
-func (os AnimalSlice) LoadOrganization(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadContact loads the animal's Contact into the .R struct
+func (os AnimalSlice) LoadContact(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if len(os) == 0 {
 		return nil
 	}
 
-	organizations, err := os.Organization(mods...).All(ctx, exec)
+	contacts, err := os.Contact(mods...).All(ctx, exec)
 	if err != nil {
 		return err
 	}
 
 	for _, o := range os {
-		for _, rel := range organizations {
-			if !o.OrganizationID.IsValue() {
-				continue
-			}
+		for _, rel := range contacts {
 
-			if o.OrganizationID.MustGet() != rel.ID {
-				continue
-			}
-
-			rel.R.Animals = append(rel.R.Animals, o)
-
-			o.R.Organization = rel
-			break
-		}
-	}
-
-	return nil
-}
-
-// LoadUser loads the animal's User into the .R struct
-func (o *Animal) LoadUser(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.User = nil
-
-	related, err := o.User(mods...).One(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	related.R.Animals = AnimalSlice{o}
-
-	o.R.User = related
-	return nil
-}
-
-// LoadUser loads the animal's User into the .R struct
-func (os AnimalSlice) LoadUser(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	users, err := os.User(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		for _, rel := range users {
-			if !o.UserID.IsValue() {
-				continue
-			}
-
-			if o.UserID.MustGet() != rel.ID {
+			if o.ContactID != rel.ID {
 				continue
 			}
 
 			rel.R.Animals = append(rel.R.Animals, o)
 
-			o.R.User = rel
+			o.R.Contact = rel
 			break
 		}
 	}
@@ -2011,62 +1766,6 @@ func (os AnimalSlice) LoadColors(ctx context.Context, exec bob.Executor, mods ..
 			rel.R.Animal = o
 
 			o.R.Colors = append(o.R.Colors, rel)
-		}
-	}
-
-	return nil
-}
-
-// LoadContacts loads the animal's Contacts into the .R struct
-func (o *Animal) LoadContacts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.Contacts = nil
-
-	related, err := o.Contacts(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, rel := range related {
-		rel.R.Animal = o
-	}
-
-	o.R.Contacts = related
-	return nil
-}
-
-// LoadContacts loads the animal's Contacts into the .R struct
-func (os AnimalSlice) LoadContacts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	contacts, err := os.Contacts(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		o.R.Contacts = nil
-	}
-
-	for _, o := range os {
-		for _, rel := range contacts {
-
-			if !rel.AnimalID.IsValue() {
-				continue
-			}
-			if o.ID != rel.AnimalID.MustGet() {
-				continue
-			}
-
-			rel.R.Animal = o
-
-			o.R.Contacts = append(o.R.Contacts, rel)
 		}
 	}
 
@@ -2301,94 +2000,48 @@ func (animal0 *Animal) AttachAdoptions(ctx context.Context, exec bob.Executor, r
 	return nil
 }
 
-func attachAnimalOrganization0(ctx context.Context, exec bob.Executor, count int, animal0 *Animal, organization1 *Organization) (*Animal, error) {
+func attachAnimalContact0(ctx context.Context, exec bob.Executor, count int, animal0 *Animal, contact1 *Contact) (*Animal, error) {
 	setter := &AnimalSetter{
-		OrganizationID: omitnull.From(organization1.ID),
+		ContactID: omit.From(contact1.ID),
 	}
 
 	err := animal0.Update(ctx, exec, setter)
 	if err != nil {
-		return nil, fmt.Errorf("attachAnimalOrganization0: %w", err)
+		return nil, fmt.Errorf("attachAnimalContact0: %w", err)
 	}
 
 	return animal0, nil
 }
 
-func (animal0 *Animal) InsertOrganization(ctx context.Context, exec bob.Executor, related *OrganizationSetter) error {
-	organization1, err := Organizations.Insert(related).One(ctx, exec)
+func (animal0 *Animal) InsertContact(ctx context.Context, exec bob.Executor, related *ContactSetter) error {
+	contact1, err := Contacts.Insert(related).One(ctx, exec)
 	if err != nil {
 		return fmt.Errorf("inserting related objects: %w", err)
 	}
 
-	_, err = attachAnimalOrganization0(ctx, exec, 1, animal0, organization1)
+	_, err = attachAnimalContact0(ctx, exec, 1, animal0, contact1)
 	if err != nil {
 		return err
 	}
 
-	animal0.R.Organization = organization1
+	animal0.R.Contact = contact1
 
-	organization1.R.Animals = append(organization1.R.Animals, animal0)
+	contact1.R.Animals = append(contact1.R.Animals, animal0)
 
 	return nil
 }
 
-func (animal0 *Animal) AttachOrganization(ctx context.Context, exec bob.Executor, organization1 *Organization) error {
+func (animal0 *Animal) AttachContact(ctx context.Context, exec bob.Executor, contact1 *Contact) error {
 	var err error
 
-	_, err = attachAnimalOrganization0(ctx, exec, 1, animal0, organization1)
+	_, err = attachAnimalContact0(ctx, exec, 1, animal0, contact1)
 	if err != nil {
 		return err
 	}
 
-	animal0.R.Organization = organization1
+	animal0.R.Contact = contact1
 
-	organization1.R.Animals = append(organization1.R.Animals, animal0)
-
-	return nil
-}
-
-func attachAnimalUser0(ctx context.Context, exec bob.Executor, count int, animal0 *Animal, user1 *User) (*Animal, error) {
-	setter := &AnimalSetter{
-		UserID: omitnull.From(user1.ID),
-	}
-
-	err := animal0.Update(ctx, exec, setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachAnimalUser0: %w", err)
-	}
-
-	return animal0, nil
-}
-
-func (animal0 *Animal) InsertUser(ctx context.Context, exec bob.Executor, related *UserSetter) error {
-	user1, err := Users.Insert(related).One(ctx, exec)
-	if err != nil {
-		return fmt.Errorf("inserting related objects: %w", err)
-	}
-
-	_, err = attachAnimalUser0(ctx, exec, 1, animal0, user1)
-	if err != nil {
-		return err
-	}
-
-	animal0.R.User = user1
-
-	user1.R.Animals = append(user1.R.Animals, animal0)
-
-	return nil
-}
-
-func (animal0 *Animal) AttachUser(ctx context.Context, exec bob.Executor, user1 *User) error {
-	var err error
-
-	_, err = attachAnimalUser0(ctx, exec, 1, animal0, user1)
-	if err != nil {
-		return err
-	}
-
-	animal0.R.User = user1
-
-	user1.R.Animals = append(user1.R.Animals, animal0)
+	contact1.R.Animals = append(contact1.R.Animals, animal0)
 
 	return nil
 }
@@ -2657,74 +2310,6 @@ func (animal0 *Animal) AttachColors(ctx context.Context, exec bob.Executor, rela
 	}
 
 	animal0.R.Colors = append(animal0.R.Colors, colors1...)
-
-	for _, rel := range related {
-		rel.R.Animal = animal0
-	}
-
-	return nil
-}
-
-func insertAnimalContacts0(ctx context.Context, exec bob.Executor, contacts1 []*ContactSetter, animal0 *Animal) (ContactSlice, error) {
-	for i := range contacts1 {
-		contacts1[i].AnimalID = omitnull.From(animal0.ID)
-	}
-
-	ret, err := Contacts.Insert(bob.ToMods(contacts1...)).All(ctx, exec)
-	if err != nil {
-		return ret, fmt.Errorf("insertAnimalContacts0: %w", err)
-	}
-
-	return ret, nil
-}
-
-func attachAnimalContacts0(ctx context.Context, exec bob.Executor, count int, contacts1 ContactSlice, animal0 *Animal) (ContactSlice, error) {
-	setter := &ContactSetter{
-		AnimalID: omitnull.From(animal0.ID),
-	}
-
-	err := contacts1.UpdateAll(ctx, exec, *setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachAnimalContacts0: %w", err)
-	}
-
-	return contacts1, nil
-}
-
-func (animal0 *Animal) InsertContacts(ctx context.Context, exec bob.Executor, related ...*ContactSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	contacts1, err := insertAnimalContacts0(ctx, exec, related, animal0)
-	if err != nil {
-		return err
-	}
-
-	animal0.R.Contacts = append(animal0.R.Contacts, contacts1...)
-
-	for _, rel := range contacts1 {
-		rel.R.Animal = animal0
-	}
-	return nil
-}
-
-func (animal0 *Animal) AttachContacts(ctx context.Context, exec bob.Executor, related ...*Contact) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	contacts1 := ContactSlice(related)
-
-	_, err = attachAnimalContacts0(ctx, exec, len(related), contacts1, animal0)
-	if err != nil {
-		return err
-	}
-
-	animal0.R.Contacts = append(animal0.R.Contacts, contacts1...)
 
 	for _, rel := range related {
 		rel.R.Animal = animal0

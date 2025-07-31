@@ -5,6 +5,7 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/google/uuid"
+	"github.com/oapi-codegen/nullable"
 	kratos "github.com/ory/client-go"
 )
 
@@ -47,11 +48,12 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 			id = &parsed
 		}
 		verifiableAddresses = append(verifiableAddresses, api.VerifiableIdentityAddress{
+
 			ID:         id,
 			Status:     verAddr.Status,
 			Value:      verAddr.Value,
 			Verified:   verAddr.Verified,
-			VerifiedAt: verAddr.VerifiedAt,
+			VerifiedAt: nullable.NewNullableWithValue(*verAddr.VerifiedAt),
 			Via:        api.VerifiableIdentityAddressVia(verAddr.Via),
 			CreatedAt:  verAddr.CreatedAt,
 			UpdatedAt:  verAddr.UpdatedAt,
@@ -64,13 +66,13 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 	resp := api.Identity{
 		ID:                  id,
 		Credentials:         &credentials,
-		MetadataAdmin:       &identity.MetadataAdmin,
-		MetadataPublic:      &identity.MetadataPublic,
+		MetadataAdmin:       nullable.NewNullableWithValue(identity.MetadataAdmin),
+		MetadataPublic:      nullable.NewNullableWithValue(identity.MetadataPublic),
 		RecoveryAddresses:   &recoveryAddresses,
 		SchemaID:            identity.SchemaId,
 		SchemaURL:           identity.SchemaUrl,
 		State:               (*api.IdentityState)(identity.State),
-		StateChangedAt:      identity.StateChangedAt,
+		StateChangedAt:      nullable.NewNullableWithValue(*identity.StateChangedAt),
 		Traits:              identity.Traits,
 		VerifiableAddresses: &verifiableAddresses,
 		CreatedAt:           identity.CreatedAt,

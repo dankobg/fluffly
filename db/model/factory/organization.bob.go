@@ -6,6 +6,7 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -37,16 +38,8 @@ func (mods OrganizationModSlice) Apply(ctx context.Context, n *OrganizationTempl
 // all columns are optional and should be set by mods
 type OrganizationTemplate struct {
 	ID               func() int64
+	ContactID        func() int64
 	Name             func() string
-	Email            func() string
-	Phone            func() string
-	Address1         func() null.Val[string]
-	Address2         func() null.Val[string]
-	City             func() null.Val[string]
-	State            func() null.Val[string]
-	Postcode         func() null.Val[string]
-	Country          func() null.Val[string]
-	URL              func() null.Val[string]
 	Website          func() null.Val[string]
 	MissionStatement func() null.Val[string]
 	AdoptionPolicy   func() null.Val[string]
@@ -57,6 +50,8 @@ type OrganizationTemplate struct {
 	Youtube          func() null.Val[string]
 	Instagram        func() null.Val[string]
 	Pinterest        func() null.Val[string]
+	CreatedAt        func() time.Time
+	UpdatedAt        func() time.Time
 
 	r organizationR
 	f *Factory
@@ -65,14 +60,13 @@ type OrganizationTemplate struct {
 }
 
 type organizationR struct {
-	Animals            []*organizationRAnimalsR
+	Contact            *organizationRContactR
 	OrganizationHours  []*organizationROrganizationHoursR
 	OrganizationPhotos []*organizationROrganizationPhotosR
 }
 
-type organizationRAnimalsR struct {
-	number int
-	o      *AnimalTemplate
+type organizationRContactR struct {
+	o *ContactTemplate
 }
 type organizationROrganizationHoursR struct {
 	number int
@@ -93,17 +87,11 @@ func (o *OrganizationTemplate) Apply(ctx context.Context, mods ...OrganizationMo
 // setModelRels creates and sets the relationships on *models.Organization
 // according to the relationships in the template. Nothing is inserted into the db
 func (t OrganizationTemplate) setModelRels(o *models.Organization) {
-	if t.r.Animals != nil {
-		rel := models.AnimalSlice{}
-		for _, r := range t.r.Animals {
-			related := r.o.BuildMany(r.number)
-			for _, rel := range related {
-				rel.OrganizationID = null.From(o.ID) // h2
-				rel.R.Organization = o
-			}
-			rel = append(rel, related...)
-		}
-		o.R.Animals = rel
+	if t.r.Contact != nil {
+		rel := t.r.Contact.o.Build()
+		rel.R.Organizations = append(rel.R.Organizations, o)
+		o.ContactID = rel.ID // h2
+		o.R.Contact = rel
 	}
 
 	if t.r.OrganizationHours != nil {
@@ -138,45 +126,13 @@ func (t OrganizationTemplate) setModelRels(o *models.Organization) {
 func (o OrganizationTemplate) BuildSetter() *models.OrganizationSetter {
 	m := &models.OrganizationSetter{}
 
+	if o.ContactID != nil {
+		val := o.ContactID()
+		m.ContactID = omit.From(val)
+	}
 	if o.Name != nil {
 		val := o.Name()
 		m.Name = omit.From(val)
-	}
-	if o.Email != nil {
-		val := o.Email()
-		m.Email = omit.From(val)
-	}
-	if o.Phone != nil {
-		val := o.Phone()
-		m.Phone = omit.From(val)
-	}
-	if o.Address1 != nil {
-		val := o.Address1()
-		m.Address1 = omitnull.FromNull(val)
-	}
-	if o.Address2 != nil {
-		val := o.Address2()
-		m.Address2 = omitnull.FromNull(val)
-	}
-	if o.City != nil {
-		val := o.City()
-		m.City = omitnull.FromNull(val)
-	}
-	if o.State != nil {
-		val := o.State()
-		m.State = omitnull.FromNull(val)
-	}
-	if o.Postcode != nil {
-		val := o.Postcode()
-		m.Postcode = omitnull.FromNull(val)
-	}
-	if o.Country != nil {
-		val := o.Country()
-		m.Country = omitnull.FromNull(val)
-	}
-	if o.URL != nil {
-		val := o.URL()
-		m.URL = omitnull.FromNull(val)
 	}
 	if o.Website != nil {
 		val := o.Website()
@@ -218,6 +174,14 @@ func (o OrganizationTemplate) BuildSetter() *models.OrganizationSetter {
 		val := o.Pinterest()
 		m.Pinterest = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -243,35 +207,11 @@ func (o OrganizationTemplate) Build() *models.Organization {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
+	if o.ContactID != nil {
+		m.ContactID = o.ContactID()
+	}
 	if o.Name != nil {
 		m.Name = o.Name()
-	}
-	if o.Email != nil {
-		m.Email = o.Email()
-	}
-	if o.Phone != nil {
-		m.Phone = o.Phone()
-	}
-	if o.Address1 != nil {
-		m.Address1 = o.Address1()
-	}
-	if o.Address2 != nil {
-		m.Address2 = o.Address2()
-	}
-	if o.City != nil {
-		m.City = o.City()
-	}
-	if o.State != nil {
-		m.State = o.State()
-	}
-	if o.Postcode != nil {
-		m.Postcode = o.Postcode()
-	}
-	if o.Country != nil {
-		m.Country = o.Country()
-	}
-	if o.URL != nil {
-		m.URL = o.URL()
 	}
 	if o.Website != nil {
 		m.Website = o.Website()
@@ -303,6 +243,12 @@ func (o OrganizationTemplate) Build() *models.Organization {
 	if o.Pinterest != nil {
 		m.Pinterest = o.Pinterest()
 	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
+	}
 
 	o.setModelRels(m)
 
@@ -323,17 +269,13 @@ func (o OrganizationTemplate) BuildMany(number int) models.OrganizationSlice {
 }
 
 func ensureCreatableOrganization(m *models.OrganizationSetter) {
+	if !(m.ContactID.IsValue()) {
+		val := random_int64(nil)
+		m.ContactID = omit.From(val)
+	}
 	if !(m.Name.IsValue()) {
 		val := random_string(nil, "255")
 		m.Name = omit.From(val)
-	}
-	if !(m.Email.IsValue()) {
-		val := random_string(nil, "255")
-		m.Email = omit.From(val)
-	}
-	if !(m.Phone.IsValue()) {
-		val := random_string(nil, "50")
-		m.Phone = omit.From(val)
 	}
 }
 
@@ -342,26 +284,6 @@ func ensureCreatableOrganization(m *models.OrganizationSetter) {
 // any required relationship should have already exist on the model
 func (o *OrganizationTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Organization) error {
 	var err error
-
-	isAnimalsDone, _ := organizationRelAnimalsCtx.Value(ctx)
-	if !isAnimalsDone && o.r.Animals != nil {
-		ctx = organizationRelAnimalsCtx.WithValue(ctx, true)
-		for _, r := range o.r.Animals {
-			if r.o.alreadyPersisted {
-				m.R.Animals = append(m.R.Animals, r.o.Build())
-			} else {
-				rel0, err := r.o.CreateMany(ctx, exec, r.number)
-				if err != nil {
-					return err
-				}
-
-				err = m.AttachAnimals(ctx, exec, rel0...)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
 
 	isOrganizationHoursDone, _ := organizationRelOrganizationHoursCtx.Value(ctx)
 	if !isOrganizationHoursDone && o.r.OrganizationHours != nil {
@@ -413,10 +335,29 @@ func (o *OrganizationTemplate) Create(ctx context.Context, exec bob.Executor) (*
 	opt := o.BuildSetter()
 	ensureCreatableOrganization(opt)
 
+	if o.r.Contact == nil {
+		OrganizationMods.WithNewContact().Apply(ctx, o)
+	}
+
+	var rel0 *models.Contact
+
+	if o.r.Contact.o.alreadyPersisted {
+		rel0 = o.r.Contact.o.Build()
+	} else {
+		rel0, err = o.r.Contact.o.Create(ctx, exec)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	opt.ContactID = omit.From(rel0.ID)
+
 	m, err := models.Organizations.Insert(opt).One(ctx, exec)
 	if err != nil {
 		return nil, err
 	}
+
+	m.R.Contact = rel0
 
 	if err := o.insertOptRels(ctx, exec, m); err != nil {
 		return nil, err
@@ -496,16 +437,8 @@ type organizationMods struct{}
 func (m organizationMods) RandomizeAllColumns(f *faker.Faker) OrganizationMod {
 	return OrganizationModSlice{
 		OrganizationMods.RandomID(f),
+		OrganizationMods.RandomContactID(f),
 		OrganizationMods.RandomName(f),
-		OrganizationMods.RandomEmail(f),
-		OrganizationMods.RandomPhone(f),
-		OrganizationMods.RandomAddress1(f),
-		OrganizationMods.RandomAddress2(f),
-		OrganizationMods.RandomCity(f),
-		OrganizationMods.RandomState(f),
-		OrganizationMods.RandomPostcode(f),
-		OrganizationMods.RandomCountry(f),
-		OrganizationMods.RandomURL(f),
 		OrganizationMods.RandomWebsite(f),
 		OrganizationMods.RandomMissionStatement(f),
 		OrganizationMods.RandomAdoptionPolicy(f),
@@ -516,6 +449,8 @@ func (m organizationMods) RandomizeAllColumns(f *faker.Faker) OrganizationMod {
 		OrganizationMods.RandomYoutube(f),
 		OrganizationMods.RandomInstagram(f),
 		OrganizationMods.RandomPinterest(f),
+		OrganizationMods.RandomCreatedAt(f),
+		OrganizationMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -551,6 +486,37 @@ func (m organizationMods) RandomID(f *faker.Faker) OrganizationMod {
 }
 
 // Set the model columns to this value
+func (m organizationMods) ContactID(val int64) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.ContactID = func() int64 { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationMods) ContactIDFunc(f func() int64) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.ContactID = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationMods) UnsetContactID() OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.ContactID = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationMods) RandomContactID(f *faker.Faker) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.ContactID = func() int64 {
+			return random_int64(f)
+		}
+	})
+}
+
+// Set the model columns to this value
 func (m organizationMods) Name(val string) OrganizationMod {
 	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
 		o.Name = func() string { return val }
@@ -577,439 +543,6 @@ func (m organizationMods) RandomName(f *faker.Faker) OrganizationMod {
 	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
 		o.Name = func() string {
 			return random_string(f, "255")
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Email(val string) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Email = func() string { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) EmailFunc(f func() string) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Email = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetEmail() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Email = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m organizationMods) RandomEmail(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Email = func() string {
-			return random_string(f, "255")
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Phone(val string) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Phone = func() string { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) PhoneFunc(f func() string) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Phone = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetPhone() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Phone = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m organizationMods) RandomPhone(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Phone = func() string {
-			return random_string(f, "50")
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Address1(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address1 = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) Address1Func(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address1 = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetAddress1() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address1 = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomAddress1(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address1 = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomAddress1NotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address1 = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Address2(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address2 = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) Address2Func(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address2 = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetAddress2() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address2 = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomAddress2(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address2 = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomAddress2NotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Address2 = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) City(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.City = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) CityFunc(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.City = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetCity() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.City = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomCity(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.City = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomCityNotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.City = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "255")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) State(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.State = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) StateFunc(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.State = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetState() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.State = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomState(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.State = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "10")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomStateNotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.State = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "10")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Postcode(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Postcode = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) PostcodeFunc(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Postcode = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetPostcode() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Postcode = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomPostcode(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Postcode = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "20")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomPostcodeNotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Postcode = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "20")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) Country(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Country = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) CountryFunc(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Country = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetCountry() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Country = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomCountry(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Country = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "10")
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomCountryNotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.Country = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f, "10")
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m organizationMods) URL(val null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.URL = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m organizationMods) URLFunc(f func() null.Val[string]) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.URL = f
-	})
-}
-
-// Clear any values for the column
-func (m organizationMods) UnsetURL() OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.URL = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m organizationMods) RandomURL(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.URL = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m organizationMods) RandomURLNotNull(f *faker.Faker) OrganizationMod {
-	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
-		o.URL = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f)
-			return null.From(val)
 		}
 	})
 }
@@ -1544,60 +1077,109 @@ func (m organizationMods) RandomPinterestNotNull(f *faker.Faker) OrganizationMod
 	})
 }
 
+// Set the model columns to this value
+func (m organizationMods) CreatedAt(val time.Time) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationMods) CreatedAtFunc(f func() time.Time) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationMods) UnsetCreatedAt() OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationMods) RandomCreatedAt(f *faker.Faker) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m organizationMods) UpdatedAt(val time.Time) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationMods) UpdatedAtFunc(f func() time.Time) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationMods) UnsetUpdatedAt() OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationMods) RandomUpdatedAt(f *faker.Faker) OrganizationMod {
+	return OrganizationModFunc(func(_ context.Context, o *OrganizationTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
 func (m organizationMods) WithParentsCascading() OrganizationMod {
 	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
 		if isDone, _ := organizationWithParentsCascadingCtx.Value(ctx); isDone {
 			return
 		}
 		ctx = organizationWithParentsCascadingCtx.WithValue(ctx, true)
-	})
-}
+		{
 
-func (m organizationMods) WithAnimals(number int, related *AnimalTemplate) OrganizationMod {
-	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		o.r.Animals = []*organizationRAnimalsR{{
-			number: number,
-			o:      related,
-		}}
-	})
-}
-
-func (m organizationMods) WithNewAnimals(number int, mods ...AnimalMod) OrganizationMod {
-	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		related := o.f.NewAnimalWithContext(ctx, mods...)
-		m.WithAnimals(number, related).Apply(ctx, o)
-	})
-}
-
-func (m organizationMods) AddAnimals(number int, related *AnimalTemplate) OrganizationMod {
-	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		o.r.Animals = append(o.r.Animals, &organizationRAnimalsR{
-			number: number,
-			o:      related,
-		})
-	})
-}
-
-func (m organizationMods) AddNewAnimals(number int, mods ...AnimalMod) OrganizationMod {
-	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		related := o.f.NewAnimalWithContext(ctx, mods...)
-		m.AddAnimals(number, related).Apply(ctx, o)
-	})
-}
-
-func (m organizationMods) AddExistingAnimals(existingModels ...*models.Animal) OrganizationMod {
-	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		for _, em := range existingModels {
-			o.r.Animals = append(o.r.Animals, &organizationRAnimalsR{
-				o: o.f.FromExistingAnimal(em),
-			})
+			related := o.f.NewContactWithContext(ctx, ContactMods.WithParentsCascading())
+			m.WithContact(related).Apply(ctx, o)
 		}
 	})
 }
 
-func (m organizationMods) WithoutAnimals() OrganizationMod {
+func (m organizationMods) WithContact(rel *ContactTemplate) OrganizationMod {
 	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
-		o.r.Animals = nil
+		o.r.Contact = &organizationRContactR{
+			o: rel,
+		}
+	})
+}
+
+func (m organizationMods) WithNewContact(mods ...ContactMod) OrganizationMod {
+	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
+		related := o.f.NewContactWithContext(ctx, mods...)
+
+		m.WithContact(related).Apply(ctx, o)
+	})
+}
+
+func (m organizationMods) WithExistingContact(em *models.Contact) OrganizationMod {
+	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
+		o.r.Contact = &organizationRContactR{
+			o: o.f.FromExistingContact(em),
+		}
+	})
+}
+
+func (m organizationMods) WithoutContact() OrganizationMod {
+	return OrganizationModFunc(func(ctx context.Context, o *OrganizationTemplate) {
+		o.r.Contact = nil
 	})
 }
 

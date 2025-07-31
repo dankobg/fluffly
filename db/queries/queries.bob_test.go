@@ -188,3 +188,273 @@ func TestGetUserById(t *testing.T) {
 		}
 	})
 }
+
+func TestListOrganizations(t *testing.T) {
+	t.Run("Base", func(t *testing.T) {
+		var sb strings.Builder
+
+		query := ListOrganizations()
+
+		if _, err := query.WriteQuery(t.Context(), &sb, 1); err != nil {
+			t.Fatal(err)
+		}
+
+		if diff := cmp.Diff(listOrganizationsSQL, sb.String()); diff != "" {
+			t.Fatalf("unexpected result (-got +want):\n%s", diff)
+		}
+	})
+
+	t.Run("Mod", func(t *testing.T) {
+		var sb strings.Builder
+
+		query := ListOrganizations()
+
+		if _, err := psql.Select(query).WriteQuery(t.Context(), &sb, 1); err != nil {
+			t.Fatal(err)
+		}
+
+		queryDiff, err := testutils.QueryDiff(listOrganizationsSQL, sb.String(), formatQuery)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if queryDiff != "" {
+			fmt.Println(sb.String())
+			t.Fatalf("unexpected result (-got +want):\n%s", queryDiff)
+		}
+	})
+
+	t.Run("Scanning", func(t *testing.T) {
+		if testDB == nil {
+			t.Skip("skipping test, no DSN provided")
+		}
+
+		ctxTx, cancel := context.WithCancel(t.Context())
+		defer cancel()
+
+		tx, err := testDB.Begin(ctxTx)
+		if err != nil {
+			t.Fatalf("Error starting transaction: %v", err)
+		}
+
+		defer func() {
+			if err := tx.Rollback(ctxTx); err != nil {
+				t.Fatalf("Error rolling back transaction: %v", err)
+			}
+		}()
+
+		query, args, err := bob.Build(ctxTx, psql.Select(ListOrganizations()))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rows, err := tx.QueryContext(ctxTx, query, args...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer rows.Close()
+
+		columns, err := rows.Columns()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(columns) != 15 {
+			t.Fatalf("expected %d columns, got %d", 15, len(columns))
+		}
+
+		if columns[0] != "id" {
+			t.Fatalf("expected column %d to be %s, got %s", 0, "id", columns[0])
+		}
+
+		if columns[1] != "contact_id" {
+			t.Fatalf("expected column %d to be %s, got %s", 1, "contact_id", columns[1])
+		}
+
+		if columns[2] != "name" {
+			t.Fatalf("expected column %d to be %s, got %s", 2, "name", columns[2])
+		}
+
+		if columns[3] != "website" {
+			t.Fatalf("expected column %d to be %s, got %s", 3, "website", columns[3])
+		}
+
+		if columns[4] != "mission_statement" {
+			t.Fatalf("expected column %d to be %s, got %s", 4, "mission_statement", columns[4])
+		}
+
+		if columns[5] != "adoption_policy" {
+			t.Fatalf("expected column %d to be %s, got %s", 5, "adoption_policy", columns[5])
+		}
+
+		if columns[6] != "adoption_url" {
+			t.Fatalf("expected column %d to be %s, got %s", 6, "adoption_url", columns[6])
+		}
+
+		if columns[7] != "distance" {
+			t.Fatalf("expected column %d to be %s, got %s", 7, "distance", columns[7])
+		}
+
+		if columns[8] != "facebook" {
+			t.Fatalf("expected column %d to be %s, got %s", 8, "facebook", columns[8])
+		}
+
+		if columns[9] != "twitter" {
+			t.Fatalf("expected column %d to be %s, got %s", 9, "twitter", columns[9])
+		}
+
+		if columns[10] != "youtube" {
+			t.Fatalf("expected column %d to be %s, got %s", 10, "youtube", columns[10])
+		}
+
+		if columns[11] != "instagram" {
+			t.Fatalf("expected column %d to be %s, got %s", 11, "instagram", columns[11])
+		}
+
+		if columns[12] != "pinterest" {
+			t.Fatalf("expected column %d to be %s, got %s", 12, "pinterest", columns[12])
+		}
+
+		if columns[13] != "created_at" {
+			t.Fatalf("expected column %d to be %s, got %s", 13, "created_at", columns[13])
+		}
+
+		if columns[14] != "updated_at" {
+			t.Fatalf("expected column %d to be %s, got %s", 14, "updated_at", columns[14])
+		}
+	})
+}
+
+func TestGetOrganizationById(t *testing.T) {
+	t.Run("Base", func(t *testing.T) {
+		var sb strings.Builder
+
+		query := GetOrganizationById(random_int64(nil))
+
+		if _, err := query.WriteQuery(t.Context(), &sb, 1); err != nil {
+			t.Fatal(err)
+		}
+
+		if diff := cmp.Diff(getOrganizationByIdSQL, sb.String()); diff != "" {
+			t.Fatalf("unexpected result (-got +want):\n%s", diff)
+		}
+	})
+
+	t.Run("Mod", func(t *testing.T) {
+		var sb strings.Builder
+
+		query := GetOrganizationById(random_int64(nil))
+
+		if _, err := psql.Select(query).WriteQuery(t.Context(), &sb, 1); err != nil {
+			t.Fatal(err)
+		}
+
+		queryDiff, err := testutils.QueryDiff(getOrganizationByIdSQL, sb.String(), formatQuery)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if queryDiff != "" {
+			fmt.Println(sb.String())
+			t.Fatalf("unexpected result (-got +want):\n%s", queryDiff)
+		}
+	})
+
+	t.Run("Scanning", func(t *testing.T) {
+		if testDB == nil {
+			t.Skip("skipping test, no DSN provided")
+		}
+
+		ctxTx, cancel := context.WithCancel(t.Context())
+		defer cancel()
+
+		tx, err := testDB.Begin(ctxTx)
+		if err != nil {
+			t.Fatalf("Error starting transaction: %v", err)
+		}
+
+		defer func() {
+			if err := tx.Rollback(ctxTx); err != nil {
+				t.Fatalf("Error rolling back transaction: %v", err)
+			}
+		}()
+
+		query, args, err := bob.Build(ctxTx, psql.Select(GetOrganizationById(random_int64(nil))))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rows, err := tx.QueryContext(ctxTx, query, args...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer rows.Close()
+
+		columns, err := rows.Columns()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(columns) != 15 {
+			t.Fatalf("expected %d columns, got %d", 15, len(columns))
+		}
+
+		if columns[0] != "id" {
+			t.Fatalf("expected column %d to be %s, got %s", 0, "id", columns[0])
+		}
+
+		if columns[1] != "contact_id" {
+			t.Fatalf("expected column %d to be %s, got %s", 1, "contact_id", columns[1])
+		}
+
+		if columns[2] != "name" {
+			t.Fatalf("expected column %d to be %s, got %s", 2, "name", columns[2])
+		}
+
+		if columns[3] != "website" {
+			t.Fatalf("expected column %d to be %s, got %s", 3, "website", columns[3])
+		}
+
+		if columns[4] != "mission_statement" {
+			t.Fatalf("expected column %d to be %s, got %s", 4, "mission_statement", columns[4])
+		}
+
+		if columns[5] != "adoption_policy" {
+			t.Fatalf("expected column %d to be %s, got %s", 5, "adoption_policy", columns[5])
+		}
+
+		if columns[6] != "adoption_url" {
+			t.Fatalf("expected column %d to be %s, got %s", 6, "adoption_url", columns[6])
+		}
+
+		if columns[7] != "distance" {
+			t.Fatalf("expected column %d to be %s, got %s", 7, "distance", columns[7])
+		}
+
+		if columns[8] != "facebook" {
+			t.Fatalf("expected column %d to be %s, got %s", 8, "facebook", columns[8])
+		}
+
+		if columns[9] != "twitter" {
+			t.Fatalf("expected column %d to be %s, got %s", 9, "twitter", columns[9])
+		}
+
+		if columns[10] != "youtube" {
+			t.Fatalf("expected column %d to be %s, got %s", 10, "youtube", columns[10])
+		}
+
+		if columns[11] != "instagram" {
+			t.Fatalf("expected column %d to be %s, got %s", 11, "instagram", columns[11])
+		}
+
+		if columns[12] != "pinterest" {
+			t.Fatalf("expected column %d to be %s, got %s", 12, "pinterest", columns[12])
+		}
+
+		if columns[13] != "created_at" {
+			t.Fatalf("expected column %d to be %s, got %s", 13, "created_at", columns[13])
+		}
+
+		if columns[14] != "updated_at" {
+			t.Fatalf("expected column %d to be %s, got %s", 14, "updated_at", columns[14])
+		}
+	})
+}

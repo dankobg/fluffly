@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -25,9 +26,11 @@ import (
 
 // Color is an object representing the database table.
 type Color struct {
-	ID       int64           `db:"id,pk,generated" `
-	AnimalID null.Val[int64] `db:"animal_id" `
-	Color    string          `db:"color" `
+	ID        int64           `db:"id,pk,generated" `
+	AnimalID  null.Val[int64] `db:"animal_id" `
+	Color     string          `db:"color" `
+	CreatedAt time.Time       `db:"created_at" `
+	UpdatedAt time.Time       `db:"updated_at" `
 
 	R colorR `db:"-" `
 }
@@ -48,9 +51,11 @@ type colorR struct {
 }
 
 type colorColumnNames struct {
-	ID       string
-	AnimalID string
-	Color    string
+	ID        string
+	AnimalID  string
+	Color     string
+	CreatedAt string
+	UpdatedAt string
 }
 
 var ColorColumns = buildColorColumns("color")
@@ -60,6 +65,8 @@ type colorColumns struct {
 	ID         psql.Expression
 	AnimalID   psql.Expression
 	Color      psql.Expression
+	CreatedAt  psql.Expression
+	UpdatedAt  psql.Expression
 }
 
 func (c colorColumns) Alias() string {
@@ -76,13 +83,17 @@ func buildColorColumns(alias string) colorColumns {
 		ID:         psql.Quote(alias, "id"),
 		AnimalID:   psql.Quote(alias, "animal_id"),
 		Color:      psql.Quote(alias, "color"),
+		CreatedAt:  psql.Quote(alias, "created_at"),
+		UpdatedAt:  psql.Quote(alias, "updated_at"),
 	}
 }
 
 type colorWhere[Q psql.Filterable] struct {
-	ID       psql.WhereMod[Q, int64]
-	AnimalID psql.WhereNullMod[Q, int64]
-	Color    psql.WhereMod[Q, string]
+	ID        psql.WhereMod[Q, int64]
+	AnimalID  psql.WhereNullMod[Q, int64]
+	Color     psql.WhereMod[Q, string]
+	CreatedAt psql.WhereMod[Q, time.Time]
+	UpdatedAt psql.WhereMod[Q, time.Time]
 }
 
 func (colorWhere[Q]) AliasedAs(alias string) colorWhere[Q] {
@@ -91,9 +102,11 @@ func (colorWhere[Q]) AliasedAs(alias string) colorWhere[Q] {
 
 func buildColorWhere[Q psql.Filterable](cols colorColumns) colorWhere[Q] {
 	return colorWhere[Q]{
-		ID:       psql.Where[Q, int64](cols.ID),
-		AnimalID: psql.WhereNull[Q, int64](cols.AnimalID),
-		Color:    psql.Where[Q, string](cols.Color),
+		ID:        psql.Where[Q, int64](cols.ID),
+		AnimalID:  psql.WhereNull[Q, int64](cols.AnimalID),
+		Color:     psql.Where[Q, string](cols.Color),
+		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -114,17 +127,25 @@ type colorErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type ColorSetter struct {
-	AnimalID omitnull.Val[int64] `db:"animal_id" `
-	Color    omit.Val[string]    `db:"color" `
+	AnimalID  omitnull.Val[int64] `db:"animal_id" `
+	Color     omit.Val[string]    `db:"color" `
+	CreatedAt omit.Val[time.Time] `db:"created_at" `
+	UpdatedAt omit.Val[time.Time] `db:"updated_at" `
 }
 
 func (s ColorSetter) SetColumns() []string {
-	vals := make([]string, 0, 2)
+	vals := make([]string, 0, 4)
 	if !s.AnimalID.IsUnset() {
 		vals = append(vals, "animal_id")
 	}
 	if s.Color.IsValue() {
 		vals = append(vals, "color")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -136,6 +157,12 @@ func (s ColorSetter) Overwrite(t *Color) {
 	if s.Color.IsValue() {
 		t.Color = s.Color.MustGet()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *ColorSetter) Apply(q *dialect.InsertQuery) {
@@ -144,7 +171,7 @@ func (s *ColorSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 2)
+		vals := make([]bob.Expression, 4)
 		if !s.AnimalID.IsUnset() {
 			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
 		} else {
@@ -157,6 +184,18 @@ func (s *ColorSetter) Apply(q *dialect.InsertQuery) {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[2] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[2] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[3] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[3] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -166,7 +205,7 @@ func (s ColorSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s ColorSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 2)
+	exprs := make([]bob.Expression, 0, 4)
 
 	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -179,6 +218,20 @@ func (s ColorSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "color")...),
 			psql.Arg(s.Color),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

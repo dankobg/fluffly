@@ -33,6 +33,8 @@ type Adoption struct {
 	AdoptedAt  time.Time           `db:"adopted_at" `
 	ReturnedAt null.Val[time.Time] `db:"returned_at" `
 	Notes      null.Val[string]    `db:"notes" `
+	CreatedAt  time.Time           `db:"created_at" `
+	UpdatedAt  time.Time           `db:"updated_at" `
 
 	R adoptionR `db:"-" `
 }
@@ -60,6 +62,8 @@ type adoptionColumnNames struct {
 	AdoptedAt  string
 	ReturnedAt string
 	Notes      string
+	CreatedAt  string
+	UpdatedAt  string
 }
 
 var AdoptionColumns = buildAdoptionColumns("adoption")
@@ -72,6 +76,8 @@ type adoptionColumns struct {
 	AdoptedAt  psql.Expression
 	ReturnedAt psql.Expression
 	Notes      psql.Expression
+	CreatedAt  psql.Expression
+	UpdatedAt  psql.Expression
 }
 
 func (c adoptionColumns) Alias() string {
@@ -91,6 +97,8 @@ func buildAdoptionColumns(alias string) adoptionColumns {
 		AdoptedAt:  psql.Quote(alias, "adopted_at"),
 		ReturnedAt: psql.Quote(alias, "returned_at"),
 		Notes:      psql.Quote(alias, "notes"),
+		CreatedAt:  psql.Quote(alias, "created_at"),
+		UpdatedAt:  psql.Quote(alias, "updated_at"),
 	}
 }
 
@@ -101,6 +109,8 @@ type adoptionWhere[Q psql.Filterable] struct {
 	AdoptedAt  psql.WhereMod[Q, time.Time]
 	ReturnedAt psql.WhereNullMod[Q, time.Time]
 	Notes      psql.WhereNullMod[Q, string]
+	CreatedAt  psql.WhereMod[Q, time.Time]
+	UpdatedAt  psql.WhereMod[Q, time.Time]
 }
 
 func (adoptionWhere[Q]) AliasedAs(alias string) adoptionWhere[Q] {
@@ -115,6 +125,8 @@ func buildAdoptionWhere[Q psql.Filterable](cols adoptionColumns) adoptionWhere[Q
 		AdoptedAt:  psql.Where[Q, time.Time](cols.AdoptedAt),
 		ReturnedAt: psql.WhereNull[Q, time.Time](cols.ReturnedAt),
 		Notes:      psql.WhereNull[Q, string](cols.Notes),
+		CreatedAt:  psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:  psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -140,10 +152,12 @@ type AdoptionSetter struct {
 	AdoptedAt  omit.Val[time.Time]     `db:"adopted_at" `
 	ReturnedAt omitnull.Val[time.Time] `db:"returned_at" `
 	Notes      omitnull.Val[string]    `db:"notes" `
+	CreatedAt  omit.Val[time.Time]     `db:"created_at" `
+	UpdatedAt  omit.Val[time.Time]     `db:"updated_at" `
 }
 
 func (s AdoptionSetter) SetColumns() []string {
-	vals := make([]string, 0, 5)
+	vals := make([]string, 0, 7)
 	if !s.AnimalID.IsUnset() {
 		vals = append(vals, "animal_id")
 	}
@@ -158,6 +172,12 @@ func (s AdoptionSetter) SetColumns() []string {
 	}
 	if !s.Notes.IsUnset() {
 		vals = append(vals, "notes")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -178,6 +198,12 @@ func (s AdoptionSetter) Overwrite(t *Adoption) {
 	if !s.Notes.IsUnset() {
 		t.Notes = s.Notes.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *AdoptionSetter) Apply(q *dialect.InsertQuery) {
@@ -186,7 +212,7 @@ func (s *AdoptionSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 5)
+		vals := make([]bob.Expression, 7)
 		if !s.AnimalID.IsUnset() {
 			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
 		} else {
@@ -217,6 +243,18 @@ func (s *AdoptionSetter) Apply(q *dialect.InsertQuery) {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[5] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[5] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[6] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[6] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -226,7 +264,7 @@ func (s AdoptionSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s AdoptionSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 5)
+	exprs := make([]bob.Expression, 0, 7)
 
 	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -260,6 +298,20 @@ func (s AdoptionSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "notes")...),
 			psql.Arg(s.Notes),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

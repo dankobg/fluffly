@@ -12,6 +12,7 @@ import (
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
+	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
 	"github.com/stephenafamo/bob/dialect/psql/dialect"
@@ -26,13 +27,14 @@ import (
 
 // Contact is an object representing the database table.
 type Contact struct {
-	ID        int64           `db:"id,pk,generated" `
-	AnimalID  null.Val[int64] `db:"animal_id" `
-	AddressID int64           `db:"address_id" `
-	Phone     string          `db:"phone" `
-	Email     string          `db:"email" `
-	CreatedAt time.Time       `db:"created_at" `
-	UpdatedAt time.Time       `db:"updated_at" `
+	ID             int64               `db:"id,pk,generated" `
+	UserID         null.Val[uuid.UUID] `db:"user_id" `
+	OrganizationID null.Val[int64]     `db:"organization_id" `
+	AddressID      int64               `db:"address_id" `
+	Phone          string              `db:"phone" `
+	Email          string              `db:"email" `
+	CreatedAt      time.Time           `db:"created_at" `
+	UpdatedAt      time.Time           `db:"updated_at" `
 
 	R contactR `db:"-" `
 }
@@ -49,30 +51,34 @@ type ContactsQuery = *psql.ViewQuery[*Contact, ContactSlice]
 
 // contactR is where relationships are stored.
 type contactR struct {
-	Animal *Animal // contact.fk_contact_animal_id_animal
+	Animals       AnimalSlice       // animal.fk_animal_contact_id_contact
+	Address       *Address          // contact.fk_contact_address_id_animal
+	Organizations OrganizationSlice // organization.fk_organization_contact_id_contact
 }
 
 type contactColumnNames struct {
-	ID        string
-	AnimalID  string
-	AddressID string
-	Phone     string
-	Email     string
-	CreatedAt string
-	UpdatedAt string
+	ID             string
+	UserID         string
+	OrganizationID string
+	AddressID      string
+	Phone          string
+	Email          string
+	CreatedAt      string
+	UpdatedAt      string
 }
 
 var ContactColumns = buildContactColumns("contact")
 
 type contactColumns struct {
-	tableAlias string
-	ID         psql.Expression
-	AnimalID   psql.Expression
-	AddressID  psql.Expression
-	Phone      psql.Expression
-	Email      psql.Expression
-	CreatedAt  psql.Expression
-	UpdatedAt  psql.Expression
+	tableAlias     string
+	ID             psql.Expression
+	UserID         psql.Expression
+	OrganizationID psql.Expression
+	AddressID      psql.Expression
+	Phone          psql.Expression
+	Email          psql.Expression
+	CreatedAt      psql.Expression
+	UpdatedAt      psql.Expression
 }
 
 func (c contactColumns) Alias() string {
@@ -85,25 +91,27 @@ func (contactColumns) AliasedAs(alias string) contactColumns {
 
 func buildContactColumns(alias string) contactColumns {
 	return contactColumns{
-		tableAlias: alias,
-		ID:         psql.Quote(alias, "id"),
-		AnimalID:   psql.Quote(alias, "animal_id"),
-		AddressID:  psql.Quote(alias, "address_id"),
-		Phone:      psql.Quote(alias, "phone"),
-		Email:      psql.Quote(alias, "email"),
-		CreatedAt:  psql.Quote(alias, "created_at"),
-		UpdatedAt:  psql.Quote(alias, "updated_at"),
+		tableAlias:     alias,
+		ID:             psql.Quote(alias, "id"),
+		UserID:         psql.Quote(alias, "user_id"),
+		OrganizationID: psql.Quote(alias, "organization_id"),
+		AddressID:      psql.Quote(alias, "address_id"),
+		Phone:          psql.Quote(alias, "phone"),
+		Email:          psql.Quote(alias, "email"),
+		CreatedAt:      psql.Quote(alias, "created_at"),
+		UpdatedAt:      psql.Quote(alias, "updated_at"),
 	}
 }
 
 type contactWhere[Q psql.Filterable] struct {
-	ID        psql.WhereMod[Q, int64]
-	AnimalID  psql.WhereNullMod[Q, int64]
-	AddressID psql.WhereMod[Q, int64]
-	Phone     psql.WhereMod[Q, string]
-	Email     psql.WhereMod[Q, string]
-	CreatedAt psql.WhereMod[Q, time.Time]
-	UpdatedAt psql.WhereMod[Q, time.Time]
+	ID             psql.WhereMod[Q, int64]
+	UserID         psql.WhereNullMod[Q, uuid.UUID]
+	OrganizationID psql.WhereNullMod[Q, int64]
+	AddressID      psql.WhereMod[Q, int64]
+	Phone          psql.WhereMod[Q, string]
+	Email          psql.WhereMod[Q, string]
+	CreatedAt      psql.WhereMod[Q, time.Time]
+	UpdatedAt      psql.WhereMod[Q, time.Time]
 }
 
 func (contactWhere[Q]) AliasedAs(alias string) contactWhere[Q] {
@@ -112,13 +120,14 @@ func (contactWhere[Q]) AliasedAs(alias string) contactWhere[Q] {
 
 func buildContactWhere[Q psql.Filterable](cols contactColumns) contactWhere[Q] {
 	return contactWhere[Q]{
-		ID:        psql.Where[Q, int64](cols.ID),
-		AnimalID:  psql.WhereNull[Q, int64](cols.AnimalID),
-		AddressID: psql.Where[Q, int64](cols.AddressID),
-		Phone:     psql.Where[Q, string](cols.Phone),
-		Email:     psql.Where[Q, string](cols.Email),
-		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
-		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
+		ID:             psql.Where[Q, int64](cols.ID),
+		UserID:         psql.WhereNull[Q, uuid.UUID](cols.UserID),
+		OrganizationID: psql.WhereNull[Q, int64](cols.OrganizationID),
+		AddressID:      psql.Where[Q, int64](cols.AddressID),
+		Phone:          psql.Where[Q, string](cols.Phone),
+		Email:          psql.Where[Q, string](cols.Email),
+		CreatedAt:      psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:      psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -139,18 +148,22 @@ type contactErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type ContactSetter struct {
-	AnimalID  omitnull.Val[int64] `db:"animal_id" `
-	AddressID omit.Val[int64]     `db:"address_id" `
-	Phone     omit.Val[string]    `db:"phone" `
-	Email     omit.Val[string]    `db:"email" `
-	CreatedAt omit.Val[time.Time] `db:"created_at" `
-	UpdatedAt omit.Val[time.Time] `db:"updated_at" `
+	UserID         omitnull.Val[uuid.UUID] `db:"user_id" `
+	OrganizationID omitnull.Val[int64]     `db:"organization_id" `
+	AddressID      omit.Val[int64]         `db:"address_id" `
+	Phone          omit.Val[string]        `db:"phone" `
+	Email          omit.Val[string]        `db:"email" `
+	CreatedAt      omit.Val[time.Time]     `db:"created_at" `
+	UpdatedAt      omit.Val[time.Time]     `db:"updated_at" `
 }
 
 func (s ContactSetter) SetColumns() []string {
-	vals := make([]string, 0, 6)
-	if !s.AnimalID.IsUnset() {
-		vals = append(vals, "animal_id")
+	vals := make([]string, 0, 7)
+	if !s.UserID.IsUnset() {
+		vals = append(vals, "user_id")
+	}
+	if !s.OrganizationID.IsUnset() {
+		vals = append(vals, "organization_id")
 	}
 	if s.AddressID.IsValue() {
 		vals = append(vals, "address_id")
@@ -171,8 +184,11 @@ func (s ContactSetter) SetColumns() []string {
 }
 
 func (s ContactSetter) Overwrite(t *Contact) {
-	if !s.AnimalID.IsUnset() {
-		t.AnimalID = s.AnimalID.MustGetNull()
+	if !s.UserID.IsUnset() {
+		t.UserID = s.UserID.MustGetNull()
+	}
+	if !s.OrganizationID.IsUnset() {
+		t.OrganizationID = s.OrganizationID.MustGetNull()
 	}
 	if s.AddressID.IsValue() {
 		t.AddressID = s.AddressID.MustGet()
@@ -197,41 +213,47 @@ func (s *ContactSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 6)
-		if !s.AnimalID.IsUnset() {
-			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
+		vals := make([]bob.Expression, 7)
+		if !s.UserID.IsUnset() {
+			vals[0] = psql.Arg(s.UserID.MustGetNull())
 		} else {
 			vals[0] = psql.Raw("DEFAULT")
 		}
 
-		if s.AddressID.IsValue() {
-			vals[1] = psql.Arg(s.AddressID.MustGet())
+		if !s.OrganizationID.IsUnset() {
+			vals[1] = psql.Arg(s.OrganizationID.MustGetNull())
 		} else {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
-		if s.Phone.IsValue() {
-			vals[2] = psql.Arg(s.Phone.MustGet())
+		if s.AddressID.IsValue() {
+			vals[2] = psql.Arg(s.AddressID.MustGet())
 		} else {
 			vals[2] = psql.Raw("DEFAULT")
 		}
 
-		if s.Email.IsValue() {
-			vals[3] = psql.Arg(s.Email.MustGet())
+		if s.Phone.IsValue() {
+			vals[3] = psql.Arg(s.Phone.MustGet())
 		} else {
 			vals[3] = psql.Raw("DEFAULT")
 		}
 
-		if s.CreatedAt.IsValue() {
-			vals[4] = psql.Arg(s.CreatedAt.MustGet())
+		if s.Email.IsValue() {
+			vals[4] = psql.Arg(s.Email.MustGet())
 		} else {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
-		if s.UpdatedAt.IsValue() {
-			vals[5] = psql.Arg(s.UpdatedAt.MustGet())
+		if s.CreatedAt.IsValue() {
+			vals[5] = psql.Arg(s.CreatedAt.MustGet())
 		} else {
 			vals[5] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[6] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[6] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -243,12 +265,19 @@ func (s ContactSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s ContactSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 6)
+	exprs := make([]bob.Expression, 0, 7)
 
-	if !s.AnimalID.IsUnset() {
+	if !s.UserID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "animal_id")...),
-			psql.Arg(s.AnimalID),
+			psql.Quote(append(prefix, "user_id")...),
+			psql.Arg(s.UserID),
+		}})
+	}
+
+	if !s.OrganizationID.IsUnset() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "organization_id")...),
+			psql.Arg(s.OrganizationID),
 		}})
 	}
 
@@ -514,8 +543,10 @@ func (o ContactSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 }
 
 type contactJoins[Q dialect.Joinable] struct {
-	typ    string
-	Animal modAs[Q, animalColumns]
+	typ           string
+	Animals       modAs[Q, animalColumns]
+	Address       modAs[Q, addressColumns]
+	Organizations modAs[Q, organizationColumns]
 }
 
 func (j contactJoins[Q]) aliasedAs(alias string) contactJoins[Q] {
@@ -525,14 +556,42 @@ func (j contactJoins[Q]) aliasedAs(alias string) contactJoins[Q] {
 func buildContactJoins[Q dialect.Joinable](cols contactColumns, typ string) contactJoins[Q] {
 	return contactJoins[Q]{
 		typ: typ,
-		Animal: modAs[Q, animalColumns]{
+		Animals: modAs[Q, animalColumns]{
 			c: AnimalColumns,
 			f: func(to animalColumns) bob.Mod[Q] {
 				mods := make(mods.QueryMods[Q], 0, 1)
 
 				{
 					mods = append(mods, dialect.Join[Q](typ, Animals.Name().As(to.Alias())).On(
-						to.ID.EQ(cols.AnimalID),
+						to.ContactID.EQ(cols.ID),
+					))
+				}
+
+				return mods
+			},
+		},
+		Address: modAs[Q, addressColumns]{
+			c: AddressColumns,
+			f: func(to addressColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Addresses.Name().As(to.Alias())).On(
+						to.ID.EQ(cols.AddressID),
+					))
+				}
+
+				return mods
+			},
+		},
+		Organizations: modAs[Q, organizationColumns]{
+			c: OrganizationColumns,
+			f: func(to organizationColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Organizations.Name().As(to.Alias())).On(
+						to.ContactID.EQ(cols.ID),
 					))
 				}
 
@@ -542,24 +601,66 @@ func buildContactJoins[Q dialect.Joinable](cols contactColumns, typ string) cont
 	}
 }
 
-// Animal starts a query for related objects on animal
-func (o *Contact) Animal(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
+// Animals starts a query for related objects on animal
+func (o *Contact) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
 	return Animals.Query(append(mods,
-		sm.Where(AnimalColumns.ID.EQ(psql.Arg(o.AnimalID))),
+		sm.Where(AnimalColumns.ContactID.EQ(psql.Arg(o.ID))),
 	)...)
 }
 
-func (os ContactSlice) Animal(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
-	pkAnimalID := make(pgtypes.Array[null.Val[int64]], len(os))
+func (os ContactSlice) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
+	pkID := make(pgtypes.Array[int64], len(os))
 	for i, o := range os {
-		pkAnimalID[i] = o.AnimalID
+		pkID[i] = o.ID
 	}
 	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkAnimalID), "bigint[]")),
+		psql.F("unnest", psql.Cast(psql.Arg(pkID), "bigint[]")),
 	))
 
 	return Animals.Query(append(mods,
-		sm.Where(psql.Group(AnimalColumns.ID).OP("IN", PKArgExpr)),
+		sm.Where(psql.Group(AnimalColumns.ContactID).OP("IN", PKArgExpr)),
+	)...)
+}
+
+// Address starts a query for related objects on address
+func (o *Contact) Address(mods ...bob.Mod[*dialect.SelectQuery]) AddressesQuery {
+	return Addresses.Query(append(mods,
+		sm.Where(AddressColumns.ID.EQ(psql.Arg(o.AddressID))),
+	)...)
+}
+
+func (os ContactSlice) Address(mods ...bob.Mod[*dialect.SelectQuery]) AddressesQuery {
+	pkAddressID := make(pgtypes.Array[int64], len(os))
+	for i, o := range os {
+		pkAddressID[i] = o.AddressID
+	}
+	PKArgExpr := psql.Select(sm.Columns(
+		psql.F("unnest", psql.Cast(psql.Arg(pkAddressID), "bigint[]")),
+	))
+
+	return Addresses.Query(append(mods,
+		sm.Where(psql.Group(AddressColumns.ID).OP("IN", PKArgExpr)),
+	)...)
+}
+
+// Organizations starts a query for related objects on organization
+func (o *Contact) Organizations(mods ...bob.Mod[*dialect.SelectQuery]) OrganizationsQuery {
+	return Organizations.Query(append(mods,
+		sm.Where(OrganizationColumns.ContactID.EQ(psql.Arg(o.ID))),
+	)...)
+}
+
+func (os ContactSlice) Organizations(mods ...bob.Mod[*dialect.SelectQuery]) OrganizationsQuery {
+	pkID := make(pgtypes.Array[int64], len(os))
+	for i, o := range os {
+		pkID[i] = o.ID
+	}
+	PKArgExpr := psql.Select(sm.Columns(
+		psql.F("unnest", psql.Cast(psql.Arg(pkID), "bigint[]")),
+	))
+
+	return Organizations.Query(append(mods,
+		sm.Where(psql.Group(OrganizationColumns.ContactID).OP("IN", PKArgExpr)),
 	)...)
 }
 
@@ -569,16 +670,44 @@ func (o *Contact) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Animal":
-		rel, ok := retrieved.(*Animal)
+	case "Animals":
+		rels, ok := retrieved.(AnimalSlice)
 		if !ok {
 			return fmt.Errorf("contact cannot load %T as %q", retrieved, name)
 		}
 
-		o.R.Animal = rel
+		o.R.Animals = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Contact = o
+			}
+		}
+		return nil
+	case "Address":
+		rel, ok := retrieved.(*Address)
+		if !ok {
+			return fmt.Errorf("contact cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Address = rel
 
 		if rel != nil {
 			rel.R.Contacts = ContactSlice{o}
+		}
+		return nil
+	case "Organizations":
+		rels, ok := retrieved.(OrganizationSlice)
+		if !ok {
+			return fmt.Errorf("contact cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Organizations = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Contact = o
+			}
 		}
 		return nil
 	default:
@@ -587,94 +716,164 @@ func (o *Contact) Preload(name string, retrieved any) error {
 }
 
 type contactPreloader struct {
-	Animal func(...psql.PreloadOption) psql.Preloader
+	Address func(...psql.PreloadOption) psql.Preloader
 }
 
 func buildContactPreloader() contactPreloader {
 	return contactPreloader{
-		Animal: func(opts ...psql.PreloadOption) psql.Preloader {
-			return psql.Preload[*Animal, AnimalSlice](orm.Relationship{
-				Name: "Animal",
+		Address: func(opts ...psql.PreloadOption) psql.Preloader {
+			return psql.Preload[*Address, AddressSlice](orm.Relationship{
+				Name: "Address",
 				Sides: []orm.RelSide{
 					{
 						From: TableNames.Contacts,
-						To:   TableNames.Animals,
+						To:   TableNames.Addresses,
 						FromColumns: []string{
-							ColumnNames.Contacts.AnimalID,
+							ColumnNames.Contacts.AddressID,
 						},
 						ToColumns: []string{
-							ColumnNames.Animals.ID,
+							ColumnNames.Addresses.ID,
 						},
 					},
 				},
-			}, Animals.Columns().Names(), opts...)
+			}, Addresses.Columns().Names(), opts...)
 		},
 	}
 }
 
 type contactThenLoader[Q orm.Loadable] struct {
-	Animal func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Animals       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Address       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Organizations func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildContactThenLoader[Q orm.Loadable]() contactThenLoader[Q] {
-	type AnimalLoadInterface interface {
-		LoadAnimal(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	type AnimalsLoadInterface interface {
+		LoadAnimals(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
+	type AddressLoadInterface interface {
+		LoadAddress(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
+	type OrganizationsLoadInterface interface {
+		LoadOrganizations(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 
 	return contactThenLoader[Q]{
-		Animal: thenLoadBuilder[Q](
-			"Animal",
-			func(ctx context.Context, exec bob.Executor, retrieved AnimalLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadAnimal(ctx, exec, mods...)
+		Animals: thenLoadBuilder[Q](
+			"Animals",
+			func(ctx context.Context, exec bob.Executor, retrieved AnimalsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadAnimals(ctx, exec, mods...)
+			},
+		),
+		Address: thenLoadBuilder[Q](
+			"Address",
+			func(ctx context.Context, exec bob.Executor, retrieved AddressLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadAddress(ctx, exec, mods...)
+			},
+		),
+		Organizations: thenLoadBuilder[Q](
+			"Organizations",
+			func(ctx context.Context, exec bob.Executor, retrieved OrganizationsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadOrganizations(ctx, exec, mods...)
 			},
 		),
 	}
 }
 
-// LoadAnimal loads the contact's Animal into the .R struct
-func (o *Contact) LoadAnimal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadAnimals loads the contact's Animals into the .R struct
+func (o *Contact) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if o == nil {
 		return nil
 	}
 
 	// Reset the relationship
-	o.R.Animal = nil
+	o.R.Animals = nil
 
-	related, err := o.Animal(mods...).One(ctx, exec)
+	related, err := o.Animals(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Contact = o
+	}
+
+	o.R.Animals = related
+	return nil
+}
+
+// LoadAnimals loads the contact's Animals into the .R struct
+func (os ContactSlice) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	animals, err := os.Animals(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Animals = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range animals {
+
+			if o.ID != rel.ContactID {
+				continue
+			}
+
+			rel.R.Contact = o
+
+			o.R.Animals = append(o.R.Animals, rel)
+		}
+	}
+
+	return nil
+}
+
+// LoadAddress loads the contact's Address into the .R struct
+func (o *Contact) LoadAddress(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Address = nil
+
+	related, err := o.Address(mods...).One(ctx, exec)
 	if err != nil {
 		return err
 	}
 
 	related.R.Contacts = ContactSlice{o}
 
-	o.R.Animal = related
+	o.R.Address = related
 	return nil
 }
 
-// LoadAnimal loads the contact's Animal into the .R struct
-func (os ContactSlice) LoadAnimal(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadAddress loads the contact's Address into the .R struct
+func (os ContactSlice) LoadAddress(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if len(os) == 0 {
 		return nil
 	}
 
-	animals, err := os.Animal(mods...).All(ctx, exec)
+	addresses, err := os.Address(mods...).All(ctx, exec)
 	if err != nil {
 		return err
 	}
 
 	for _, o := range os {
-		for _, rel := range animals {
-			if !o.AnimalID.IsValue() {
-				continue
-			}
+		for _, rel := range addresses {
 
-			if o.AnimalID.MustGet() != rel.ID {
+			if o.AddressID != rel.ID {
 				continue
 			}
 
 			rel.R.Contacts = append(rel.R.Contacts, o)
 
-			o.R.Animal = rel
+			o.R.Address = rel
 			break
 		}
 	}
@@ -682,48 +881,237 @@ func (os ContactSlice) LoadAnimal(ctx context.Context, exec bob.Executor, mods .
 	return nil
 }
 
-func attachContactAnimal0(ctx context.Context, exec bob.Executor, count int, contact0 *Contact, animal1 *Animal) (*Contact, error) {
+// LoadOrganizations loads the contact's Organizations into the .R struct
+func (o *Contact) LoadOrganizations(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Organizations = nil
+
+	related, err := o.Organizations(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Contact = o
+	}
+
+	o.R.Organizations = related
+	return nil
+}
+
+// LoadOrganizations loads the contact's Organizations into the .R struct
+func (os ContactSlice) LoadOrganizations(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	organizations, err := os.Organizations(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Organizations = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range organizations {
+
+			if o.ID != rel.ContactID {
+				continue
+			}
+
+			rel.R.Contact = o
+
+			o.R.Organizations = append(o.R.Organizations, rel)
+		}
+	}
+
+	return nil
+}
+
+func insertContactAnimals0(ctx context.Context, exec bob.Executor, animals1 []*AnimalSetter, contact0 *Contact) (AnimalSlice, error) {
+	for i := range animals1 {
+		animals1[i].ContactID = omit.From(contact0.ID)
+	}
+
+	ret, err := Animals.Insert(bob.ToMods(animals1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertContactAnimals0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachContactAnimals0(ctx context.Context, exec bob.Executor, count int, animals1 AnimalSlice, contact0 *Contact) (AnimalSlice, error) {
+	setter := &AnimalSetter{
+		ContactID: omit.From(contact0.ID),
+	}
+
+	err := animals1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachContactAnimals0: %w", err)
+	}
+
+	return animals1, nil
+}
+
+func (contact0 *Contact) InsertAnimals(ctx context.Context, exec bob.Executor, related ...*AnimalSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	animals1, err := insertContactAnimals0(ctx, exec, related, contact0)
+	if err != nil {
+		return err
+	}
+
+	contact0.R.Animals = append(contact0.R.Animals, animals1...)
+
+	for _, rel := range animals1 {
+		rel.R.Contact = contact0
+	}
+	return nil
+}
+
+func (contact0 *Contact) AttachAnimals(ctx context.Context, exec bob.Executor, related ...*Animal) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	animals1 := AnimalSlice(related)
+
+	_, err = attachContactAnimals0(ctx, exec, len(related), animals1, contact0)
+	if err != nil {
+		return err
+	}
+
+	contact0.R.Animals = append(contact0.R.Animals, animals1...)
+
+	for _, rel := range related {
+		rel.R.Contact = contact0
+	}
+
+	return nil
+}
+
+func attachContactAddress0(ctx context.Context, exec bob.Executor, count int, contact0 *Contact, address1 *Address) (*Contact, error) {
 	setter := &ContactSetter{
-		AnimalID: omitnull.From(animal1.ID),
+		AddressID: omit.From(address1.ID),
 	}
 
 	err := contact0.Update(ctx, exec, setter)
 	if err != nil {
-		return nil, fmt.Errorf("attachContactAnimal0: %w", err)
+		return nil, fmt.Errorf("attachContactAddress0: %w", err)
 	}
 
 	return contact0, nil
 }
 
-func (contact0 *Contact) InsertAnimal(ctx context.Context, exec bob.Executor, related *AnimalSetter) error {
-	animal1, err := Animals.Insert(related).One(ctx, exec)
+func (contact0 *Contact) InsertAddress(ctx context.Context, exec bob.Executor, related *AddressSetter) error {
+	address1, err := Addresses.Insert(related).One(ctx, exec)
 	if err != nil {
 		return fmt.Errorf("inserting related objects: %w", err)
 	}
 
-	_, err = attachContactAnimal0(ctx, exec, 1, contact0, animal1)
+	_, err = attachContactAddress0(ctx, exec, 1, contact0, address1)
 	if err != nil {
 		return err
 	}
 
-	contact0.R.Animal = animal1
+	contact0.R.Address = address1
 
-	animal1.R.Contacts = append(animal1.R.Contacts, contact0)
+	address1.R.Contacts = append(address1.R.Contacts, contact0)
 
 	return nil
 }
 
-func (contact0 *Contact) AttachAnimal(ctx context.Context, exec bob.Executor, animal1 *Animal) error {
+func (contact0 *Contact) AttachAddress(ctx context.Context, exec bob.Executor, address1 *Address) error {
 	var err error
 
-	_, err = attachContactAnimal0(ctx, exec, 1, contact0, animal1)
+	_, err = attachContactAddress0(ctx, exec, 1, contact0, address1)
 	if err != nil {
 		return err
 	}
 
-	contact0.R.Animal = animal1
+	contact0.R.Address = address1
 
-	animal1.R.Contacts = append(animal1.R.Contacts, contact0)
+	address1.R.Contacts = append(address1.R.Contacts, contact0)
+
+	return nil
+}
+
+func insertContactOrganizations0(ctx context.Context, exec bob.Executor, organizations1 []*OrganizationSetter, contact0 *Contact) (OrganizationSlice, error) {
+	for i := range organizations1 {
+		organizations1[i].ContactID = omit.From(contact0.ID)
+	}
+
+	ret, err := Organizations.Insert(bob.ToMods(organizations1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertContactOrganizations0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachContactOrganizations0(ctx context.Context, exec bob.Executor, count int, organizations1 OrganizationSlice, contact0 *Contact) (OrganizationSlice, error) {
+	setter := &OrganizationSetter{
+		ContactID: omit.From(contact0.ID),
+	}
+
+	err := organizations1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachContactOrganizations0: %w", err)
+	}
+
+	return organizations1, nil
+}
+
+func (contact0 *Contact) InsertOrganizations(ctx context.Context, exec bob.Executor, related ...*OrganizationSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	organizations1, err := insertContactOrganizations0(ctx, exec, related, contact0)
+	if err != nil {
+		return err
+	}
+
+	contact0.R.Organizations = append(contact0.R.Organizations, organizations1...)
+
+	for _, rel := range organizations1 {
+		rel.R.Contact = contact0
+	}
+	return nil
+}
+
+func (contact0 *Contact) AttachOrganizations(ctx context.Context, exec bob.Executor, related ...*Organization) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	organizations1 := OrganizationSlice(related)
+
+	_, err = attachContactOrganizations0(ctx, exec, len(related), organizations1, contact0)
+	if err != nil {
+		return err
+	}
+
+	contact0.R.Organizations = append(contact0.R.Organizations, organizations1...)
+
+	for _, rel := range related {
+		rel.R.Contact = contact0
+	}
 
 	return nil
 }

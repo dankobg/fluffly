@@ -44,6 +44,8 @@ type AdoptionTemplate struct {
 	AdoptedAt  func() time.Time
 	ReturnedAt func() null.Val[time.Time]
 	Notes      func() null.Val[string]
+	CreatedAt  func() time.Time
+	UpdatedAt  func() time.Time
 
 	r adoptionR
 	f *Factory
@@ -113,6 +115,14 @@ func (o AdoptionTemplate) BuildSetter() *models.AdoptionSetter {
 		val := o.Notes()
 		m.Notes = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -152,6 +162,12 @@ func (o AdoptionTemplate) Build() *models.Adoption {
 	}
 	if o.Notes != nil {
 		m.Notes = o.Notes()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -317,6 +333,8 @@ func (m adoptionMods) RandomizeAllColumns(f *faker.Faker) AdoptionMod {
 		AdoptionMods.RandomAdoptedAt(f),
 		AdoptionMods.RandomReturnedAt(f),
 		AdoptionMods.RandomNotes(f),
+		AdoptionMods.RandomCreatedAt(f),
+		AdoptionMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -590,6 +608,68 @@ func (m adoptionMods) RandomNotesNotNull(f *faker.Faker) AdoptionMod {
 
 			val := random_string(f)
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m adoptionMods) CreatedAt(val time.Time) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m adoptionMods) CreatedAtFunc(f func() time.Time) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m adoptionMods) UnsetCreatedAt() AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m adoptionMods) RandomCreatedAt(f *faker.Faker) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m adoptionMods) UpdatedAt(val time.Time) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m adoptionMods) UpdatedAtFunc(f func() time.Time) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m adoptionMods) UnsetUpdatedAt() AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m adoptionMods) RandomUpdatedAt(f *faker.Faker) AdoptionMod {
+	return AdoptionModFunc(func(_ context.Context, o *AdoptionTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

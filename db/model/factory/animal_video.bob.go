@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -35,9 +37,11 @@ func (mods AnimalVideoModSlice) Apply(ctx context.Context, n *AnimalVideoTemplat
 // AnimalVideoTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type AnimalVideoTemplate struct {
-	ID       func() int64
-	AnimalID func() null.Val[int64]
-	URL      func() null.Val[string]
+	ID        func() int64
+	AnimalID  func() null.Val[int64]
+	URL       func() null.Val[string]
+	CreatedAt func() time.Time
+	UpdatedAt func() time.Time
 
 	r animalVideoR
 	f *Factory
@@ -84,6 +88,14 @@ func (o AnimalVideoTemplate) BuildSetter() *models.AnimalVideoSetter {
 		val := o.URL()
 		m.URL = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -114,6 +126,12 @@ func (o AnimalVideoTemplate) Build() *models.AnimalVideo {
 	}
 	if o.URL != nil {
 		m.URL = o.URL()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -257,6 +275,8 @@ func (m animalVideoMods) RandomizeAllColumns(f *faker.Faker) AnimalVideoMod {
 		AnimalVideoMods.RandomID(f),
 		AnimalVideoMods.RandomAnimalID(f),
 		AnimalVideoMods.RandomURL(f),
+		AnimalVideoMods.RandomCreatedAt(f),
+		AnimalVideoMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -393,6 +413,68 @@ func (m animalVideoMods) RandomURLNotNull(f *faker.Faker) AnimalVideoMod {
 
 			val := random_string(f)
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m animalVideoMods) CreatedAt(val time.Time) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m animalVideoMods) CreatedAtFunc(f func() time.Time) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m animalVideoMods) UnsetCreatedAt() AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m animalVideoMods) RandomCreatedAt(f *faker.Faker) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m animalVideoMods) UpdatedAt(val time.Time) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m animalVideoMods) UpdatedAtFunc(f func() time.Time) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m animalVideoMods) UnsetUpdatedAt() AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m animalVideoMods) RandomUpdatedAt(f *faker.Faker) AnimalVideoMod {
+	return AnimalVideoModFunc(func(_ context.Context, o *AnimalVideoTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

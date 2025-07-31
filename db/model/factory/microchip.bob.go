@@ -6,6 +6,7 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -42,6 +43,8 @@ type MicrochipTemplate struct {
 	Brand       func() null.Val[string]
 	Description func() null.Val[string]
 	Location    func() null.Val[string]
+	CreatedAt   func() time.Time
+	UpdatedAt   func() time.Time
 
 	r microchipR
 	f *Factory
@@ -100,6 +103,14 @@ func (o MicrochipTemplate) BuildSetter() *models.MicrochipSetter {
 		val := o.Location()
 		m.Location = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -140,6 +151,12 @@ func (o MicrochipTemplate) Build() *models.Microchip {
 	if o.Location != nil {
 		m.Location = o.Location()
 	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
+	}
 
 	o.setModelRels(m)
 
@@ -161,7 +178,7 @@ func (o MicrochipTemplate) BuildMany(number int) models.MicrochipSlice {
 
 func ensureCreatableMicrochip(m *models.MicrochipSetter) {
 	if !(m.Number.IsValue()) {
-		val := random_string(nil)
+		val := random_string(nil, "30")
 		m.Number = omit.From(val)
 	}
 }
@@ -289,6 +306,8 @@ func (m microchipMods) RandomizeAllColumns(f *faker.Faker) MicrochipMod {
 		MicrochipMods.RandomBrand(f),
 		MicrochipMods.RandomDescription(f),
 		MicrochipMods.RandomLocation(f),
+		MicrochipMods.RandomCreatedAt(f),
+		MicrochipMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -402,7 +421,7 @@ func (m microchipMods) UnsetNumber() MicrochipMod {
 func (m microchipMods) RandomNumber(f *faker.Faker) MicrochipMod {
 	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
 		o.Number = func() string {
-			return random_string(f)
+			return random_string(f, "30")
 		}
 	})
 }
@@ -438,7 +457,7 @@ func (m microchipMods) RandomBrand(f *faker.Faker) MicrochipMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "255")
 			return null.From(val)
 		}
 	})
@@ -454,7 +473,7 @@ func (m microchipMods) RandomBrandNotNull(f *faker.Faker) MicrochipMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "255")
 			return null.From(val)
 		}
 	})
@@ -544,7 +563,7 @@ func (m microchipMods) RandomLocation(f *faker.Faker) MicrochipMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "100")
 			return null.From(val)
 		}
 	})
@@ -560,8 +579,70 @@ func (m microchipMods) RandomLocationNotNull(f *faker.Faker) MicrochipMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "100")
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m microchipMods) CreatedAt(val time.Time) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m microchipMods) CreatedAtFunc(f func() time.Time) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m microchipMods) UnsetCreatedAt() MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m microchipMods) RandomCreatedAt(f *faker.Faker) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m microchipMods) UpdatedAt(val time.Time) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m microchipMods) UpdatedAtFunc(f func() time.Time) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m microchipMods) UnsetUpdatedAt() MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m microchipMods) RandomUpdatedAt(f *faker.Faker) MicrochipMod {
+	return MicrochipModFunc(func(_ context.Context, o *MicrochipTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

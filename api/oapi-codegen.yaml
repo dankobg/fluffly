@@ -9,3 +9,4 @@ output: api/gen/gen.go
 output-options:
   name-normalizer: ToCamelCaseWithInitialisms
   skip-prune: true
+  nullable-type: true

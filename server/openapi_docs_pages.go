@@ -15,12 +15,16 @@ func (a *ApiHandler) renderOpenapiDocsPage(w http.ResponseWriter, tplName string
 	}
 }
 
+func (a *ApiHandler) openapiRapidocPage(w http.ResponseWriter, r *http.Request) {
+	a.renderOpenapiDocsPage(w, "rapidoc.tpl")
+}
+
 func (a *ApiHandler) openapiRedocPage(w http.ResponseWriter, r *http.Request) {
 	a.renderOpenapiDocsPage(w, "redoc.tpl")
 }
 
-func (a *ApiHandler) openapiRapidocPage(w http.ResponseWriter, r *http.Request) {
-	a.renderOpenapiDocsPage(w, "rapidoc.tpl")
+func (a *ApiHandler) openapiScalarPage(w http.ResponseWriter, r *http.Request) {
+	a.renderOpenapiDocsPage(w, "scalar.tpl")
 }
 
 func (a *ApiHandler) openapiStoplightPage(w http.ResponseWriter, r *http.Request) {

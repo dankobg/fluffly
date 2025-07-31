@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -26,16 +27,8 @@ import (
 // Organization is an object representing the database table.
 type Organization struct {
 	ID               int64            `db:"id,pk,generated" `
+	ContactID        int64            `db:"contact_id" `
 	Name             string           `db:"name" `
-	Email            string           `db:"email" `
-	Phone            string           `db:"phone" `
-	Address1         null.Val[string] `db:"address1" `
-	Address2         null.Val[string] `db:"address2" `
-	City             null.Val[string] `db:"city" `
-	State            null.Val[string] `db:"state" `
-	Postcode         null.Val[string] `db:"postcode" `
-	Country          null.Val[string] `db:"country" `
-	URL              null.Val[string] `db:"url" `
 	Website          null.Val[string] `db:"website" `
 	MissionStatement null.Val[string] `db:"mission_statement" `
 	AdoptionPolicy   null.Val[string] `db:"adoption_policy" `
@@ -46,6 +39,8 @@ type Organization struct {
 	Youtube          null.Val[string] `db:"youtube" `
 	Instagram        null.Val[string] `db:"instagram" `
 	Pinterest        null.Val[string] `db:"pinterest" `
+	CreatedAt        time.Time        `db:"created_at" `
+	UpdatedAt        time.Time        `db:"updated_at" `
 
 	R organizationR `db:"-" `
 }
@@ -62,23 +57,15 @@ type OrganizationsQuery = *psql.ViewQuery[*Organization, OrganizationSlice]
 
 // organizationR is where relationships are stored.
 type organizationR struct {
-	Animals            AnimalSlice            // animal.fk_animal_organization_id_user
+	Contact            *Contact               // organization.fk_organization_contact_id_contact
 	OrganizationHours  OrganizationHourSlice  // organization_hour.fk_organization_hour_organization_id_organization
 	OrganizationPhotos OrganizationPhotoSlice // organization_photo.fk_organization_photo_organization_id_animal
 }
 
 type organizationColumnNames struct {
 	ID               string
+	ContactID        string
 	Name             string
-	Email            string
-	Phone            string
-	Address1         string
-	Address2         string
-	City             string
-	State            string
-	Postcode         string
-	Country          string
-	URL              string
 	Website          string
 	MissionStatement string
 	AdoptionPolicy   string
@@ -89,6 +76,8 @@ type organizationColumnNames struct {
 	Youtube          string
 	Instagram        string
 	Pinterest        string
+	CreatedAt        string
+	UpdatedAt        string
 }
 
 var OrganizationColumns = buildOrganizationColumns("organization")
@@ -96,16 +85,8 @@ var OrganizationColumns = buildOrganizationColumns("organization")
 type organizationColumns struct {
 	tableAlias       string
 	ID               psql.Expression
+	ContactID        psql.Expression
 	Name             psql.Expression
-	Email            psql.Expression
-	Phone            psql.Expression
-	Address1         psql.Expression
-	Address2         psql.Expression
-	City             psql.Expression
-	State            psql.Expression
-	Postcode         psql.Expression
-	Country          psql.Expression
-	URL              psql.Expression
 	Website          psql.Expression
 	MissionStatement psql.Expression
 	AdoptionPolicy   psql.Expression
@@ -116,6 +97,8 @@ type organizationColumns struct {
 	Youtube          psql.Expression
 	Instagram        psql.Expression
 	Pinterest        psql.Expression
+	CreatedAt        psql.Expression
+	UpdatedAt        psql.Expression
 }
 
 func (c organizationColumns) Alias() string {
@@ -130,16 +113,8 @@ func buildOrganizationColumns(alias string) organizationColumns {
 	return organizationColumns{
 		tableAlias:       alias,
 		ID:               psql.Quote(alias, "id"),
+		ContactID:        psql.Quote(alias, "contact_id"),
 		Name:             psql.Quote(alias, "name"),
-		Email:            psql.Quote(alias, "email"),
-		Phone:            psql.Quote(alias, "phone"),
-		Address1:         psql.Quote(alias, "address1"),
-		Address2:         psql.Quote(alias, "address2"),
-		City:             psql.Quote(alias, "city"),
-		State:            psql.Quote(alias, "state"),
-		Postcode:         psql.Quote(alias, "postcode"),
-		Country:          psql.Quote(alias, "country"),
-		URL:              psql.Quote(alias, "url"),
 		Website:          psql.Quote(alias, "website"),
 		MissionStatement: psql.Quote(alias, "mission_statement"),
 		AdoptionPolicy:   psql.Quote(alias, "adoption_policy"),
@@ -150,21 +125,15 @@ func buildOrganizationColumns(alias string) organizationColumns {
 		Youtube:          psql.Quote(alias, "youtube"),
 		Instagram:        psql.Quote(alias, "instagram"),
 		Pinterest:        psql.Quote(alias, "pinterest"),
+		CreatedAt:        psql.Quote(alias, "created_at"),
+		UpdatedAt:        psql.Quote(alias, "updated_at"),
 	}
 }
 
 type organizationWhere[Q psql.Filterable] struct {
 	ID               psql.WhereMod[Q, int64]
+	ContactID        psql.WhereMod[Q, int64]
 	Name             psql.WhereMod[Q, string]
-	Email            psql.WhereMod[Q, string]
-	Phone            psql.WhereMod[Q, string]
-	Address1         psql.WhereNullMod[Q, string]
-	Address2         psql.WhereNullMod[Q, string]
-	City             psql.WhereNullMod[Q, string]
-	State            psql.WhereNullMod[Q, string]
-	Postcode         psql.WhereNullMod[Q, string]
-	Country          psql.WhereNullMod[Q, string]
-	URL              psql.WhereNullMod[Q, string]
 	Website          psql.WhereNullMod[Q, string]
 	MissionStatement psql.WhereNullMod[Q, string]
 	AdoptionPolicy   psql.WhereNullMod[Q, string]
@@ -175,6 +144,8 @@ type organizationWhere[Q psql.Filterable] struct {
 	Youtube          psql.WhereNullMod[Q, string]
 	Instagram        psql.WhereNullMod[Q, string]
 	Pinterest        psql.WhereNullMod[Q, string]
+	CreatedAt        psql.WhereMod[Q, time.Time]
+	UpdatedAt        psql.WhereMod[Q, time.Time]
 }
 
 func (organizationWhere[Q]) AliasedAs(alias string) organizationWhere[Q] {
@@ -184,16 +155,8 @@ func (organizationWhere[Q]) AliasedAs(alias string) organizationWhere[Q] {
 func buildOrganizationWhere[Q psql.Filterable](cols organizationColumns) organizationWhere[Q] {
 	return organizationWhere[Q]{
 		ID:               psql.Where[Q, int64](cols.ID),
+		ContactID:        psql.Where[Q, int64](cols.ContactID),
 		Name:             psql.Where[Q, string](cols.Name),
-		Email:            psql.Where[Q, string](cols.Email),
-		Phone:            psql.Where[Q, string](cols.Phone),
-		Address1:         psql.WhereNull[Q, string](cols.Address1),
-		Address2:         psql.WhereNull[Q, string](cols.Address2),
-		City:             psql.WhereNull[Q, string](cols.City),
-		State:            psql.WhereNull[Q, string](cols.State),
-		Postcode:         psql.WhereNull[Q, string](cols.Postcode),
-		Country:          psql.WhereNull[Q, string](cols.Country),
-		URL:              psql.WhereNull[Q, string](cols.URL),
 		Website:          psql.WhereNull[Q, string](cols.Website),
 		MissionStatement: psql.WhereNull[Q, string](cols.MissionStatement),
 		AdoptionPolicy:   psql.WhereNull[Q, string](cols.AdoptionPolicy),
@@ -204,6 +167,8 @@ func buildOrganizationWhere[Q psql.Filterable](cols organizationColumns) organiz
 		Youtube:          psql.WhereNull[Q, string](cols.Youtube),
 		Instagram:        psql.WhereNull[Q, string](cols.Instagram),
 		Pinterest:        psql.WhereNull[Q, string](cols.Pinterest),
+		CreatedAt:        psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:        psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -224,16 +189,8 @@ type organizationErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type OrganizationSetter struct {
+	ContactID        omit.Val[int64]      `db:"contact_id" `
 	Name             omit.Val[string]     `db:"name" `
-	Email            omit.Val[string]     `db:"email" `
-	Phone            omit.Val[string]     `db:"phone" `
-	Address1         omitnull.Val[string] `db:"address1" `
-	Address2         omitnull.Val[string] `db:"address2" `
-	City             omitnull.Val[string] `db:"city" `
-	State            omitnull.Val[string] `db:"state" `
-	Postcode         omitnull.Val[string] `db:"postcode" `
-	Country          omitnull.Val[string] `db:"country" `
-	URL              omitnull.Val[string] `db:"url" `
 	Website          omitnull.Val[string] `db:"website" `
 	MissionStatement omitnull.Val[string] `db:"mission_statement" `
 	AdoptionPolicy   omitnull.Val[string] `db:"adoption_policy" `
@@ -244,39 +201,17 @@ type OrganizationSetter struct {
 	Youtube          omitnull.Val[string] `db:"youtube" `
 	Instagram        omitnull.Val[string] `db:"instagram" `
 	Pinterest        omitnull.Val[string] `db:"pinterest" `
+	CreatedAt        omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt        omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s OrganizationSetter) SetColumns() []string {
-	vals := make([]string, 0, 20)
+	vals := make([]string, 0, 14)
+	if s.ContactID.IsValue() {
+		vals = append(vals, "contact_id")
+	}
 	if s.Name.IsValue() {
 		vals = append(vals, "name")
-	}
-	if s.Email.IsValue() {
-		vals = append(vals, "email")
-	}
-	if s.Phone.IsValue() {
-		vals = append(vals, "phone")
-	}
-	if !s.Address1.IsUnset() {
-		vals = append(vals, "address1")
-	}
-	if !s.Address2.IsUnset() {
-		vals = append(vals, "address2")
-	}
-	if !s.City.IsUnset() {
-		vals = append(vals, "city")
-	}
-	if !s.State.IsUnset() {
-		vals = append(vals, "state")
-	}
-	if !s.Postcode.IsUnset() {
-		vals = append(vals, "postcode")
-	}
-	if !s.Country.IsUnset() {
-		vals = append(vals, "country")
-	}
-	if !s.URL.IsUnset() {
-		vals = append(vals, "url")
 	}
 	if !s.Website.IsUnset() {
 		vals = append(vals, "website")
@@ -308,39 +243,21 @@ func (s OrganizationSetter) SetColumns() []string {
 	if !s.Pinterest.IsUnset() {
 		vals = append(vals, "pinterest")
 	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
+	}
 	return vals
 }
 
 func (s OrganizationSetter) Overwrite(t *Organization) {
+	if s.ContactID.IsValue() {
+		t.ContactID = s.ContactID.MustGet()
+	}
 	if s.Name.IsValue() {
 		t.Name = s.Name.MustGet()
-	}
-	if s.Email.IsValue() {
-		t.Email = s.Email.MustGet()
-	}
-	if s.Phone.IsValue() {
-		t.Phone = s.Phone.MustGet()
-	}
-	if !s.Address1.IsUnset() {
-		t.Address1 = s.Address1.MustGetNull()
-	}
-	if !s.Address2.IsUnset() {
-		t.Address2 = s.Address2.MustGetNull()
-	}
-	if !s.City.IsUnset() {
-		t.City = s.City.MustGetNull()
-	}
-	if !s.State.IsUnset() {
-		t.State = s.State.MustGetNull()
-	}
-	if !s.Postcode.IsUnset() {
-		t.Postcode = s.Postcode.MustGetNull()
-	}
-	if !s.Country.IsUnset() {
-		t.Country = s.Country.MustGetNull()
-	}
-	if !s.URL.IsUnset() {
-		t.URL = s.URL.MustGetNull()
 	}
 	if !s.Website.IsUnset() {
 		t.Website = s.Website.MustGetNull()
@@ -372,6 +289,12 @@ func (s OrganizationSetter) Overwrite(t *Organization) {
 	if !s.Pinterest.IsUnset() {
 		t.Pinterest = s.Pinterest.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *OrganizationSetter) Apply(q *dialect.InsertQuery) {
@@ -380,125 +303,89 @@ func (s *OrganizationSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 20)
-		if s.Name.IsValue() {
-			vals[0] = psql.Arg(s.Name.MustGet())
+		vals := make([]bob.Expression, 14)
+		if s.ContactID.IsValue() {
+			vals[0] = psql.Arg(s.ContactID.MustGet())
 		} else {
 			vals[0] = psql.Raw("DEFAULT")
 		}
 
-		if s.Email.IsValue() {
-			vals[1] = psql.Arg(s.Email.MustGet())
+		if s.Name.IsValue() {
+			vals[1] = psql.Arg(s.Name.MustGet())
 		} else {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
-		if s.Phone.IsValue() {
-			vals[2] = psql.Arg(s.Phone.MustGet())
+		if !s.Website.IsUnset() {
+			vals[2] = psql.Arg(s.Website.MustGetNull())
 		} else {
 			vals[2] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Address1.IsUnset() {
-			vals[3] = psql.Arg(s.Address1.MustGetNull())
+		if !s.MissionStatement.IsUnset() {
+			vals[3] = psql.Arg(s.MissionStatement.MustGetNull())
 		} else {
 			vals[3] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Address2.IsUnset() {
-			vals[4] = psql.Arg(s.Address2.MustGetNull())
+		if !s.AdoptionPolicy.IsUnset() {
+			vals[4] = psql.Arg(s.AdoptionPolicy.MustGetNull())
 		} else {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
-		if !s.City.IsUnset() {
-			vals[5] = psql.Arg(s.City.MustGetNull())
+		if !s.AdoptionURL.IsUnset() {
+			vals[5] = psql.Arg(s.AdoptionURL.MustGetNull())
 		} else {
 			vals[5] = psql.Raw("DEFAULT")
 		}
 
-		if !s.State.IsUnset() {
-			vals[6] = psql.Arg(s.State.MustGetNull())
+		if !s.Distance.IsUnset() {
+			vals[6] = psql.Arg(s.Distance.MustGetNull())
 		} else {
 			vals[6] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Postcode.IsUnset() {
-			vals[7] = psql.Arg(s.Postcode.MustGetNull())
+		if !s.Facebook.IsUnset() {
+			vals[7] = psql.Arg(s.Facebook.MustGetNull())
 		} else {
 			vals[7] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Country.IsUnset() {
-			vals[8] = psql.Arg(s.Country.MustGetNull())
+		if !s.Twitter.IsUnset() {
+			vals[8] = psql.Arg(s.Twitter.MustGetNull())
 		} else {
 			vals[8] = psql.Raw("DEFAULT")
 		}
 
-		if !s.URL.IsUnset() {
-			vals[9] = psql.Arg(s.URL.MustGetNull())
+		if !s.Youtube.IsUnset() {
+			vals[9] = psql.Arg(s.Youtube.MustGetNull())
 		} else {
 			vals[9] = psql.Raw("DEFAULT")
 		}
 
-		if !s.Website.IsUnset() {
-			vals[10] = psql.Arg(s.Website.MustGetNull())
+		if !s.Instagram.IsUnset() {
+			vals[10] = psql.Arg(s.Instagram.MustGetNull())
 		} else {
 			vals[10] = psql.Raw("DEFAULT")
 		}
 
-		if !s.MissionStatement.IsUnset() {
-			vals[11] = psql.Arg(s.MissionStatement.MustGetNull())
+		if !s.Pinterest.IsUnset() {
+			vals[11] = psql.Arg(s.Pinterest.MustGetNull())
 		} else {
 			vals[11] = psql.Raw("DEFAULT")
 		}
 
-		if !s.AdoptionPolicy.IsUnset() {
-			vals[12] = psql.Arg(s.AdoptionPolicy.MustGetNull())
+		if s.CreatedAt.IsValue() {
+			vals[12] = psql.Arg(s.CreatedAt.MustGet())
 		} else {
 			vals[12] = psql.Raw("DEFAULT")
 		}
 
-		if !s.AdoptionURL.IsUnset() {
-			vals[13] = psql.Arg(s.AdoptionURL.MustGetNull())
+		if s.UpdatedAt.IsValue() {
+			vals[13] = psql.Arg(s.UpdatedAt.MustGet())
 		} else {
 			vals[13] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Distance.IsUnset() {
-			vals[14] = psql.Arg(s.Distance.MustGetNull())
-		} else {
-			vals[14] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Facebook.IsUnset() {
-			vals[15] = psql.Arg(s.Facebook.MustGetNull())
-		} else {
-			vals[15] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Twitter.IsUnset() {
-			vals[16] = psql.Arg(s.Twitter.MustGetNull())
-		} else {
-			vals[16] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Youtube.IsUnset() {
-			vals[17] = psql.Arg(s.Youtube.MustGetNull())
-		} else {
-			vals[17] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Instagram.IsUnset() {
-			vals[18] = psql.Arg(s.Instagram.MustGetNull())
-		} else {
-			vals[18] = psql.Raw("DEFAULT")
-		}
-
-		if !s.Pinterest.IsUnset() {
-			vals[19] = psql.Arg(s.Pinterest.MustGetNull())
-		} else {
-			vals[19] = psql.Raw("DEFAULT")
 		}
 
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
@@ -510,75 +397,19 @@ func (s OrganizationSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s OrganizationSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 20)
+	exprs := make([]bob.Expression, 0, 14)
+
+	if s.ContactID.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "contact_id")...),
+			psql.Arg(s.ContactID),
+		}})
+	}
 
 	if s.Name.IsValue() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "name")...),
 			psql.Arg(s.Name),
-		}})
-	}
-
-	if s.Email.IsValue() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "email")...),
-			psql.Arg(s.Email),
-		}})
-	}
-
-	if s.Phone.IsValue() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "phone")...),
-			psql.Arg(s.Phone),
-		}})
-	}
-
-	if !s.Address1.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "address1")...),
-			psql.Arg(s.Address1),
-		}})
-	}
-
-	if !s.Address2.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "address2")...),
-			psql.Arg(s.Address2),
-		}})
-	}
-
-	if !s.City.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "city")...),
-			psql.Arg(s.City),
-		}})
-	}
-
-	if !s.State.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "state")...),
-			psql.Arg(s.State),
-		}})
-	}
-
-	if !s.Postcode.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "postcode")...),
-			psql.Arg(s.Postcode),
-		}})
-	}
-
-	if !s.Country.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "country")...),
-			psql.Arg(s.Country),
-		}})
-	}
-
-	if !s.URL.IsUnset() {
-		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
-			psql.Quote(append(prefix, "url")...),
-			psql.Arg(s.URL),
 		}})
 	}
 
@@ -649,6 +480,20 @@ func (s OrganizationSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "pinterest")...),
 			psql.Arg(s.Pinterest),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 
@@ -880,7 +725,7 @@ func (o OrganizationSlice) ReloadAll(ctx context.Context, exec bob.Executor) err
 
 type organizationJoins[Q dialect.Joinable] struct {
 	typ                string
-	Animals            modAs[Q, animalColumns]
+	Contact            modAs[Q, contactColumns]
 	OrganizationHours  modAs[Q, organizationHourColumns]
 	OrganizationPhotos modAs[Q, organizationPhotoColumns]
 }
@@ -892,14 +737,14 @@ func (j organizationJoins[Q]) aliasedAs(alias string) organizationJoins[Q] {
 func buildOrganizationJoins[Q dialect.Joinable](cols organizationColumns, typ string) organizationJoins[Q] {
 	return organizationJoins[Q]{
 		typ: typ,
-		Animals: modAs[Q, animalColumns]{
-			c: AnimalColumns,
-			f: func(to animalColumns) bob.Mod[Q] {
+		Contact: modAs[Q, contactColumns]{
+			c: ContactColumns,
+			f: func(to contactColumns) bob.Mod[Q] {
 				mods := make(mods.QueryMods[Q], 0, 1)
 
 				{
-					mods = append(mods, dialect.Join[Q](typ, Animals.Name().As(to.Alias())).On(
-						to.OrganizationID.EQ(cols.ID),
+					mods = append(mods, dialect.Join[Q](typ, Contacts.Name().As(to.Alias())).On(
+						to.ID.EQ(cols.ContactID),
 					))
 				}
 
@@ -937,24 +782,24 @@ func buildOrganizationJoins[Q dialect.Joinable](cols organizationColumns, typ st
 	}
 }
 
-// Animals starts a query for related objects on animal
-func (o *Organization) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
-	return Animals.Query(append(mods,
-		sm.Where(AnimalColumns.OrganizationID.EQ(psql.Arg(o.ID))),
+// Contact starts a query for related objects on contact
+func (o *Organization) Contact(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	return Contacts.Query(append(mods,
+		sm.Where(ContactColumns.ID.EQ(psql.Arg(o.ContactID))),
 	)...)
 }
 
-func (os OrganizationSlice) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
-	pkID := make(pgtypes.Array[int64], len(os))
+func (os OrganizationSlice) Contact(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	pkContactID := make(pgtypes.Array[int64], len(os))
 	for i, o := range os {
-		pkID[i] = o.ID
+		pkContactID[i] = o.ContactID
 	}
 	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkID), "bigint[]")),
+		psql.F("unnest", psql.Cast(psql.Arg(pkContactID), "bigint[]")),
 	))
 
-	return Animals.Query(append(mods,
-		sm.Where(psql.Group(AnimalColumns.OrganizationID).OP("IN", PKArgExpr)),
+	return Contacts.Query(append(mods,
+		sm.Where(psql.Group(ContactColumns.ID).OP("IN", PKArgExpr)),
 	)...)
 }
 
@@ -1006,18 +851,16 @@ func (o *Organization) Preload(name string, retrieved any) error {
 	}
 
 	switch name {
-	case "Animals":
-		rels, ok := retrieved.(AnimalSlice)
+	case "Contact":
+		rel, ok := retrieved.(*Contact)
 		if !ok {
 			return fmt.Errorf("organization cannot load %T as %q", retrieved, name)
 		}
 
-		o.R.Animals = rels
+		o.R.Contact = rel
 
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.Organization = o
-			}
+		if rel != nil {
+			rel.R.Organizations = OrganizationSlice{o}
 		}
 		return nil
 	case "OrganizationHours":
@@ -1053,21 +896,41 @@ func (o *Organization) Preload(name string, retrieved any) error {
 	}
 }
 
-type organizationPreloader struct{}
+type organizationPreloader struct {
+	Contact func(...psql.PreloadOption) psql.Preloader
+}
 
 func buildOrganizationPreloader() organizationPreloader {
-	return organizationPreloader{}
+	return organizationPreloader{
+		Contact: func(opts ...psql.PreloadOption) psql.Preloader {
+			return psql.Preload[*Contact, ContactSlice](orm.Relationship{
+				Name: "Contact",
+				Sides: []orm.RelSide{
+					{
+						From: TableNames.Organizations,
+						To:   TableNames.Contacts,
+						FromColumns: []string{
+							ColumnNames.Organizations.ContactID,
+						},
+						ToColumns: []string{
+							ColumnNames.Contacts.ID,
+						},
+					},
+				},
+			}, Contacts.Columns().Names(), opts...)
+		},
+	}
 }
 
 type organizationThenLoader[Q orm.Loadable] struct {
-	Animals            func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Contact            func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	OrganizationHours  func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	OrganizationPhotos func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildOrganizationThenLoader[Q orm.Loadable]() organizationThenLoader[Q] {
-	type AnimalsLoadInterface interface {
-		LoadAnimals(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	type ContactLoadInterface interface {
+		LoadContact(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 	type OrganizationHoursLoadInterface interface {
 		LoadOrganizationHours(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
@@ -1077,10 +940,10 @@ func buildOrganizationThenLoader[Q orm.Loadable]() organizationThenLoader[Q] {
 	}
 
 	return organizationThenLoader[Q]{
-		Animals: thenLoadBuilder[Q](
-			"Animals",
-			func(ctx context.Context, exec bob.Executor, retrieved AnimalsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadAnimals(ctx, exec, mods...)
+		Contact: thenLoadBuilder[Q](
+			"Contact",
+			func(ctx context.Context, exec bob.Executor, retrieved ContactLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadContact(ctx, exec, mods...)
 			},
 		),
 		OrganizationHours: thenLoadBuilder[Q](
@@ -1098,56 +961,48 @@ func buildOrganizationThenLoader[Q orm.Loadable]() organizationThenLoader[Q] {
 	}
 }
 
-// LoadAnimals loads the organization's Animals into the .R struct
-func (o *Organization) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadContact loads the organization's Contact into the .R struct
+func (o *Organization) LoadContact(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if o == nil {
 		return nil
 	}
 
 	// Reset the relationship
-	o.R.Animals = nil
+	o.R.Contact = nil
 
-	related, err := o.Animals(mods...).All(ctx, exec)
+	related, err := o.Contact(mods...).One(ctx, exec)
 	if err != nil {
 		return err
 	}
 
-	for _, rel := range related {
-		rel.R.Organization = o
-	}
+	related.R.Organizations = OrganizationSlice{o}
 
-	o.R.Animals = related
+	o.R.Contact = related
 	return nil
 }
 
-// LoadAnimals loads the organization's Animals into the .R struct
-func (os OrganizationSlice) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+// LoadContact loads the organization's Contact into the .R struct
+func (os OrganizationSlice) LoadContact(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
 	if len(os) == 0 {
 		return nil
 	}
 
-	animals, err := os.Animals(mods...).All(ctx, exec)
+	contacts, err := os.Contact(mods...).All(ctx, exec)
 	if err != nil {
 		return err
 	}
 
 	for _, o := range os {
-		o.R.Animals = nil
-	}
+		for _, rel := range contacts {
 
-	for _, o := range os {
-		for _, rel := range animals {
-
-			if !rel.OrganizationID.IsValue() {
-				continue
-			}
-			if o.ID != rel.OrganizationID.MustGet() {
+			if o.ContactID != rel.ID {
 				continue
 			}
 
-			rel.R.Organization = o
+			rel.R.Organizations = append(rel.R.Organizations, o)
 
-			o.R.Animals = append(o.R.Animals, rel)
+			o.R.Contact = rel
+			break
 		}
 	}
 
@@ -1266,70 +1121,48 @@ func (os OrganizationSlice) LoadOrganizationPhotos(ctx context.Context, exec bob
 	return nil
 }
 
-func insertOrganizationAnimals0(ctx context.Context, exec bob.Executor, animals1 []*AnimalSetter, organization0 *Organization) (AnimalSlice, error) {
-	for i := range animals1 {
-		animals1[i].OrganizationID = omitnull.From(organization0.ID)
+func attachOrganizationContact0(ctx context.Context, exec bob.Executor, count int, organization0 *Organization, contact1 *Contact) (*Organization, error) {
+	setter := &OrganizationSetter{
+		ContactID: omit.From(contact1.ID),
 	}
 
-	ret, err := Animals.Insert(bob.ToMods(animals1...)).All(ctx, exec)
+	err := organization0.Update(ctx, exec, setter)
 	if err != nil {
-		return ret, fmt.Errorf("insertOrganizationAnimals0: %w", err)
+		return nil, fmt.Errorf("attachOrganizationContact0: %w", err)
 	}
 
-	return ret, nil
+	return organization0, nil
 }
 
-func attachOrganizationAnimals0(ctx context.Context, exec bob.Executor, count int, animals1 AnimalSlice, organization0 *Organization) (AnimalSlice, error) {
-	setter := &AnimalSetter{
-		OrganizationID: omitnull.From(organization0.ID),
-	}
-
-	err := animals1.UpdateAll(ctx, exec, *setter)
+func (organization0 *Organization) InsertContact(ctx context.Context, exec bob.Executor, related *ContactSetter) error {
+	contact1, err := Contacts.Insert(related).One(ctx, exec)
 	if err != nil {
-		return nil, fmt.Errorf("attachOrganizationAnimals0: %w", err)
+		return fmt.Errorf("inserting related objects: %w", err)
 	}
 
-	return animals1, nil
-}
-
-func (organization0 *Organization) InsertAnimals(ctx context.Context, exec bob.Executor, related ...*AnimalSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	animals1, err := insertOrganizationAnimals0(ctx, exec, related, organization0)
+	_, err = attachOrganizationContact0(ctx, exec, 1, organization0, contact1)
 	if err != nil {
 		return err
 	}
 
-	organization0.R.Animals = append(organization0.R.Animals, animals1...)
+	organization0.R.Contact = contact1
 
-	for _, rel := range animals1 {
-		rel.R.Organization = organization0
-	}
+	contact1.R.Organizations = append(contact1.R.Organizations, organization0)
+
 	return nil
 }
 
-func (organization0 *Organization) AttachAnimals(ctx context.Context, exec bob.Executor, related ...*Animal) error {
-	if len(related) == 0 {
-		return nil
-	}
-
+func (organization0 *Organization) AttachContact(ctx context.Context, exec bob.Executor, contact1 *Contact) error {
 	var err error
-	animals1 := AnimalSlice(related)
 
-	_, err = attachOrganizationAnimals0(ctx, exec, len(related), animals1, organization0)
+	_, err = attachOrganizationContact0(ctx, exec, 1, organization0, contact1)
 	if err != nil {
 		return err
 	}
 
-	organization0.R.Animals = append(organization0.R.Animals, animals1...)
+	organization0.R.Contact = contact1
 
-	for _, rel := range related {
-		rel.R.Organization = organization0
-	}
+	contact1.R.Organizations = append(contact1.R.Organizations, organization0)
 
 	return nil
 }

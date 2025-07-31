@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -48,10 +50,26 @@ type AddressTemplate struct {
 	Lat          func() null.Val[decimal.Decimal]
 	LNG          func() null.Val[decimal.Decimal]
 	Note         func() null.Val[string]
+	CreatedAt    func() time.Time
+	UpdatedAt    func() time.Time
 
+	r addressR
 	f *Factory
 
 	alreadyPersisted bool
+}
+
+type addressR struct {
+	Country  *addressRCountryR
+	Contacts []*addressRContactsR
+}
+
+type addressRCountryR struct {
+	o *CountryTemplate
+}
+type addressRContactsR struct {
+	number int
+	o      *ContactTemplate
 }
 
 // Apply mods to the AddressTemplate
@@ -63,7 +81,27 @@ func (o *AddressTemplate) Apply(ctx context.Context, mods ...AddressMod) {
 
 // setModelRels creates and sets the relationships on *models.Address
 // according to the relationships in the template. Nothing is inserted into the db
-func (t AddressTemplate) setModelRels(o *models.Address) {}
+func (t AddressTemplate) setModelRels(o *models.Address) {
+	if t.r.Country != nil {
+		rel := t.r.Country.o.Build()
+		rel.R.Addresses = append(rel.R.Addresses, o)
+		o.CountryID = null.From(rel.ID) // h2
+		o.R.Country = rel
+	}
+
+	if t.r.Contacts != nil {
+		rel := models.ContactSlice{}
+		for _, r := range t.r.Contacts {
+			related := r.o.BuildMany(r.number)
+			for _, rel := range related {
+				rel.AddressID = o.ID // h2
+				rel.R.Address = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Contacts = rel
+	}
+}
 
 // BuildSetter returns an *models.AddressSetter
 // this does nothing with the relationship templates
@@ -113,6 +151,14 @@ func (o AddressTemplate) BuildSetter() *models.AddressSetter {
 	if o.Note != nil {
 		val := o.Note()
 		m.Note = omitnull.FromNull(val)
+	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
 	}
 
 	return m
@@ -172,6 +218,12 @@ func (o AddressTemplate) Build() *models.Address {
 	if o.Note != nil {
 		m.Note = o.Note()
 	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
+	}
 
 	o.setModelRels(m)
 
@@ -199,6 +251,45 @@ func ensureCreatableAddress(m *models.AddressSetter) {
 // any required relationship should have already exist on the model
 func (o *AddressTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Address) error {
 	var err error
+
+	isCountryDone, _ := addressRelCountryCtx.Value(ctx)
+	if !isCountryDone && o.r.Country != nil {
+		ctx = addressRelCountryCtx.WithValue(ctx, true)
+		if o.r.Country.o.alreadyPersisted {
+			m.R.Country = o.r.Country.o.Build()
+		} else {
+			var rel0 *models.Country
+			rel0, err = o.r.Country.o.Create(ctx, exec)
+			if err != nil {
+				return err
+			}
+			err = m.AttachCountry(ctx, exec, rel0)
+			if err != nil {
+				return err
+			}
+		}
+
+	}
+
+	isContactsDone, _ := addressRelContactsCtx.Value(ctx)
+	if !isContactsDone && o.r.Contacts != nil {
+		ctx = addressRelContactsCtx.WithValue(ctx, true)
+		for _, r := range o.r.Contacts {
+			if r.o.alreadyPersisted {
+				m.R.Contacts = append(m.R.Contacts, r.o.Build())
+			} else {
+				rel1, err := r.o.CreateMany(ctx, exec, r.number)
+				if err != nil {
+					return err
+				}
+
+				err = m.AttachContacts(ctx, exec, rel1...)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 
 	return err
 }
@@ -304,6 +395,8 @@ func (m addressMods) RandomizeAllColumns(f *faker.Faker) AddressMod {
 		AddressMods.RandomLat(f),
 		AddressMods.RandomLNG(f),
 		AddressMods.RandomNote(f),
+		AddressMods.RandomCreatedAt(f),
+		AddressMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -740,7 +833,7 @@ func (m addressMods) RandomPostalCode(f *faker.Faker) AddressMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "20")
+			val := random_string(f, "50")
 			return null.From(val)
 		}
 	})
@@ -756,7 +849,7 @@ func (m addressMods) RandomPostalCodeNotNull(f *faker.Faker) AddressMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "20")
+			val := random_string(f, "50")
 			return null.From(val)
 		}
 	})
@@ -921,11 +1014,156 @@ func (m addressMods) RandomNoteNotNull(f *faker.Faker) AddressMod {
 	})
 }
 
+// Set the model columns to this value
+func (m addressMods) CreatedAt(val time.Time) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m addressMods) CreatedAtFunc(f func() time.Time) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m addressMods) UnsetCreatedAt() AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m addressMods) RandomCreatedAt(f *faker.Faker) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m addressMods) UpdatedAt(val time.Time) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m addressMods) UpdatedAtFunc(f func() time.Time) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m addressMods) UnsetUpdatedAt() AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m addressMods) RandomUpdatedAt(f *faker.Faker) AddressMod {
+	return AddressModFunc(func(_ context.Context, o *AddressTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
 func (m addressMods) WithParentsCascading() AddressMod {
 	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
 		if isDone, _ := addressWithParentsCascadingCtx.Value(ctx); isDone {
 			return
 		}
 		ctx = addressWithParentsCascadingCtx.WithValue(ctx, true)
+		{
+
+			related := o.f.NewCountryWithContext(ctx, CountryMods.WithParentsCascading())
+			m.WithCountry(related).Apply(ctx, o)
+		}
+	})
+}
+
+func (m addressMods) WithCountry(rel *CountryTemplate) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Country = &addressRCountryR{
+			o: rel,
+		}
+	})
+}
+
+func (m addressMods) WithNewCountry(mods ...CountryMod) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		related := o.f.NewCountryWithContext(ctx, mods...)
+
+		m.WithCountry(related).Apply(ctx, o)
+	})
+}
+
+func (m addressMods) WithExistingCountry(em *models.Country) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Country = &addressRCountryR{
+			o: o.f.FromExistingCountry(em),
+		}
+	})
+}
+
+func (m addressMods) WithoutCountry() AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Country = nil
+	})
+}
+
+func (m addressMods) WithContacts(number int, related *ContactTemplate) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Contacts = []*addressRContactsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m addressMods) WithNewContacts(number int, mods ...ContactMod) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		related := o.f.NewContactWithContext(ctx, mods...)
+		m.WithContacts(number, related).Apply(ctx, o)
+	})
+}
+
+func (m addressMods) AddContacts(number int, related *ContactTemplate) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Contacts = append(o.r.Contacts, &addressRContactsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m addressMods) AddNewContacts(number int, mods ...ContactMod) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		related := o.f.NewContactWithContext(ctx, mods...)
+		m.AddContacts(number, related).Apply(ctx, o)
+	})
+}
+
+func (m addressMods) AddExistingContacts(existingModels ...*models.Contact) AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		for _, em := range existingModels {
+			o.r.Contacts = append(o.r.Contacts, &addressRContactsR{
+				o: o.f.FromExistingContact(em),
+			})
+		}
+	})
+}
+
+func (m addressMods) WithoutContacts() AddressMod {
+	return AddressModFunc(func(ctx context.Context, o *AddressTemplate) {
+		o.r.Contacts = nil
 	})
 }

@@ -79,6 +79,7 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	mux.HandleFunc("GET /docs/rapidoc", a.openapiRapidocPage)
 	mux.HandleFunc("GET /docs/redoc", a.openapiRedocPage)
 	mux.HandleFunc("GET /docs/stoplight", a.openapiStoplightPage)
+	mux.HandleFunc("GET /docs/scalar", a.openapiScalarPage)
 	mux.HandleFunc("GET /docs/swagger", a.openapiSwaggerPage)
 
 	apiSrv := api.NewStrictHandler(a, make([]api.StrictMiddlewareFunc, 0))

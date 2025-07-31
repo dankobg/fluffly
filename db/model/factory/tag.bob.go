@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -35,9 +37,11 @@ func (mods TagModSlice) Apply(ctx context.Context, n *TagTemplate) {
 // TagTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type TagTemplate struct {
-	ID       func() int64
-	AnimalID func() null.Val[int64]
-	Name     func() null.Val[string]
+	ID        func() int64
+	AnimalID  func() null.Val[int64]
+	Name      func() null.Val[string]
+	CreatedAt func() time.Time
+	UpdatedAt func() time.Time
 
 	r tagR
 	f *Factory
@@ -84,6 +88,14 @@ func (o TagTemplate) BuildSetter() *models.TagSetter {
 		val := o.Name()
 		m.Name = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -114,6 +126,12 @@ func (o TagTemplate) Build() *models.Tag {
 	}
 	if o.Name != nil {
 		m.Name = o.Name()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -257,6 +275,8 @@ func (m tagMods) RandomizeAllColumns(f *faker.Faker) TagMod {
 		TagMods.RandomID(f),
 		TagMods.RandomAnimalID(f),
 		TagMods.RandomName(f),
+		TagMods.RandomCreatedAt(f),
+		TagMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -375,7 +395,7 @@ func (m tagMods) RandomName(f *faker.Faker) TagMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "255")
 			return null.From(val)
 		}
 	})
@@ -391,8 +411,70 @@ func (m tagMods) RandomNameNotNull(f *faker.Faker) TagMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "255")
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m tagMods) CreatedAt(val time.Time) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m tagMods) CreatedAtFunc(f func() time.Time) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m tagMods) UnsetCreatedAt() TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m tagMods) RandomCreatedAt(f *faker.Faker) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m tagMods) UpdatedAt(val time.Time) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m tagMods) UpdatedAtFunc(f func() time.Time) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m tagMods) UnsetUpdatedAt() TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m tagMods) RandomUpdatedAt(f *faker.Faker) TagMod {
+	return TagModFunc(func(_ context.Context, o *TagTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

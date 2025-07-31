@@ -5,9 +5,12 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/shopspring/decimal"
 	"github.com/stephenafamo/bob"
@@ -17,6 +20,9 @@ import (
 	"github.com/stephenafamo/bob/dialect/psql/sm"
 	"github.com/stephenafamo/bob/dialect/psql/um"
 	"github.com/stephenafamo/bob/expr"
+	"github.com/stephenafamo/bob/mods"
+	"github.com/stephenafamo/bob/orm"
+	"github.com/stephenafamo/bob/types/pgtypes"
 )
 
 // Address is an object representing the database table.
@@ -33,6 +39,10 @@ type Address struct {
 	Lat          null.Val[decimal.Decimal] `db:"lat" `
 	LNG          null.Val[decimal.Decimal] `db:"lng" `
 	Note         null.Val[string]          `db:"note" `
+	CreatedAt    time.Time                 `db:"created_at" `
+	UpdatedAt    time.Time                 `db:"updated_at" `
+
+	R addressR `db:"-" `
 }
 
 // AddressSlice is an alias for a slice of pointers to Address.
@@ -44,6 +54,12 @@ var Addresses = psql.NewTablex[*Address, AddressSlice, *AddressSetter]("", "addr
 
 // AddressesQuery is a query on the address table
 type AddressesQuery = *psql.ViewQuery[*Address, AddressSlice]
+
+// addressR is where relationships are stored.
+type addressR struct {
+	Country  *Country     // address.fk_address_country_id_country
+	Contacts ContactSlice // contact.fk_contact_address_id_animal
+}
 
 type addressColumnNames struct {
 	ID           string
@@ -58,6 +74,8 @@ type addressColumnNames struct {
 	Lat          string
 	LNG          string
 	Note         string
+	CreatedAt    string
+	UpdatedAt    string
 }
 
 var AddressColumns = buildAddressColumns("address")
@@ -76,6 +94,8 @@ type addressColumns struct {
 	Lat          psql.Expression
 	LNG          psql.Expression
 	Note         psql.Expression
+	CreatedAt    psql.Expression
+	UpdatedAt    psql.Expression
 }
 
 func (c addressColumns) Alias() string {
@@ -101,6 +121,8 @@ func buildAddressColumns(alias string) addressColumns {
 		Lat:          psql.Quote(alias, "lat"),
 		LNG:          psql.Quote(alias, "lng"),
 		Note:         psql.Quote(alias, "note"),
+		CreatedAt:    psql.Quote(alias, "created_at"),
+		UpdatedAt:    psql.Quote(alias, "updated_at"),
 	}
 }
 
@@ -117,6 +139,8 @@ type addressWhere[Q psql.Filterable] struct {
 	Lat          psql.WhereNullMod[Q, decimal.Decimal]
 	LNG          psql.WhereNullMod[Q, decimal.Decimal]
 	Note         psql.WhereNullMod[Q, string]
+	CreatedAt    psql.WhereMod[Q, time.Time]
+	UpdatedAt    psql.WhereMod[Q, time.Time]
 }
 
 func (addressWhere[Q]) AliasedAs(alias string) addressWhere[Q] {
@@ -137,6 +161,8 @@ func buildAddressWhere[Q psql.Filterable](cols addressColumns) addressWhere[Q] {
 		Lat:          psql.WhereNull[Q, decimal.Decimal](cols.Lat),
 		LNG:          psql.WhereNull[Q, decimal.Decimal](cols.LNG),
 		Note:         psql.WhereNull[Q, string](cols.Note),
+		CreatedAt:    psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:    psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -168,10 +194,12 @@ type AddressSetter struct {
 	Lat          omitnull.Val[decimal.Decimal] `db:"lat" `
 	LNG          omitnull.Val[decimal.Decimal] `db:"lng" `
 	Note         omitnull.Val[string]          `db:"note" `
+	CreatedAt    omit.Val[time.Time]           `db:"created_at" `
+	UpdatedAt    omit.Val[time.Time]           `db:"updated_at" `
 }
 
 func (s AddressSetter) SetColumns() []string {
-	vals := make([]string, 0, 11)
+	vals := make([]string, 0, 13)
 	if !s.CountryID.IsUnset() {
 		vals = append(vals, "country_id")
 	}
@@ -204,6 +232,12 @@ func (s AddressSetter) SetColumns() []string {
 	}
 	if !s.Note.IsUnset() {
 		vals = append(vals, "note")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -242,6 +276,12 @@ func (s AddressSetter) Overwrite(t *Address) {
 	if !s.Note.IsUnset() {
 		t.Note = s.Note.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *AddressSetter) Apply(q *dialect.InsertQuery) {
@@ -250,7 +290,7 @@ func (s *AddressSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 11)
+		vals := make([]bob.Expression, 13)
 		if !s.CountryID.IsUnset() {
 			vals[0] = psql.Arg(s.CountryID.MustGetNull())
 		} else {
@@ -317,6 +357,18 @@ func (s *AddressSetter) Apply(q *dialect.InsertQuery) {
 			vals[10] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[11] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[11] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[12] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[12] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -326,7 +378,7 @@ func (s AddressSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s AddressSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 11)
+	exprs := make([]bob.Expression, 0, 13)
 
 	if !s.CountryID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -405,6 +457,20 @@ func (s AddressSetter) Expressions(prefix ...string) []bob.Expression {
 		}})
 	}
 
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
+		}})
+	}
+
 	return exprs
 }
 
@@ -466,6 +532,7 @@ func (o *Address) Update(ctx context.Context, exec bob.Executor, s *AddressSette
 		return err
 	}
 
+	o.R = v.R
 	*o = *v
 
 	return nil
@@ -485,7 +552,7 @@ func (o *Address) Reload(ctx context.Context, exec bob.Executor) error {
 	if err != nil {
 		return err
 	}
-
+	o2.R = o.R
 	*o = *o2
 
 	return nil
@@ -532,7 +599,7 @@ func (o AddressSlice) copyMatchingRows(from ...*Address) {
 			if new.ID != old.ID {
 				continue
 			}
-
+			new.R = old.R
 			o[i] = new
 			break
 		}
@@ -626,6 +693,402 @@ func (o AddressSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 	}
 
 	o.copyMatchingRows(o2...)
+
+	return nil
+}
+
+type addressJoins[Q dialect.Joinable] struct {
+	typ      string
+	Country  modAs[Q, countryColumns]
+	Contacts modAs[Q, contactColumns]
+}
+
+func (j addressJoins[Q]) aliasedAs(alias string) addressJoins[Q] {
+	return buildAddressJoins[Q](buildAddressColumns(alias), j.typ)
+}
+
+func buildAddressJoins[Q dialect.Joinable](cols addressColumns, typ string) addressJoins[Q] {
+	return addressJoins[Q]{
+		typ: typ,
+		Country: modAs[Q, countryColumns]{
+			c: CountryColumns,
+			f: func(to countryColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Countries.Name().As(to.Alias())).On(
+						to.ID.EQ(cols.CountryID),
+					))
+				}
+
+				return mods
+			},
+		},
+		Contacts: modAs[Q, contactColumns]{
+			c: ContactColumns,
+			f: func(to contactColumns) bob.Mod[Q] {
+				mods := make(mods.QueryMods[Q], 0, 1)
+
+				{
+					mods = append(mods, dialect.Join[Q](typ, Contacts.Name().As(to.Alias())).On(
+						to.AddressID.EQ(cols.ID),
+					))
+				}
+
+				return mods
+			},
+		},
+	}
+}
+
+// Country starts a query for related objects on country
+func (o *Address) Country(mods ...bob.Mod[*dialect.SelectQuery]) CountriesQuery {
+	return Countries.Query(append(mods,
+		sm.Where(CountryColumns.ID.EQ(psql.Arg(o.CountryID))),
+	)...)
+}
+
+func (os AddressSlice) Country(mods ...bob.Mod[*dialect.SelectQuery]) CountriesQuery {
+	pkCountryID := make(pgtypes.Array[null.Val[int64]], len(os))
+	for i, o := range os {
+		pkCountryID[i] = o.CountryID
+	}
+	PKArgExpr := psql.Select(sm.Columns(
+		psql.F("unnest", psql.Cast(psql.Arg(pkCountryID), "bigint[]")),
+	))
+
+	return Countries.Query(append(mods,
+		sm.Where(psql.Group(CountryColumns.ID).OP("IN", PKArgExpr)),
+	)...)
+}
+
+// Contacts starts a query for related objects on contact
+func (o *Address) Contacts(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	return Contacts.Query(append(mods,
+		sm.Where(ContactColumns.AddressID.EQ(psql.Arg(o.ID))),
+	)...)
+}
+
+func (os AddressSlice) Contacts(mods ...bob.Mod[*dialect.SelectQuery]) ContactsQuery {
+	pkID := make(pgtypes.Array[int64], len(os))
+	for i, o := range os {
+		pkID[i] = o.ID
+	}
+	PKArgExpr := psql.Select(sm.Columns(
+		psql.F("unnest", psql.Cast(psql.Arg(pkID), "bigint[]")),
+	))
+
+	return Contacts.Query(append(mods,
+		sm.Where(psql.Group(ContactColumns.AddressID).OP("IN", PKArgExpr)),
+	)...)
+}
+
+func (o *Address) Preload(name string, retrieved any) error {
+	if o == nil {
+		return nil
+	}
+
+	switch name {
+	case "Country":
+		rel, ok := retrieved.(*Country)
+		if !ok {
+			return fmt.Errorf("address cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Country = rel
+
+		if rel != nil {
+			rel.R.Addresses = AddressSlice{o}
+		}
+		return nil
+	case "Contacts":
+		rels, ok := retrieved.(ContactSlice)
+		if !ok {
+			return fmt.Errorf("address cannot load %T as %q", retrieved, name)
+		}
+
+		o.R.Contacts = rels
+
+		for _, rel := range rels {
+			if rel != nil {
+				rel.R.Address = o
+			}
+		}
+		return nil
+	default:
+		return fmt.Errorf("address has no relationship %q", name)
+	}
+}
+
+type addressPreloader struct {
+	Country func(...psql.PreloadOption) psql.Preloader
+}
+
+func buildAddressPreloader() addressPreloader {
+	return addressPreloader{
+		Country: func(opts ...psql.PreloadOption) psql.Preloader {
+			return psql.Preload[*Country, CountrySlice](orm.Relationship{
+				Name: "Country",
+				Sides: []orm.RelSide{
+					{
+						From: TableNames.Addresses,
+						To:   TableNames.Countries,
+						FromColumns: []string{
+							ColumnNames.Addresses.CountryID,
+						},
+						ToColumns: []string{
+							ColumnNames.Countries.ID,
+						},
+					},
+				},
+			}, Countries.Columns().Names(), opts...)
+		},
+	}
+}
+
+type addressThenLoader[Q orm.Loadable] struct {
+	Country  func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+	Contacts func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
+}
+
+func buildAddressThenLoader[Q orm.Loadable]() addressThenLoader[Q] {
+	type CountryLoadInterface interface {
+		LoadCountry(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
+	type ContactsLoadInterface interface {
+		LoadContacts(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
+	}
+
+	return addressThenLoader[Q]{
+		Country: thenLoadBuilder[Q](
+			"Country",
+			func(ctx context.Context, exec bob.Executor, retrieved CountryLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadCountry(ctx, exec, mods...)
+			},
+		),
+		Contacts: thenLoadBuilder[Q](
+			"Contacts",
+			func(ctx context.Context, exec bob.Executor, retrieved ContactsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
+				return retrieved.LoadContacts(ctx, exec, mods...)
+			},
+		),
+	}
+}
+
+// LoadCountry loads the address's Country into the .R struct
+func (o *Address) LoadCountry(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Country = nil
+
+	related, err := o.Country(mods...).One(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	related.R.Addresses = AddressSlice{o}
+
+	o.R.Country = related
+	return nil
+}
+
+// LoadCountry loads the address's Country into the .R struct
+func (os AddressSlice) LoadCountry(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	countries, err := os.Country(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		for _, rel := range countries {
+			if !o.CountryID.IsValue() {
+				continue
+			}
+
+			if o.CountryID.MustGet() != rel.ID {
+				continue
+			}
+
+			rel.R.Addresses = append(rel.R.Addresses, o)
+
+			o.R.Country = rel
+			break
+		}
+	}
+
+	return nil
+}
+
+// LoadContacts loads the address's Contacts into the .R struct
+func (o *Address) LoadContacts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if o == nil {
+		return nil
+	}
+
+	// Reset the relationship
+	o.R.Contacts = nil
+
+	related, err := o.Contacts(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, rel := range related {
+		rel.R.Address = o
+	}
+
+	o.R.Contacts = related
+	return nil
+}
+
+// LoadContacts loads the address's Contacts into the .R struct
+func (os AddressSlice) LoadContacts(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
+	if len(os) == 0 {
+		return nil
+	}
+
+	contacts, err := os.Contacts(mods...).All(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, o := range os {
+		o.R.Contacts = nil
+	}
+
+	for _, o := range os {
+		for _, rel := range contacts {
+
+			if o.ID != rel.AddressID {
+				continue
+			}
+
+			rel.R.Address = o
+
+			o.R.Contacts = append(o.R.Contacts, rel)
+		}
+	}
+
+	return nil
+}
+
+func attachAddressCountry0(ctx context.Context, exec bob.Executor, count int, address0 *Address, country1 *Country) (*Address, error) {
+	setter := &AddressSetter{
+		CountryID: omitnull.From(country1.ID),
+	}
+
+	err := address0.Update(ctx, exec, setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachAddressCountry0: %w", err)
+	}
+
+	return address0, nil
+}
+
+func (address0 *Address) InsertCountry(ctx context.Context, exec bob.Executor, related *CountrySetter) error {
+	country1, err := Countries.Insert(related).One(ctx, exec)
+	if err != nil {
+		return fmt.Errorf("inserting related objects: %w", err)
+	}
+
+	_, err = attachAddressCountry0(ctx, exec, 1, address0, country1)
+	if err != nil {
+		return err
+	}
+
+	address0.R.Country = country1
+
+	country1.R.Addresses = append(country1.R.Addresses, address0)
+
+	return nil
+}
+
+func (address0 *Address) AttachCountry(ctx context.Context, exec bob.Executor, country1 *Country) error {
+	var err error
+
+	_, err = attachAddressCountry0(ctx, exec, 1, address0, country1)
+	if err != nil {
+		return err
+	}
+
+	address0.R.Country = country1
+
+	country1.R.Addresses = append(country1.R.Addresses, address0)
+
+	return nil
+}
+
+func insertAddressContacts0(ctx context.Context, exec bob.Executor, contacts1 []*ContactSetter, address0 *Address) (ContactSlice, error) {
+	for i := range contacts1 {
+		contacts1[i].AddressID = omit.From(address0.ID)
+	}
+
+	ret, err := Contacts.Insert(bob.ToMods(contacts1...)).All(ctx, exec)
+	if err != nil {
+		return ret, fmt.Errorf("insertAddressContacts0: %w", err)
+	}
+
+	return ret, nil
+}
+
+func attachAddressContacts0(ctx context.Context, exec bob.Executor, count int, contacts1 ContactSlice, address0 *Address) (ContactSlice, error) {
+	setter := &ContactSetter{
+		AddressID: omit.From(address0.ID),
+	}
+
+	err := contacts1.UpdateAll(ctx, exec, *setter)
+	if err != nil {
+		return nil, fmt.Errorf("attachAddressContacts0: %w", err)
+	}
+
+	return contacts1, nil
+}
+
+func (address0 *Address) InsertContacts(ctx context.Context, exec bob.Executor, related ...*ContactSetter) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+
+	contacts1, err := insertAddressContacts0(ctx, exec, related, address0)
+	if err != nil {
+		return err
+	}
+
+	address0.R.Contacts = append(address0.R.Contacts, contacts1...)
+
+	for _, rel := range contacts1 {
+		rel.R.Address = address0
+	}
+	return nil
+}
+
+func (address0 *Address) AttachContacts(ctx context.Context, exec bob.Executor, related ...*Contact) error {
+	if len(related) == 0 {
+		return nil
+	}
+
+	var err error
+	contacts1 := ContactSlice(related)
+
+	_, err = attachAddressContacts0(ctx, exec, len(related), contacts1, address0)
+	if err != nil {
+		return err
+	}
+
+	address0.R.Contacts = append(address0.R.Contacts, contacts1...)
+
+	for _, rel := range related {
+		rel.R.Address = address0
+	}
 
 	return nil
 }

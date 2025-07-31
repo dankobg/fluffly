@@ -46,7 +46,6 @@ type UsersQuery = *psql.ViewQuery[*User, UserSlice]
 // userR is where relationships are stored.
 type userR struct {
 	Adoptions       AdoptionSlice       // adoption.fk_adoption_user_id_animal
-	Animals         AnimalSlice         // animal.fk_animal_user_id_user
 	UserAnimalLikes UserAnimalLikeSlice // user_animal_like.fk_user_animal_like_user_id_user
 }
 
@@ -434,7 +433,6 @@ func (o UserSlice) ReloadAll(ctx context.Context, exec bob.Executor) error {
 type userJoins[Q dialect.Joinable] struct {
 	typ             string
 	Adoptions       modAs[Q, adoptionColumns]
-	Animals         modAs[Q, animalColumns]
 	UserAnimalLikes modAs[Q, userAnimalLikeColumns]
 }
 
@@ -452,20 +450,6 @@ func buildUserJoins[Q dialect.Joinable](cols userColumns, typ string) userJoins[
 
 				{
 					mods = append(mods, dialect.Join[Q](typ, Adoptions.Name().As(to.Alias())).On(
-						to.UserID.EQ(cols.ID),
-					))
-				}
-
-				return mods
-			},
-		},
-		Animals: modAs[Q, animalColumns]{
-			c: AnimalColumns,
-			f: func(to animalColumns) bob.Mod[Q] {
-				mods := make(mods.QueryMods[Q], 0, 1)
-
-				{
-					mods = append(mods, dialect.Join[Q](typ, Animals.Name().As(to.Alias())).On(
 						to.UserID.EQ(cols.ID),
 					))
 				}
@@ -511,27 +495,6 @@ func (os UserSlice) Adoptions(mods ...bob.Mod[*dialect.SelectQuery]) AdoptionsQu
 	)...)
 }
 
-// Animals starts a query for related objects on animal
-func (o *User) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
-	return Animals.Query(append(mods,
-		sm.Where(AnimalColumns.UserID.EQ(psql.Arg(o.ID))),
-	)...)
-}
-
-func (os UserSlice) Animals(mods ...bob.Mod[*dialect.SelectQuery]) AnimalsQuery {
-	pkID := make(pgtypes.Array[uuid.UUID], len(os))
-	for i, o := range os {
-		pkID[i] = o.ID
-	}
-	PKArgExpr := psql.Select(sm.Columns(
-		psql.F("unnest", psql.Cast(psql.Arg(pkID), "uuid[]")),
-	))
-
-	return Animals.Query(append(mods,
-		sm.Where(psql.Group(AnimalColumns.UserID).OP("IN", PKArgExpr)),
-	)...)
-}
-
 // UserAnimalLikes starts a query for related objects on user_animal_like
 func (o *User) UserAnimalLikes(mods ...bob.Mod[*dialect.SelectQuery]) UserAnimalLikesQuery {
 	return UserAnimalLikes.Query(append(mods,
@@ -573,20 +536,6 @@ func (o *User) Preload(name string, retrieved any) error {
 			}
 		}
 		return nil
-	case "Animals":
-		rels, ok := retrieved.(AnimalSlice)
-		if !ok {
-			return fmt.Errorf("user cannot load %T as %q", retrieved, name)
-		}
-
-		o.R.Animals = rels
-
-		for _, rel := range rels {
-			if rel != nil {
-				rel.R.User = o
-			}
-		}
-		return nil
 	case "UserAnimalLikes":
 		rels, ok := retrieved.(UserAnimalLikeSlice)
 		if !ok {
@@ -614,16 +563,12 @@ func buildUserPreloader() userPreloader {
 
 type userThenLoader[Q orm.Loadable] struct {
 	Adoptions       func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
-	Animals         func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 	UserAnimalLikes func(...bob.Mod[*dialect.SelectQuery]) orm.Loader[Q]
 }
 
 func buildUserThenLoader[Q orm.Loadable]() userThenLoader[Q] {
 	type AdoptionsLoadInterface interface {
 		LoadAdoptions(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
-	}
-	type AnimalsLoadInterface interface {
-		LoadAnimals(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
 	}
 	type UserAnimalLikesLoadInterface interface {
 		LoadUserAnimalLikes(context.Context, bob.Executor, ...bob.Mod[*dialect.SelectQuery]) error
@@ -634,12 +579,6 @@ func buildUserThenLoader[Q orm.Loadable]() userThenLoader[Q] {
 			"Adoptions",
 			func(ctx context.Context, exec bob.Executor, retrieved AdoptionsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
 				return retrieved.LoadAdoptions(ctx, exec, mods...)
-			},
-		),
-		Animals: thenLoadBuilder[Q](
-			"Animals",
-			func(ctx context.Context, exec bob.Executor, retrieved AnimalsLoadInterface, mods ...bob.Mod[*dialect.SelectQuery]) error {
-				return retrieved.LoadAnimals(ctx, exec, mods...)
 			},
 		),
 		UserAnimalLikes: thenLoadBuilder[Q](
@@ -701,62 +640,6 @@ func (os UserSlice) LoadAdoptions(ctx context.Context, exec bob.Executor, mods .
 			rel.R.User = o
 
 			o.R.Adoptions = append(o.R.Adoptions, rel)
-		}
-	}
-
-	return nil
-}
-
-// LoadAnimals loads the user's Animals into the .R struct
-func (o *User) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if o == nil {
-		return nil
-	}
-
-	// Reset the relationship
-	o.R.Animals = nil
-
-	related, err := o.Animals(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, rel := range related {
-		rel.R.User = o
-	}
-
-	o.R.Animals = related
-	return nil
-}
-
-// LoadAnimals loads the user's Animals into the .R struct
-func (os UserSlice) LoadAnimals(ctx context.Context, exec bob.Executor, mods ...bob.Mod[*dialect.SelectQuery]) error {
-	if len(os) == 0 {
-		return nil
-	}
-
-	animals, err := os.Animals(mods...).All(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, o := range os {
-		o.R.Animals = nil
-	}
-
-	for _, o := range os {
-		for _, rel := range animals {
-
-			if !rel.UserID.IsValue() {
-				continue
-			}
-			if o.ID != rel.UserID.MustGet() {
-				continue
-			}
-
-			rel.R.User = o
-
-			o.R.Animals = append(o.R.Animals, rel)
 		}
 	}
 
@@ -876,74 +759,6 @@ func (user0 *User) AttachAdoptions(ctx context.Context, exec bob.Executor, relat
 	}
 
 	user0.R.Adoptions = append(user0.R.Adoptions, adoptions1...)
-
-	for _, rel := range related {
-		rel.R.User = user0
-	}
-
-	return nil
-}
-
-func insertUserAnimals0(ctx context.Context, exec bob.Executor, animals1 []*AnimalSetter, user0 *User) (AnimalSlice, error) {
-	for i := range animals1 {
-		animals1[i].UserID = omitnull.From(user0.ID)
-	}
-
-	ret, err := Animals.Insert(bob.ToMods(animals1...)).All(ctx, exec)
-	if err != nil {
-		return ret, fmt.Errorf("insertUserAnimals0: %w", err)
-	}
-
-	return ret, nil
-}
-
-func attachUserAnimals0(ctx context.Context, exec bob.Executor, count int, animals1 AnimalSlice, user0 *User) (AnimalSlice, error) {
-	setter := &AnimalSetter{
-		UserID: omitnull.From(user0.ID),
-	}
-
-	err := animals1.UpdateAll(ctx, exec, *setter)
-	if err != nil {
-		return nil, fmt.Errorf("attachUserAnimals0: %w", err)
-	}
-
-	return animals1, nil
-}
-
-func (user0 *User) InsertAnimals(ctx context.Context, exec bob.Executor, related ...*AnimalSetter) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-
-	animals1, err := insertUserAnimals0(ctx, exec, related, user0)
-	if err != nil {
-		return err
-	}
-
-	user0.R.Animals = append(user0.R.Animals, animals1...)
-
-	for _, rel := range animals1 {
-		rel.R.User = user0
-	}
-	return nil
-}
-
-func (user0 *User) AttachAnimals(ctx context.Context, exec bob.Executor, related ...*Animal) error {
-	if len(related) == 0 {
-		return nil
-	}
-
-	var err error
-	animals1 := AnimalSlice(related)
-
-	_, err = attachUserAnimals0(ctx, exec, len(related), animals1, user0)
-	if err != nil {
-		return err
-	}
-
-	user0.R.Animals = append(user0.R.Animals, animals1...)
 
 	for _, rel := range related {
 		rel.R.User = user0

@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -44,6 +46,8 @@ type OrganizationHourTemplate struct {
 	Friday         func() null.Val[string]
 	Saturday       func() null.Val[string]
 	Sunday         func() null.Val[string]
+	CreatedAt      func() time.Time
+	UpdatedAt      func() time.Time
 
 	r organizationHourR
 	f *Factory
@@ -114,6 +118,14 @@ func (o OrganizationHourTemplate) BuildSetter() *models.OrganizationHourSetter {
 		val := o.Sunday()
 		m.Sunday = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -162,6 +174,12 @@ func (o OrganizationHourTemplate) Build() *models.OrganizationHour {
 	}
 	if o.Sunday != nil {
 		m.Sunday = o.Sunday()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -311,6 +329,8 @@ func (m organizationHourMods) RandomizeAllColumns(f *faker.Faker) OrganizationHo
 		OrganizationHourMods.RandomFriday(f),
 		OrganizationHourMods.RandomSaturday(f),
 		OrganizationHourMods.RandomSunday(f),
+		OrganizationHourMods.RandomCreatedAt(f),
+		OrganizationHourMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -429,7 +449,7 @@ func (m organizationHourMods) RandomMonday(f *faker.Faker) OrganizationHourMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -445,7 +465,7 @@ func (m organizationHourMods) RandomMondayNotNull(f *faker.Faker) OrganizationHo
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -482,7 +502,7 @@ func (m organizationHourMods) RandomTuesday(f *faker.Faker) OrganizationHourMod 
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -498,7 +518,7 @@ func (m organizationHourMods) RandomTuesdayNotNull(f *faker.Faker) OrganizationH
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -535,7 +555,7 @@ func (m organizationHourMods) RandomWednesday(f *faker.Faker) OrganizationHourMo
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -551,7 +571,7 @@ func (m organizationHourMods) RandomWednesdayNotNull(f *faker.Faker) Organizatio
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -588,7 +608,7 @@ func (m organizationHourMods) RandomThursday(f *faker.Faker) OrganizationHourMod
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -604,7 +624,7 @@ func (m organizationHourMods) RandomThursdayNotNull(f *faker.Faker) Organization
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -641,7 +661,7 @@ func (m organizationHourMods) RandomFriday(f *faker.Faker) OrganizationHourMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -657,7 +677,7 @@ func (m organizationHourMods) RandomFridayNotNull(f *faker.Faker) OrganizationHo
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -694,7 +714,7 @@ func (m organizationHourMods) RandomSaturday(f *faker.Faker) OrganizationHourMod
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -710,7 +730,7 @@ func (m organizationHourMods) RandomSaturdayNotNull(f *faker.Faker) Organization
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -747,7 +767,7 @@ func (m organizationHourMods) RandomSunday(f *faker.Faker) OrganizationHourMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -763,8 +783,70 @@ func (m organizationHourMods) RandomSundayNotNull(f *faker.Faker) OrganizationHo
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m organizationHourMods) CreatedAt(val time.Time) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationHourMods) CreatedAtFunc(f func() time.Time) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationHourMods) UnsetCreatedAt() OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationHourMods) RandomCreatedAt(f *faker.Faker) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m organizationHourMods) UpdatedAt(val time.Time) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationHourMods) UpdatedAtFunc(f func() time.Time) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationHourMods) UnsetUpdatedAt() OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationHourMods) RandomUpdatedAt(f *faker.Faker) OrganizationHourMod {
+	return OrganizationHourModFunc(func(_ context.Context, o *OrganizationHourTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

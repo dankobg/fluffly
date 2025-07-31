@@ -7,8 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
@@ -24,9 +26,11 @@ import (
 
 // AnimalVideo is an object representing the database table.
 type AnimalVideo struct {
-	ID       int64            `db:"id,pk,generated" `
-	AnimalID null.Val[int64]  `db:"animal_id" `
-	URL      null.Val[string] `db:"url" `
+	ID        int64            `db:"id,pk,generated" `
+	AnimalID  null.Val[int64]  `db:"animal_id" `
+	URL       null.Val[string] `db:"url" `
+	CreatedAt time.Time        `db:"created_at" `
+	UpdatedAt time.Time        `db:"updated_at" `
 
 	R animalVideoR `db:"-" `
 }
@@ -47,9 +51,11 @@ type animalVideoR struct {
 }
 
 type animalVideoColumnNames struct {
-	ID       string
-	AnimalID string
-	URL      string
+	ID        string
+	AnimalID  string
+	URL       string
+	CreatedAt string
+	UpdatedAt string
 }
 
 var AnimalVideoColumns = buildAnimalVideoColumns("animal_video")
@@ -59,6 +65,8 @@ type animalVideoColumns struct {
 	ID         psql.Expression
 	AnimalID   psql.Expression
 	URL        psql.Expression
+	CreatedAt  psql.Expression
+	UpdatedAt  psql.Expression
 }
 
 func (c animalVideoColumns) Alias() string {
@@ -75,13 +83,17 @@ func buildAnimalVideoColumns(alias string) animalVideoColumns {
 		ID:         psql.Quote(alias, "id"),
 		AnimalID:   psql.Quote(alias, "animal_id"),
 		URL:        psql.Quote(alias, "url"),
+		CreatedAt:  psql.Quote(alias, "created_at"),
+		UpdatedAt:  psql.Quote(alias, "updated_at"),
 	}
 }
 
 type animalVideoWhere[Q psql.Filterable] struct {
-	ID       psql.WhereMod[Q, int64]
-	AnimalID psql.WhereNullMod[Q, int64]
-	URL      psql.WhereNullMod[Q, string]
+	ID        psql.WhereMod[Q, int64]
+	AnimalID  psql.WhereNullMod[Q, int64]
+	URL       psql.WhereNullMod[Q, string]
+	CreatedAt psql.WhereMod[Q, time.Time]
+	UpdatedAt psql.WhereMod[Q, time.Time]
 }
 
 func (animalVideoWhere[Q]) AliasedAs(alias string) animalVideoWhere[Q] {
@@ -90,9 +102,11 @@ func (animalVideoWhere[Q]) AliasedAs(alias string) animalVideoWhere[Q] {
 
 func buildAnimalVideoWhere[Q psql.Filterable](cols animalVideoColumns) animalVideoWhere[Q] {
 	return animalVideoWhere[Q]{
-		ID:       psql.Where[Q, int64](cols.ID),
-		AnimalID: psql.WhereNull[Q, int64](cols.AnimalID),
-		URL:      psql.WhereNull[Q, string](cols.URL),
+		ID:        psql.Where[Q, int64](cols.ID),
+		AnimalID:  psql.WhereNull[Q, int64](cols.AnimalID),
+		URL:       psql.WhereNull[Q, string](cols.URL),
+		CreatedAt: psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt: psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -113,17 +127,25 @@ type animalVideoErrors struct {
 // All values are optional, and do not have to be set
 // Generated columns are not included
 type AnimalVideoSetter struct {
-	AnimalID omitnull.Val[int64]  `db:"animal_id" `
-	URL      omitnull.Val[string] `db:"url" `
+	AnimalID  omitnull.Val[int64]  `db:"animal_id" `
+	URL       omitnull.Val[string] `db:"url" `
+	CreatedAt omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s AnimalVideoSetter) SetColumns() []string {
-	vals := make([]string, 0, 2)
+	vals := make([]string, 0, 4)
 	if !s.AnimalID.IsUnset() {
 		vals = append(vals, "animal_id")
 	}
 	if !s.URL.IsUnset() {
 		vals = append(vals, "url")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -135,6 +157,12 @@ func (s AnimalVideoSetter) Overwrite(t *AnimalVideo) {
 	if !s.URL.IsUnset() {
 		t.URL = s.URL.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *AnimalVideoSetter) Apply(q *dialect.InsertQuery) {
@@ -143,7 +171,7 @@ func (s *AnimalVideoSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 2)
+		vals := make([]bob.Expression, 4)
 		if !s.AnimalID.IsUnset() {
 			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
 		} else {
@@ -156,6 +184,18 @@ func (s *AnimalVideoSetter) Apply(q *dialect.InsertQuery) {
 			vals[1] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[2] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[2] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[3] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[3] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -165,7 +205,7 @@ func (s AnimalVideoSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s AnimalVideoSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 2)
+	exprs := make([]bob.Expression, 0, 4)
 
 	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -178,6 +218,20 @@ func (s AnimalVideoSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "url")...),
 			psql.Arg(s.URL),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

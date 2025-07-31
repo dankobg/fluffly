@@ -6,6 +6,7 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -36,9 +37,11 @@ func (mods ColorModSlice) Apply(ctx context.Context, n *ColorTemplate) {
 // ColorTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type ColorTemplate struct {
-	ID       func() int64
-	AnimalID func() null.Val[int64]
-	Color    func() string
+	ID        func() int64
+	AnimalID  func() null.Val[int64]
+	Color     func() string
+	CreatedAt func() time.Time
+	UpdatedAt func() time.Time
 
 	r colorR
 	f *Factory
@@ -85,6 +88,14 @@ func (o ColorTemplate) BuildSetter() *models.ColorSetter {
 		val := o.Color()
 		m.Color = omit.From(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -116,6 +127,12 @@ func (o ColorTemplate) Build() *models.Color {
 	if o.Color != nil {
 		m.Color = o.Color()
 	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
+	}
 
 	o.setModelRels(m)
 
@@ -137,7 +154,7 @@ func (o ColorTemplate) BuildMany(number int) models.ColorSlice {
 
 func ensureCreatableColor(m *models.ColorSetter) {
 	if !(m.Color.IsValue()) {
-		val := random_string(nil)
+		val := random_string(nil, "255")
 		m.Color = omit.From(val)
 	}
 }
@@ -262,6 +279,8 @@ func (m colorMods) RandomizeAllColumns(f *faker.Faker) ColorMod {
 		ColorMods.RandomID(f),
 		ColorMods.RandomAnimalID(f),
 		ColorMods.RandomColor(f),
+		ColorMods.RandomCreatedAt(f),
+		ColorMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -375,7 +394,69 @@ func (m colorMods) UnsetColor() ColorMod {
 func (m colorMods) RandomColor(f *faker.Faker) ColorMod {
 	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
 		o.Color = func() string {
-			return random_string(f)
+			return random_string(f, "255")
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m colorMods) CreatedAt(val time.Time) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m colorMods) CreatedAtFunc(f func() time.Time) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m colorMods) UnsetCreatedAt() ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m colorMods) RandomCreatedAt(f *faker.Faker) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m colorMods) UpdatedAt(val time.Time) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m colorMods) UpdatedAtFunc(f func() time.Time) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m colorMods) UnsetUpdatedAt() ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m colorMods) RandomUpdatedAt(f *faker.Faker) ColorMod {
+	return ColorModFunc(func(_ context.Context, o *ColorTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

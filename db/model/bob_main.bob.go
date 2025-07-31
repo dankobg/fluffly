@@ -94,6 +94,8 @@ var ColumnNames = struct {
 		Lat:          "lat",
 		LNG:          "lng",
 		Note:         "note",
+		CreatedAt:    "created_at",
+		UpdatedAt:    "updated_at",
 	},
 	Adoptions: adoptionColumnNames{
 		ID:         "id",
@@ -102,15 +104,16 @@ var ColumnNames = struct {
 		AdoptedAt:  "adopted_at",
 		ReturnedAt: "returned_at",
 		Notes:      "notes",
+		CreatedAt:  "created_at",
+		UpdatedAt:  "updated_at",
 	},
 	Animals: animalColumnNames{
 		ID:              "id",
-		UserID:          "user_id",
-		OrganizationID:  "organization_id",
-		Name:            "name",
+		ContactID:       "contact_id",
 		TypeID:          "type_id",
 		BreedID:         "breed_id",
 		SpeciesID:       "species_id",
+		Name:            "name",
 		Gender:          "gender",
 		Hermaphrodite:   "hermaphrodite",
 		Age:             "age",
@@ -118,64 +121,80 @@ var ColumnNames = struct {
 		Size:            "size",
 		ImageURL:        "image_url",
 		Description:     "description",
-		Adopted:         "adopted",
+		Distance:        "distance",
 		Status:          "status",
 		StatusChangedAt: "status_changed_at",
-		Distance:        "distance",
 		AdoptedAt:       "adopted_at",
 		CreatedAt:       "created_at",
 		UpdatedAt:       "updated_at",
 	},
 	AnimalBreeds: animalBreedColumnNames{
-		AnimalID: "animal_id",
-		BreedID:  "breed_id",
-		Primary:  "primary",
+		AnimalID:  "animal_id",
+		BreedID:   "breed_id",
+		Primary:   "primary",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	AnimalPhotos: animalPhotoColumnNames{
-		ID:       "id",
-		AnimalID: "animal_id",
-		Small:    "small",
-		Medium:   "medium",
-		Large:    "large",
-		Full:     "full",
+		ID:        "id",
+		AnimalID:  "animal_id",
+		Small:     "small",
+		Medium:    "medium",
+		Large:     "large",
+		Full:      "full",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	AnimalSpecies: animalSpecyColumnNames{
 		ID:           "id",
 		AnimalTypeID: "animal_type_id",
 		Name:         "name",
+		CreatedAt:    "created_at",
+		UpdatedAt:    "updated_at",
 	},
 	AnimalTypes: animalTypeColumnNames{
-		ID:   "id",
-		Name: "name",
+		ID:        "id",
+		Name:      "name",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	AnimalVideos: animalVideoColumnNames{
-		ID:       "id",
-		AnimalID: "animal_id",
-		URL:      "url",
+		ID:        "id",
+		AnimalID:  "animal_id",
+		URL:       "url",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	Breeds: breedColumnNames{
 		ID:           "id",
 		AnimalTypeID: "animal_type_id",
 		Name:         "name",
+		CreatedAt:    "created_at",
+		UpdatedAt:    "updated_at",
 	},
 	Colors: colorColumnNames{
-		ID:       "id",
-		AnimalID: "animal_id",
-		Color:    "color",
-	},
-	Contacts: contactColumnNames{
 		ID:        "id",
 		AnimalID:  "animal_id",
-		AddressID: "address_id",
-		Phone:     "phone",
-		Email:     "email",
+		Color:     "color",
 		CreatedAt: "created_at",
 		UpdatedAt: "updated_at",
 	},
+	Contacts: contactColumnNames{
+		ID:             "id",
+		UserID:         "user_id",
+		OrganizationID: "organization_id",
+		AddressID:      "address_id",
+		Phone:          "phone",
+		Email:          "email",
+		CreatedAt:      "created_at",
+		UpdatedAt:      "updated_at",
+	},
 	Countries: countryColumnNames{
-		ID:      "id",
-		Name:    "name",
-		IsoCode: "iso_code",
+		ID:        "id",
+		Name:      "name",
+		IsoCode:   "iso_code",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	Microchips: microchipColumnNames{
 		ID:          "id",
@@ -184,19 +203,13 @@ var ColumnNames = struct {
 		Brand:       "brand",
 		Description: "description",
 		Location:    "location",
+		CreatedAt:   "created_at",
+		UpdatedAt:   "updated_at",
 	},
 	Organizations: organizationColumnNames{
 		ID:               "id",
+		ContactID:        "contact_id",
 		Name:             "name",
-		Email:            "email",
-		Phone:            "phone",
-		Address1:         "address1",
-		Address2:         "address2",
-		City:             "city",
-		State:            "state",
-		Postcode:         "postcode",
-		Country:          "country",
-		URL:              "url",
 		Website:          "website",
 		MissionStatement: "mission_statement",
 		AdoptionPolicy:   "adoption_policy",
@@ -207,6 +220,8 @@ var ColumnNames = struct {
 		Youtube:          "youtube",
 		Instagram:        "instagram",
 		Pinterest:        "pinterest",
+		CreatedAt:        "created_at",
+		UpdatedAt:        "updated_at",
 	},
 	OrganizationHours: organizationHourColumnNames{
 		ID:             "id",
@@ -218,6 +233,8 @@ var ColumnNames = struct {
 		Friday:         "friday",
 		Saturday:       "saturday",
 		Sunday:         "sunday",
+		CreatedAt:      "created_at",
+		UpdatedAt:      "updated_at",
 	},
 	OrganizationPhotos: organizationPhotoColumnNames{
 		ID:             "id",
@@ -226,11 +243,15 @@ var ColumnNames = struct {
 		Medium:         "medium",
 		Large:          "large",
 		Full:           "full",
+		CreatedAt:      "created_at",
+		UpdatedAt:      "updated_at",
 	},
 	Tags: tagColumnNames{
-		ID:       "id",
-		AnimalID: "animal_id",
-		Name:     "name",
+		ID:        "id",
+		AnimalID:  "animal_id",
+		Name:      "name",
+		CreatedAt: "created_at",
+		UpdatedAt: "updated_at",
 	},
 	Users: userColumnNames{
 		ID:        "id",
@@ -318,6 +339,7 @@ func Where[Q psql.Filterable]() struct {
 var Preload = getPreloaders()
 
 type preloaders struct {
+	Address           addressPreloader
 	Adoption          adoptionPreloader
 	Animal            animalPreloader
 	AnimalBreed       animalBreedPreloader
@@ -328,6 +350,7 @@ type preloaders struct {
 	Breed             breedPreloader
 	Color             colorPreloader
 	Contact           contactPreloader
+	Country           countryPreloader
 	Microchip         microchipPreloader
 	Organization      organizationPreloader
 	OrganizationHour  organizationHourPreloader
@@ -339,6 +362,7 @@ type preloaders struct {
 
 func getPreloaders() preloaders {
 	return preloaders{
+		Address:           buildAddressPreloader(),
 		Adoption:          buildAdoptionPreloader(),
 		Animal:            buildAnimalPreloader(),
 		AnimalBreed:       buildAnimalBreedPreloader(),
@@ -349,6 +373,7 @@ func getPreloaders() preloaders {
 		Breed:             buildBreedPreloader(),
 		Color:             buildColorPreloader(),
 		Contact:           buildContactPreloader(),
+		Country:           buildCountryPreloader(),
 		Microchip:         buildMicrochipPreloader(),
 		Organization:      buildOrganizationPreloader(),
 		OrganizationHour:  buildOrganizationHourPreloader(),
@@ -366,6 +391,7 @@ var (
 )
 
 type thenLoaders[Q orm.Loadable] struct {
+	Address           addressThenLoader[Q]
 	Adoption          adoptionThenLoader[Q]
 	Animal            animalThenLoader[Q]
 	AnimalBreed       animalBreedThenLoader[Q]
@@ -376,6 +402,7 @@ type thenLoaders[Q orm.Loadable] struct {
 	Breed             breedThenLoader[Q]
 	Color             colorThenLoader[Q]
 	Contact           contactThenLoader[Q]
+	Country           countryThenLoader[Q]
 	Microchip         microchipThenLoader[Q]
 	Organization      organizationThenLoader[Q]
 	OrganizationHour  organizationHourThenLoader[Q]
@@ -387,6 +414,7 @@ type thenLoaders[Q orm.Loadable] struct {
 
 func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
 	return thenLoaders[Q]{
+		Address:           buildAddressThenLoader[Q](),
 		Adoption:          buildAdoptionThenLoader[Q](),
 		Animal:            buildAnimalThenLoader[Q](),
 		AnimalBreed:       buildAnimalBreedThenLoader[Q](),
@@ -397,6 +425,7 @@ func getThenLoaders[Q orm.Loadable]() thenLoaders[Q] {
 		Breed:             buildBreedThenLoader[Q](),
 		Color:             buildColorThenLoader[Q](),
 		Contact:           buildContactThenLoader[Q](),
+		Country:           buildCountryThenLoader[Q](),
 		Microchip:         buildMicrochipThenLoader[Q](),
 		Organization:      buildOrganizationThenLoader[Q](),
 		OrganizationHour:  buildOrganizationHourThenLoader[Q](),
@@ -448,6 +477,7 @@ func (j joinSet[Q]) AliasedAs(alias string) joinSet[Q] {
 }
 
 type joins[Q dialect.Joinable] struct {
+	Addresses          joinSet[addressJoins[Q]]
 	Adoptions          joinSet[adoptionJoins[Q]]
 	Animals            joinSet[animalJoins[Q]]
 	AnimalBreeds       joinSet[animalBreedJoins[Q]]
@@ -458,6 +488,7 @@ type joins[Q dialect.Joinable] struct {
 	Breeds             joinSet[breedJoins[Q]]
 	Colors             joinSet[colorJoins[Q]]
 	Contacts           joinSet[contactJoins[Q]]
+	Countries          joinSet[countryJoins[Q]]
 	Microchips         joinSet[microchipJoins[Q]]
 	Organizations      joinSet[organizationJoins[Q]]
 	OrganizationHours  joinSet[organizationHourJoins[Q]]
@@ -477,6 +508,7 @@ func buildJoinSet[Q interface{ aliasedAs(string) Q }, C any, F func(C, string) Q
 
 func getJoins[Q dialect.Joinable]() joins[Q] {
 	return joins[Q]{
+		Addresses:          buildJoinSet[addressJoins[Q]](AddressColumns, buildAddressJoins),
 		Adoptions:          buildJoinSet[adoptionJoins[Q]](AdoptionColumns, buildAdoptionJoins),
 		Animals:            buildJoinSet[animalJoins[Q]](AnimalColumns, buildAnimalJoins),
 		AnimalBreeds:       buildJoinSet[animalBreedJoins[Q]](AnimalBreedColumns, buildAnimalBreedJoins),
@@ -487,6 +519,7 @@ func getJoins[Q dialect.Joinable]() joins[Q] {
 		Breeds:             buildJoinSet[breedJoins[Q]](BreedColumns, buildBreedJoins),
 		Colors:             buildJoinSet[colorJoins[Q]](ColorColumns, buildColorJoins),
 		Contacts:           buildJoinSet[contactJoins[Q]](ContactColumns, buildContactJoins),
+		Countries:          buildJoinSet[countryJoins[Q]](CountryColumns, buildCountryJoins),
 		Microchips:         buildJoinSet[microchipJoins[Q]](MicrochipColumns, buildMicrochipJoins),
 		Organizations:      buildJoinSet[organizationJoins[Q]](OrganizationColumns, buildOrganizationJoins),
 		OrganizationHours:  buildJoinSet[organizationHourJoins[Q]](OrganizationHourColumns, buildOrganizationHourJoins),

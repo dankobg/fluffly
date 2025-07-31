@@ -125,16 +125,19 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 				if verAddr.ID != nil {
 					id = ptr.Of(verAddr.ID.String())
 				}
-				verifiableAddresses = append(verifiableAddresses, client.VerifiableIdentityAddress{
-					Id:         id,
-					Status:     verAddr.Status,
-					Value:      verAddr.Value,
-					Verified:   verAddr.Verified,
-					VerifiedAt: verAddr.VerifiedAt,
-					Via:        string(verAddr.Via),
-					CreatedAt:  verAddr.CreatedAt,
-					UpdatedAt:  verAddr.UpdatedAt,
-				})
+				verifiableAddress := client.VerifiableIdentityAddress{
+					Id:        id,
+					Status:    verAddr.Status,
+					Value:     verAddr.Value,
+					Verified:  verAddr.Verified,
+					Via:       string(verAddr.Via),
+					CreatedAt: verAddr.CreatedAt,
+					UpdatedAt: verAddr.UpdatedAt,
+				}
+				if !verAddr.VerifiedAt.IsNull() {
+					verifiableAddress.VerifiedAt = ptr.Of(verAddr.VerifiedAt.MustGet().UTC())
+				}
+				verifiableAddresses = append(verifiableAddresses, verifiableAddress)
 			}
 		}
 		req = req.CreateIdentityBody(client.CreateIdentityBody{

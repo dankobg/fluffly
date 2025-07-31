@@ -6,3 +6,9 @@ select "user"."id" AS "id", "user"."created_at" AS "created_at", "user"."updated
 
 -- GetUserById
 select "user"."id" AS "id", "user"."created_at" AS "created_at", "user"."updated_at" AS "updated_at" from "user" where "id" = $1;
+
+-- ListOrganizations
+select "organization"."id" AS "id", "organization"."contact_id" AS "contact_id", "organization"."name" AS "name", "organization"."website" AS "website", "organization"."mission_statement" AS "mission_statement", "organization"."adoption_policy" AS "adoption_policy", "organization"."adoption_url" AS "adoption_url", "organization"."distance" AS "distance", "organization"."facebook" AS "facebook", "organization"."twitter" AS "twitter", "organization"."youtube" AS "youtube", "organization"."instagram" AS "instagram", "organization"."pinterest" AS "pinterest", "organization"."created_at" AS "created_at", "organization"."updated_at" AS "updated_at" from "organization";
+
+-- GetOrganizationById
+select "organization"."id" AS "id", "organization"."contact_id" AS "contact_id", "organization"."name" AS "name", "organization"."website" AS "website", "organization"."mission_statement" AS "mission_statement", "organization"."adoption_policy" AS "adoption_policy", "organization"."adoption_url" AS "adoption_url", "organization"."distance" AS "distance", "organization"."facebook" AS "facebook", "organization"."twitter" AS "twitter", "organization"."youtube" AS "youtube", "organization"."instagram" AS "instagram", "organization"."pinterest" AS "pinterest", "organization"."created_at" AS "created_at", "organization"."updated_at" AS "updated_at" from "organization" where "id" = $1;

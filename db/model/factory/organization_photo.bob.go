@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -41,6 +43,8 @@ type OrganizationPhotoTemplate struct {
 	Medium         func() null.Val[string]
 	Large          func() null.Val[string]
 	Full           func() null.Val[string]
+	CreatedAt      func() time.Time
+	UpdatedAt      func() time.Time
 
 	r organizationPhotoR
 	f *Factory
@@ -99,6 +103,14 @@ func (o OrganizationPhotoTemplate) BuildSetter() *models.OrganizationPhotoSetter
 		val := o.Full()
 		m.Full = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -138,6 +150,12 @@ func (o OrganizationPhotoTemplate) Build() *models.OrganizationPhoto {
 	}
 	if o.Full != nil {
 		m.Full = o.Full()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -284,6 +302,8 @@ func (m organizationPhotoMods) RandomizeAllColumns(f *faker.Faker) OrganizationP
 		OrganizationPhotoMods.RandomMedium(f),
 		OrganizationPhotoMods.RandomLarge(f),
 		OrganizationPhotoMods.RandomFull(f),
+		OrganizationPhotoMods.RandomCreatedAt(f),
+		OrganizationPhotoMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -579,6 +599,68 @@ func (m organizationPhotoMods) RandomFullNotNull(f *faker.Faker) OrganizationPho
 
 			val := random_string(f)
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m organizationPhotoMods) CreatedAt(val time.Time) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationPhotoMods) CreatedAtFunc(f func() time.Time) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationPhotoMods) UnsetCreatedAt() OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationPhotoMods) RandomCreatedAt(f *faker.Faker) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m organizationPhotoMods) UpdatedAt(val time.Time) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m organizationPhotoMods) UpdatedAtFunc(f func() time.Time) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m organizationPhotoMods) UnsetUpdatedAt() OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m organizationPhotoMods) RandomUpdatedAt(f *faker.Faker) OrganizationPhotoMod {
+	return OrganizationPhotoModFunc(func(_ context.Context, o *OrganizationPhotoTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

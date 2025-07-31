@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/aarondl/opt/null"
 	"github.com/aarondl/opt/omit"
@@ -31,6 +32,8 @@ type Microchip struct {
 	Brand       null.Val[string] `db:"brand" `
 	Description null.Val[string] `db:"description" `
 	Location    null.Val[string] `db:"location" `
+	CreatedAt   time.Time        `db:"created_at" `
+	UpdatedAt   time.Time        `db:"updated_at" `
 
 	R microchipR `db:"-" `
 }
@@ -57,6 +60,8 @@ type microchipColumnNames struct {
 	Brand       string
 	Description string
 	Location    string
+	CreatedAt   string
+	UpdatedAt   string
 }
 
 var MicrochipColumns = buildMicrochipColumns("microchip")
@@ -69,6 +74,8 @@ type microchipColumns struct {
 	Brand       psql.Expression
 	Description psql.Expression
 	Location    psql.Expression
+	CreatedAt   psql.Expression
+	UpdatedAt   psql.Expression
 }
 
 func (c microchipColumns) Alias() string {
@@ -88,6 +95,8 @@ func buildMicrochipColumns(alias string) microchipColumns {
 		Brand:       psql.Quote(alias, "brand"),
 		Description: psql.Quote(alias, "description"),
 		Location:    psql.Quote(alias, "location"),
+		CreatedAt:   psql.Quote(alias, "created_at"),
+		UpdatedAt:   psql.Quote(alias, "updated_at"),
 	}
 }
 
@@ -98,6 +107,8 @@ type microchipWhere[Q psql.Filterable] struct {
 	Brand       psql.WhereNullMod[Q, string]
 	Description psql.WhereNullMod[Q, string]
 	Location    psql.WhereNullMod[Q, string]
+	CreatedAt   psql.WhereMod[Q, time.Time]
+	UpdatedAt   psql.WhereMod[Q, time.Time]
 }
 
 func (microchipWhere[Q]) AliasedAs(alias string) microchipWhere[Q] {
@@ -112,6 +123,8 @@ func buildMicrochipWhere[Q psql.Filterable](cols microchipColumns) microchipWher
 		Brand:       psql.WhereNull[Q, string](cols.Brand),
 		Description: psql.WhereNull[Q, string](cols.Description),
 		Location:    psql.WhereNull[Q, string](cols.Location),
+		CreatedAt:   psql.Where[Q, time.Time](cols.CreatedAt),
+		UpdatedAt:   psql.Where[Q, time.Time](cols.UpdatedAt),
 	}
 }
 
@@ -146,10 +159,12 @@ type MicrochipSetter struct {
 	Brand       omitnull.Val[string] `db:"brand" `
 	Description omitnull.Val[string] `db:"description" `
 	Location    omitnull.Val[string] `db:"location" `
+	CreatedAt   omit.Val[time.Time]  `db:"created_at" `
+	UpdatedAt   omit.Val[time.Time]  `db:"updated_at" `
 }
 
 func (s MicrochipSetter) SetColumns() []string {
-	vals := make([]string, 0, 5)
+	vals := make([]string, 0, 7)
 	if !s.AnimalID.IsUnset() {
 		vals = append(vals, "animal_id")
 	}
@@ -164,6 +179,12 @@ func (s MicrochipSetter) SetColumns() []string {
 	}
 	if !s.Location.IsUnset() {
 		vals = append(vals, "location")
+	}
+	if s.CreatedAt.IsValue() {
+		vals = append(vals, "created_at")
+	}
+	if s.UpdatedAt.IsValue() {
+		vals = append(vals, "updated_at")
 	}
 	return vals
 }
@@ -184,6 +205,12 @@ func (s MicrochipSetter) Overwrite(t *Microchip) {
 	if !s.Location.IsUnset() {
 		t.Location = s.Location.MustGetNull()
 	}
+	if s.CreatedAt.IsValue() {
+		t.CreatedAt = s.CreatedAt.MustGet()
+	}
+	if s.UpdatedAt.IsValue() {
+		t.UpdatedAt = s.UpdatedAt.MustGet()
+	}
 }
 
 func (s *MicrochipSetter) Apply(q *dialect.InsertQuery) {
@@ -192,7 +219,7 @@ func (s *MicrochipSetter) Apply(q *dialect.InsertQuery) {
 	})
 
 	q.AppendValues(bob.ExpressionFunc(func(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
-		vals := make([]bob.Expression, 5)
+		vals := make([]bob.Expression, 7)
 		if !s.AnimalID.IsUnset() {
 			vals[0] = psql.Arg(s.AnimalID.MustGetNull())
 		} else {
@@ -223,6 +250,18 @@ func (s *MicrochipSetter) Apply(q *dialect.InsertQuery) {
 			vals[4] = psql.Raw("DEFAULT")
 		}
 
+		if s.CreatedAt.IsValue() {
+			vals[5] = psql.Arg(s.CreatedAt.MustGet())
+		} else {
+			vals[5] = psql.Raw("DEFAULT")
+		}
+
+		if s.UpdatedAt.IsValue() {
+			vals[6] = psql.Arg(s.UpdatedAt.MustGet())
+		} else {
+			vals[6] = psql.Raw("DEFAULT")
+		}
+
 		return bob.ExpressSlice(ctx, w, d, start, vals, "", ", ", "")
 	}))
 }
@@ -232,7 +271,7 @@ func (s MicrochipSetter) UpdateMod() bob.Mod[*dialect.UpdateQuery] {
 }
 
 func (s MicrochipSetter) Expressions(prefix ...string) []bob.Expression {
-	exprs := make([]bob.Expression, 0, 5)
+	exprs := make([]bob.Expression, 0, 7)
 
 	if !s.AnimalID.IsUnset() {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
@@ -266,6 +305,20 @@ func (s MicrochipSetter) Expressions(prefix ...string) []bob.Expression {
 		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
 			psql.Quote(append(prefix, "location")...),
 			psql.Arg(s.Location),
+		}})
+	}
+
+	if s.CreatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "created_at")...),
+			psql.Arg(s.CreatedAt),
+		}})
+	}
+
+	if s.UpdatedAt.IsValue() {
+		exprs = append(exprs, expr.Join{Sep: " = ", Exprs: []bob.Expression{
+			psql.Quote(append(prefix, "updated_at")...),
+			psql.Arg(s.UpdatedAt),
 		}})
 	}
 

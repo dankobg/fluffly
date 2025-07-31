@@ -12,7 +12,6 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
-	"github.com/google/uuid"
 	"github.com/jaswdr/faker/v2"
 	"github.com/stephenafamo/bob"
 )
@@ -39,12 +38,11 @@ func (mods AnimalModSlice) Apply(ctx context.Context, n *AnimalTemplate) {
 // all columns are optional and should be set by mods
 type AnimalTemplate struct {
 	ID              func() int64
-	UserID          func() null.Val[uuid.UUID]
-	OrganizationID  func() null.Val[int64]
-	Name            func() string
+	ContactID       func() int64
 	TypeID          func() int64
 	BreedID         func() int64
 	SpeciesID       func() int64
+	Name            func() string
 	Gender          func() null.Val[Gender]
 	Hermaphrodite   func() bool
 	Age             func() string
@@ -52,10 +50,9 @@ type AnimalTemplate struct {
 	Size            func() string
 	ImageURL        func() string
 	Description     func() null.Val[string]
-	Adopted         func() bool
+	Distance        func() null.Val[string]
 	Status          func() null.Val[string]
 	StatusChangedAt func() null.Val[time.Time]
-	Distance        func() null.Val[string]
 	AdoptedAt       func() null.Val[time.Time]
 	CreatedAt       func() time.Time
 	UpdatedAt       func() time.Time
@@ -68,13 +65,11 @@ type AnimalTemplate struct {
 
 type animalR struct {
 	Adoptions       []*animalRAdoptionsR
-	Organization    *animalROrganizationR
-	User            *animalRUserR
+	Contact         *animalRContactR
 	AnimalBreeds    []*animalRAnimalBreedsR
 	AnimalPhotos    []*animalRAnimalPhotosR
 	AnimalVideos    []*animalRAnimalVideosR
 	Colors          []*animalRColorsR
-	Contacts        []*animalRContactsR
 	Microchip       *animalRMicrochipR
 	Tags            []*animalRTagsR
 	UserAnimalLikes []*animalRUserAnimalLikesR
@@ -84,11 +79,8 @@ type animalRAdoptionsR struct {
 	number int
 	o      *AdoptionTemplate
 }
-type animalROrganizationR struct {
-	o *OrganizationTemplate
-}
-type animalRUserR struct {
-	o *UserTemplate
+type animalRContactR struct {
+	o *ContactTemplate
 }
 type animalRAnimalBreedsR struct {
 	number int
@@ -105,10 +97,6 @@ type animalRAnimalVideosR struct {
 type animalRColorsR struct {
 	number int
 	o      *ColorTemplate
-}
-type animalRContactsR struct {
-	number int
-	o      *ContactTemplate
 }
 type animalRMicrochipR struct {
 	o *MicrochipTemplate
@@ -145,18 +133,11 @@ func (t AnimalTemplate) setModelRels(o *models.Animal) {
 		o.R.Adoptions = rel
 	}
 
-	if t.r.Organization != nil {
-		rel := t.r.Organization.o.Build()
+	if t.r.Contact != nil {
+		rel := t.r.Contact.o.Build()
 		rel.R.Animals = append(rel.R.Animals, o)
-		o.OrganizationID = null.From(rel.ID) // h2
-		o.R.Organization = rel
-	}
-
-	if t.r.User != nil {
-		rel := t.r.User.o.Build()
-		rel.R.Animals = append(rel.R.Animals, o)
-		o.UserID = null.From(rel.ID) // h2
-		o.R.User = rel
+		o.ContactID = rel.ID // h2
+		o.R.Contact = rel
 	}
 
 	if t.r.AnimalBreeds != nil {
@@ -211,19 +192,6 @@ func (t AnimalTemplate) setModelRels(o *models.Animal) {
 		o.R.Colors = rel
 	}
 
-	if t.r.Contacts != nil {
-		rel := models.ContactSlice{}
-		for _, r := range t.r.Contacts {
-			related := r.o.BuildMany(r.number)
-			for _, rel := range related {
-				rel.AnimalID = null.From(o.ID) // h2
-				rel.R.Animal = o
-			}
-			rel = append(rel, related...)
-		}
-		o.R.Contacts = rel
-	}
-
 	if t.r.Microchip != nil {
 		rel := t.r.Microchip.o.Build()
 		rel.R.Animal = o
@@ -263,17 +231,9 @@ func (t AnimalTemplate) setModelRels(o *models.Animal) {
 func (o AnimalTemplate) BuildSetter() *models.AnimalSetter {
 	m := &models.AnimalSetter{}
 
-	if o.UserID != nil {
-		val := o.UserID()
-		m.UserID = omitnull.FromNull(val)
-	}
-	if o.OrganizationID != nil {
-		val := o.OrganizationID()
-		m.OrganizationID = omitnull.FromNull(val)
-	}
-	if o.Name != nil {
-		val := o.Name()
-		m.Name = omit.From(val)
+	if o.ContactID != nil {
+		val := o.ContactID()
+		m.ContactID = omit.From(val)
 	}
 	if o.TypeID != nil {
 		val := o.TypeID()
@@ -286,6 +246,10 @@ func (o AnimalTemplate) BuildSetter() *models.AnimalSetter {
 	if o.SpeciesID != nil {
 		val := o.SpeciesID()
 		m.SpeciesID = omit.From(val)
+	}
+	if o.Name != nil {
+		val := o.Name()
+		m.Name = omit.From(val)
 	}
 	if o.Gender != nil {
 		val := o.Gender()
@@ -315,9 +279,9 @@ func (o AnimalTemplate) BuildSetter() *models.AnimalSetter {
 		val := o.Description()
 		m.Description = omitnull.FromNull(val)
 	}
-	if o.Adopted != nil {
-		val := o.Adopted()
-		m.Adopted = omit.From(val)
+	if o.Distance != nil {
+		val := o.Distance()
+		m.Distance = omitnull.FromNull(val)
 	}
 	if o.Status != nil {
 		val := o.Status()
@@ -326,10 +290,6 @@ func (o AnimalTemplate) BuildSetter() *models.AnimalSetter {
 	if o.StatusChangedAt != nil {
 		val := o.StatusChangedAt()
 		m.StatusChangedAt = omitnull.FromNull(val)
-	}
-	if o.Distance != nil {
-		val := o.Distance()
-		m.Distance = omitnull.FromNull(val)
 	}
 	if o.AdoptedAt != nil {
 		val := o.AdoptedAt()
@@ -368,14 +328,8 @@ func (o AnimalTemplate) Build() *models.Animal {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
-	if o.UserID != nil {
-		m.UserID = o.UserID()
-	}
-	if o.OrganizationID != nil {
-		m.OrganizationID = o.OrganizationID()
-	}
-	if o.Name != nil {
-		m.Name = o.Name()
+	if o.ContactID != nil {
+		m.ContactID = o.ContactID()
 	}
 	if o.TypeID != nil {
 		m.TypeID = o.TypeID()
@@ -385,6 +339,9 @@ func (o AnimalTemplate) Build() *models.Animal {
 	}
 	if o.SpeciesID != nil {
 		m.SpeciesID = o.SpeciesID()
+	}
+	if o.Name != nil {
+		m.Name = o.Name()
 	}
 	if o.Gender != nil {
 		m.Gender = o.Gender()
@@ -407,17 +364,14 @@ func (o AnimalTemplate) Build() *models.Animal {
 	if o.Description != nil {
 		m.Description = o.Description()
 	}
-	if o.Adopted != nil {
-		m.Adopted = o.Adopted()
+	if o.Distance != nil {
+		m.Distance = o.Distance()
 	}
 	if o.Status != nil {
 		m.Status = o.Status()
 	}
 	if o.StatusChangedAt != nil {
 		m.StatusChangedAt = o.StatusChangedAt()
-	}
-	if o.Distance != nil {
-		m.Distance = o.Distance()
 	}
 	if o.AdoptedAt != nil {
 		m.AdoptedAt = o.AdoptedAt()
@@ -448,9 +402,9 @@ func (o AnimalTemplate) BuildMany(number int) models.AnimalSlice {
 }
 
 func ensureCreatableAnimal(m *models.AnimalSetter) {
-	if !(m.Name.IsValue()) {
-		val := random_string(nil)
-		m.Name = omit.From(val)
+	if !(m.ContactID.IsValue()) {
+		val := random_int64(nil)
+		m.ContactID = omit.From(val)
 	}
 	if !(m.TypeID.IsValue()) {
 		val := random_int64(nil)
@@ -464,21 +418,21 @@ func ensureCreatableAnimal(m *models.AnimalSetter) {
 		val := random_int64(nil)
 		m.SpeciesID = omit.From(val)
 	}
+	if !(m.Name.IsValue()) {
+		val := random_string(nil, "255")
+		m.Name = omit.From(val)
+	}
 	if !(m.Age.IsValue()) {
-		val := random_string(nil)
+		val := random_string(nil, "20")
 		m.Age = omit.From(val)
 	}
 	if !(m.Size.IsValue()) {
-		val := random_string(nil)
+		val := random_string(nil, "30")
 		m.Size = omit.From(val)
 	}
 	if !(m.ImageURL.IsValue()) {
 		val := random_string(nil)
 		m.ImageURL = omit.From(val)
-	}
-	if !(m.Adopted.IsValue()) {
-		val := random_bool(nil)
-		m.Adopted = omit.From(val)
 	}
 }
 
@@ -508,44 +462,6 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 		}
 	}
 
-	isOrganizationDone, _ := animalRelOrganizationCtx.Value(ctx)
-	if !isOrganizationDone && o.r.Organization != nil {
-		ctx = animalRelOrganizationCtx.WithValue(ctx, true)
-		if o.r.Organization.o.alreadyPersisted {
-			m.R.Organization = o.r.Organization.o.Build()
-		} else {
-			var rel1 *models.Organization
-			rel1, err = o.r.Organization.o.Create(ctx, exec)
-			if err != nil {
-				return err
-			}
-			err = m.AttachOrganization(ctx, exec, rel1)
-			if err != nil {
-				return err
-			}
-		}
-
-	}
-
-	isUserDone, _ := animalRelUserCtx.Value(ctx)
-	if !isUserDone && o.r.User != nil {
-		ctx = animalRelUserCtx.WithValue(ctx, true)
-		if o.r.User.o.alreadyPersisted {
-			m.R.User = o.r.User.o.Build()
-		} else {
-			var rel2 *models.User
-			rel2, err = o.r.User.o.Create(ctx, exec)
-			if err != nil {
-				return err
-			}
-			err = m.AttachUser(ctx, exec, rel2)
-			if err != nil {
-				return err
-			}
-		}
-
-	}
-
 	isAnimalBreedsDone, _ := animalRelAnimalBreedsCtx.Value(ctx)
 	if !isAnimalBreedsDone && o.r.AnimalBreeds != nil {
 		ctx = animalRelAnimalBreedsCtx.WithValue(ctx, true)
@@ -553,12 +469,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.AnimalBreeds = append(m.R.AnimalBreeds, r.o.Build())
 			} else {
-				rel3, err := r.o.CreateMany(ctx, exec, r.number)
+				rel2, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachAnimalBreeds(ctx, exec, rel3...)
+				err = m.AttachAnimalBreeds(ctx, exec, rel2...)
 				if err != nil {
 					return err
 				}
@@ -573,12 +489,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.AnimalPhotos = append(m.R.AnimalPhotos, r.o.Build())
 			} else {
-				rel4, err := r.o.CreateMany(ctx, exec, r.number)
+				rel3, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachAnimalPhotos(ctx, exec, rel4...)
+				err = m.AttachAnimalPhotos(ctx, exec, rel3...)
 				if err != nil {
 					return err
 				}
@@ -593,12 +509,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.AnimalVideos = append(m.R.AnimalVideos, r.o.Build())
 			} else {
-				rel5, err := r.o.CreateMany(ctx, exec, r.number)
+				rel4, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachAnimalVideos(ctx, exec, rel5...)
+				err = m.AttachAnimalVideos(ctx, exec, rel4...)
 				if err != nil {
 					return err
 				}
@@ -613,32 +529,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.Colors = append(m.R.Colors, r.o.Build())
 			} else {
-				rel6, err := r.o.CreateMany(ctx, exec, r.number)
+				rel5, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachColors(ctx, exec, rel6...)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	isContactsDone, _ := animalRelContactsCtx.Value(ctx)
-	if !isContactsDone && o.r.Contacts != nil {
-		ctx = animalRelContactsCtx.WithValue(ctx, true)
-		for _, r := range o.r.Contacts {
-			if r.o.alreadyPersisted {
-				m.R.Contacts = append(m.R.Contacts, r.o.Build())
-			} else {
-				rel7, err := r.o.CreateMany(ctx, exec, r.number)
-				if err != nil {
-					return err
-				}
-
-				err = m.AttachContacts(ctx, exec, rel7...)
+				err = m.AttachColors(ctx, exec, rel5...)
 				if err != nil {
 					return err
 				}
@@ -652,12 +548,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 		if o.r.Microchip.o.alreadyPersisted {
 			m.R.Microchip = o.r.Microchip.o.Build()
 		} else {
-			var rel8 *models.Microchip
-			rel8, err = o.r.Microchip.o.Create(ctx, exec)
+			var rel6 *models.Microchip
+			rel6, err = o.r.Microchip.o.Create(ctx, exec)
 			if err != nil {
 				return err
 			}
-			err = m.AttachMicrochip(ctx, exec, rel8)
+			err = m.AttachMicrochip(ctx, exec, rel6)
 			if err != nil {
 				return err
 			}
@@ -672,12 +568,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.Tags = append(m.R.Tags, r.o.Build())
 			} else {
-				rel9, err := r.o.CreateMany(ctx, exec, r.number)
+				rel7, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachTags(ctx, exec, rel9...)
+				err = m.AttachTags(ctx, exec, rel7...)
 				if err != nil {
 					return err
 				}
@@ -692,12 +588,12 @@ func (o *AnimalTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m
 			if r.o.alreadyPersisted {
 				m.R.UserAnimalLikes = append(m.R.UserAnimalLikes, r.o.Build())
 			} else {
-				rel10, err := r.o.CreateMany(ctx, exec, r.number)
+				rel8, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachUserAnimalLikes(ctx, exec, rel10...)
+				err = m.AttachUserAnimalLikes(ctx, exec, rel8...)
 				if err != nil {
 					return err
 				}
@@ -715,10 +611,29 @@ func (o *AnimalTemplate) Create(ctx context.Context, exec bob.Executor) (*models
 	opt := o.BuildSetter()
 	ensureCreatableAnimal(opt)
 
+	if o.r.Contact == nil {
+		AnimalMods.WithNewContact().Apply(ctx, o)
+	}
+
+	var rel1 *models.Contact
+
+	if o.r.Contact.o.alreadyPersisted {
+		rel1 = o.r.Contact.o.Build()
+	} else {
+		rel1, err = o.r.Contact.o.Create(ctx, exec)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	opt.ContactID = omit.From(rel1.ID)
+
 	m, err := models.Animals.Insert(opt).One(ctx, exec)
 	if err != nil {
 		return nil, err
 	}
+
+	m.R.Contact = rel1
 
 	if err := o.insertOptRels(ctx, exec, m); err != nil {
 		return nil, err
@@ -798,12 +713,11 @@ type animalMods struct{}
 func (m animalMods) RandomizeAllColumns(f *faker.Faker) AnimalMod {
 	return AnimalModSlice{
 		AnimalMods.RandomID(f),
-		AnimalMods.RandomUserID(f),
-		AnimalMods.RandomOrganizationID(f),
-		AnimalMods.RandomName(f),
+		AnimalMods.RandomContactID(f),
 		AnimalMods.RandomTypeID(f),
 		AnimalMods.RandomBreedID(f),
 		AnimalMods.RandomSpeciesID(f),
+		AnimalMods.RandomName(f),
 		AnimalMods.RandomGender(f),
 		AnimalMods.RandomHermaphrodite(f),
 		AnimalMods.RandomAge(f),
@@ -811,10 +725,9 @@ func (m animalMods) RandomizeAllColumns(f *faker.Faker) AnimalMod {
 		AnimalMods.RandomSize(f),
 		AnimalMods.RandomImageURL(f),
 		AnimalMods.RandomDescription(f),
-		AnimalMods.RandomAdopted(f),
+		AnimalMods.RandomDistance(f),
 		AnimalMods.RandomStatus(f),
 		AnimalMods.RandomStatusChangedAt(f),
-		AnimalMods.RandomDistance(f),
 		AnimalMods.RandomAdoptedAt(f),
 		AnimalMods.RandomCreatedAt(f),
 		AnimalMods.RandomUpdatedAt(f),
@@ -853,138 +766,32 @@ func (m animalMods) RandomID(f *faker.Faker) AnimalMod {
 }
 
 // Set the model columns to this value
-func (m animalMods) UserID(val null.Val[uuid.UUID]) AnimalMod {
+func (m animalMods) ContactID(val int64) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.UserID = func() null.Val[uuid.UUID] { return val }
+		o.ContactID = func() int64 { return val }
 	})
 }
 
 // Set the Column from the function
-func (m animalMods) UserIDFunc(f func() null.Val[uuid.UUID]) AnimalMod {
+func (m animalMods) ContactIDFunc(f func() int64) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.UserID = f
+		o.ContactID = f
 	})
 }
 
 // Clear any values for the column
-func (m animalMods) UnsetUserID() AnimalMod {
+func (m animalMods) UnsetContactID() AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.UserID = nil
+		o.ContactID = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m animalMods) RandomUserID(f *faker.Faker) AnimalMod {
+func (m animalMods) RandomContactID(f *faker.Faker) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.UserID = func() null.Val[uuid.UUID] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_uuid_UUID(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m animalMods) RandomUserIDNotNull(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.UserID = func() null.Val[uuid.UUID] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_uuid_UUID(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m animalMods) OrganizationID(val null.Val[int64]) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.OrganizationID = func() null.Val[int64] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m animalMods) OrganizationIDFunc(f func() null.Val[int64]) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.OrganizationID = f
-	})
-}
-
-// Clear any values for the column
-func (m animalMods) UnsetOrganizationID() AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.OrganizationID = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m animalMods) RandomOrganizationID(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.OrganizationID = func() null.Val[int64] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_int64(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m animalMods) RandomOrganizationIDNotNull(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.OrganizationID = func() null.Val[int64] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_int64(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m animalMods) Name(val string) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Name = func() string { return val }
-	})
-}
-
-// Set the Column from the function
-func (m animalMods) NameFunc(f func() string) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Name = f
-	})
-}
-
-// Clear any values for the column
-func (m animalMods) UnsetName() AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Name = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-func (m animalMods) RandomName(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Name = func() string {
-			return random_string(f)
+		o.ContactID = func() int64 {
+			return random_int64(f)
 		}
 	})
 }
@@ -1078,6 +885,37 @@ func (m animalMods) RandomSpeciesID(f *faker.Faker) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
 		o.SpeciesID = func() int64 {
 			return random_int64(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m animalMods) Name(val string) AnimalMod {
+	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
+		o.Name = func() string { return val }
+	})
+}
+
+// Set the Column from the function
+func (m animalMods) NameFunc(f func() string) AnimalMod {
+	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
+		o.Name = f
+	})
+}
+
+// Clear any values for the column
+func (m animalMods) UnsetName() AnimalMod {
+	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
+		o.Name = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m animalMods) RandomName(f *faker.Faker) AnimalMod {
+	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
+		o.Name = func() string {
+			return random_string(f, "255")
 		}
 	})
 }
@@ -1192,7 +1030,7 @@ func (m animalMods) UnsetAge() AnimalMod {
 func (m animalMods) RandomAge(f *faker.Faker) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
 		o.Age = func() string {
-			return random_string(f)
+			return random_string(f, "20")
 		}
 	})
 }
@@ -1228,7 +1066,7 @@ func (m animalMods) RandomCoatLength(f *faker.Faker) AnimalMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -1244,7 +1082,7 @@ func (m animalMods) RandomCoatLengthNotNull(f *faker.Faker) AnimalMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f)
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -1276,7 +1114,7 @@ func (m animalMods) UnsetSize() AnimalMod {
 func (m animalMods) RandomSize(f *faker.Faker) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
 		o.Size = func() string {
-			return random_string(f)
+			return random_string(f, "30")
 		}
 	})
 }
@@ -1366,32 +1204,54 @@ func (m animalMods) RandomDescriptionNotNull(f *faker.Faker) AnimalMod {
 }
 
 // Set the model columns to this value
-func (m animalMods) Adopted(val bool) AnimalMod {
+func (m animalMods) Distance(val null.Val[string]) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Adopted = func() bool { return val }
+		o.Distance = func() null.Val[string] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m animalMods) AdoptedFunc(f func() bool) AnimalMod {
+func (m animalMods) DistanceFunc(f func() null.Val[string]) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Adopted = f
+		o.Distance = f
 	})
 }
 
 // Clear any values for the column
-func (m animalMods) UnsetAdopted() AnimalMod {
+func (m animalMods) UnsetDistance() AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Adopted = nil
+		o.Distance = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
-func (m animalMods) RandomAdopted(f *faker.Faker) AnimalMod {
+// The generated value is sometimes null
+func (m animalMods) RandomDistance(f *faker.Faker) AnimalMod {
 	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Adopted = func() bool {
-			return random_bool(f)
+		o.Distance = func() null.Val[string] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_string(f)
+			return null.From(val)
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m animalMods) RandomDistanceNotNull(f *faker.Faker) AnimalMod {
+	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
+		o.Distance = func() null.Val[string] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_string(f)
+			return null.From(val)
 		}
 	})
 }
@@ -1427,7 +1287,7 @@ func (m animalMods) RandomStatus(f *faker.Faker) AnimalMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "50")
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -1443,7 +1303,7 @@ func (m animalMods) RandomStatusNotNull(f *faker.Faker) AnimalMod {
 				f = &defaultFaker
 			}
 
-			val := random_string(f, "50")
+			val := random_string(f, "30")
 			return null.From(val)
 		}
 	})
@@ -1497,59 +1357,6 @@ func (m animalMods) RandomStatusChangedAtNotNull(f *faker.Faker) AnimalMod {
 			}
 
 			val := random_time_Time(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Set the model columns to this value
-func (m animalMods) Distance(val null.Val[string]) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Distance = func() null.Val[string] { return val }
-	})
-}
-
-// Set the Column from the function
-func (m animalMods) DistanceFunc(f func() null.Val[string]) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Distance = f
-	})
-}
-
-// Clear any values for the column
-func (m animalMods) UnsetDistance() AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Distance = nil
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is sometimes null
-func (m animalMods) RandomDistance(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Distance = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f)
-			return null.From(val)
-		}
-	})
-}
-
-// Generates a random value for the column using the given faker
-// if faker is nil, a default faker is used
-// The generated value is never null
-func (m animalMods) RandomDistanceNotNull(f *faker.Faker) AnimalMod {
-	return AnimalModFunc(func(_ context.Context, o *AnimalTemplate) {
-		o.Distance = func() null.Val[string] {
-			if f == nil {
-				f = &defaultFaker
-			}
-
-			val := random_string(f)
 			return null.From(val)
 		}
 	})
@@ -1678,13 +1485,8 @@ func (m animalMods) WithParentsCascading() AnimalMod {
 		ctx = animalWithParentsCascadingCtx.WithValue(ctx, true)
 		{
 
-			related := o.f.NewOrganizationWithContext(ctx, OrganizationMods.WithParentsCascading())
-			m.WithOrganization(related).Apply(ctx, o)
-		}
-		{
-
-			related := o.f.NewUserWithContext(ctx, UserMods.WithParentsCascading())
-			m.WithUser(related).Apply(ctx, o)
+			related := o.f.NewContactWithContext(ctx, ContactMods.WithParentsCascading())
+			m.WithContact(related).Apply(ctx, o)
 		}
 		{
 
@@ -1694,63 +1496,33 @@ func (m animalMods) WithParentsCascading() AnimalMod {
 	})
 }
 
-func (m animalMods) WithOrganization(rel *OrganizationTemplate) AnimalMod {
+func (m animalMods) WithContact(rel *ContactTemplate) AnimalMod {
 	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Organization = &animalROrganizationR{
+		o.r.Contact = &animalRContactR{
 			o: rel,
 		}
 	})
 }
 
-func (m animalMods) WithNewOrganization(mods ...OrganizationMod) AnimalMod {
+func (m animalMods) WithNewContact(mods ...ContactMod) AnimalMod {
 	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		related := o.f.NewOrganizationWithContext(ctx, mods...)
+		related := o.f.NewContactWithContext(ctx, mods...)
 
-		m.WithOrganization(related).Apply(ctx, o)
+		m.WithContact(related).Apply(ctx, o)
 	})
 }
 
-func (m animalMods) WithExistingOrganization(em *models.Organization) AnimalMod {
+func (m animalMods) WithExistingContact(em *models.Contact) AnimalMod {
 	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Organization = &animalROrganizationR{
-			o: o.f.FromExistingOrganization(em),
+		o.r.Contact = &animalRContactR{
+			o: o.f.FromExistingContact(em),
 		}
 	})
 }
 
-func (m animalMods) WithoutOrganization() AnimalMod {
+func (m animalMods) WithoutContact() AnimalMod {
 	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Organization = nil
-	})
-}
-
-func (m animalMods) WithUser(rel *UserTemplate) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.User = &animalRUserR{
-			o: rel,
-		}
-	})
-}
-
-func (m animalMods) WithNewUser(mods ...UserMod) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		related := o.f.NewUserWithContext(ctx, mods...)
-
-		m.WithUser(related).Apply(ctx, o)
-	})
-}
-
-func (m animalMods) WithExistingUser(em *models.User) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.User = &animalRUserR{
-			o: o.f.FromExistingUser(em),
-		}
-	})
-}
-
-func (m animalMods) WithoutUser() AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.User = nil
+		o.r.Contact = nil
 	})
 }
 
@@ -2021,54 +1793,6 @@ func (m animalMods) AddExistingColors(existingModels ...*models.Color) AnimalMod
 func (m animalMods) WithoutColors() AnimalMod {
 	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
 		o.r.Colors = nil
-	})
-}
-
-func (m animalMods) WithContacts(number int, related *ContactTemplate) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Contacts = []*animalRContactsR{{
-			number: number,
-			o:      related,
-		}}
-	})
-}
-
-func (m animalMods) WithNewContacts(number int, mods ...ContactMod) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		related := o.f.NewContactWithContext(ctx, mods...)
-		m.WithContacts(number, related).Apply(ctx, o)
-	})
-}
-
-func (m animalMods) AddContacts(number int, related *ContactTemplate) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Contacts = append(o.r.Contacts, &animalRContactsR{
-			number: number,
-			o:      related,
-		})
-	})
-}
-
-func (m animalMods) AddNewContacts(number int, mods ...ContactMod) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		related := o.f.NewContactWithContext(ctx, mods...)
-		m.AddContacts(number, related).Apply(ctx, o)
-	})
-}
-
-func (m animalMods) AddExistingContacts(existingModels ...*models.Contact) AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		for _, em := range existingModels {
-			o.r.Contacts = append(o.r.Contacts, &animalRContactsR{
-				o: o.f.FromExistingContact(em),
-			})
-		}
-	})
-}
-
-func (m animalMods) WithoutContacts() AnimalMod {
-	return AnimalModFunc(func(ctx context.Context, o *AnimalTemplate) {
-		o.r.Contacts = nil
 	})
 }
 

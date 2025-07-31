@@ -10,6 +10,8 @@ type contextKey string
 var (
 	// Relationship Contexts for address
 	addressWithParentsCascadingCtx = newContextual[bool]("addressWithParentsCascading")
+	addressRelCountryCtx           = newContextual[bool]("address.country.address.fk_address_country_id_country")
+	addressRelContactsCtx          = newContextual[bool]("address.contact.contact.fk_contact_address_id_animal")
 
 	// Relationship Contexts for adoption
 	adoptionWithParentsCascadingCtx = newContextual[bool]("adoptionWithParentsCascading")
@@ -19,13 +21,11 @@ var (
 	// Relationship Contexts for animal
 	animalWithParentsCascadingCtx = newContextual[bool]("animalWithParentsCascading")
 	animalRelAdoptionsCtx         = newContextual[bool]("adoption.animal.adoption.fk_adoption_animal_id_animal")
-	animalRelOrganizationCtx      = newContextual[bool]("animal.organization.animal.fk_animal_organization_id_user")
-	animalRelUserCtx              = newContextual[bool]("animal.user.animal.fk_animal_user_id_user")
+	animalRelContactCtx           = newContextual[bool]("animal.contact.animal.fk_animal_contact_id_contact")
 	animalRelAnimalBreedsCtx      = newContextual[bool]("animal.animal_breed.animal_breed.fk_animal_breed_animal_id_animal")
 	animalRelAnimalPhotosCtx      = newContextual[bool]("animal.animal_photo.animal_photo.fk_animal_photo_animal_id_animal")
 	animalRelAnimalVideosCtx      = newContextual[bool]("animal.animal_video.animal_video.fk_animal_video_animal_id_animal")
 	animalRelColorsCtx            = newContextual[bool]("animal.color.color.fk_color_animal_id_animal")
-	animalRelContactsCtx          = newContextual[bool]("animal.contact.contact.fk_contact_animal_id_animal")
 	animalRelMicrochipCtx         = newContextual[bool]("animal.microchip.microchip.fk_microchip_animal")
 	animalRelTagsCtx              = newContextual[bool]("animal.tag.tag.fk_tag_animal_id_animal")
 	animalRelUserAnimalLikesCtx   = newContextual[bool]("animal.user_animal_like.user_animal_like.fk_user_animal_like_animal_id_user")
@@ -63,10 +63,13 @@ var (
 
 	// Relationship Contexts for contact
 	contactWithParentsCascadingCtx = newContextual[bool]("contactWithParentsCascading")
-	contactRelAnimalCtx            = newContextual[bool]("animal.contact.contact.fk_contact_animal_id_animal")
+	contactRelAnimalsCtx           = newContextual[bool]("animal.contact.animal.fk_animal_contact_id_contact")
+	contactRelAddressCtx           = newContextual[bool]("address.contact.contact.fk_contact_address_id_animal")
+	contactRelOrganizationsCtx     = newContextual[bool]("contact.organization.organization.fk_organization_contact_id_contact")
 
 	// Relationship Contexts for country
 	countryWithParentsCascadingCtx = newContextual[bool]("countryWithParentsCascading")
+	countryRelAddressesCtx         = newContextual[bool]("address.country.address.fk_address_country_id_country")
 
 	// Relationship Contexts for microchip
 	microchipWithParentsCascadingCtx = newContextual[bool]("microchipWithParentsCascading")
@@ -74,7 +77,7 @@ var (
 
 	// Relationship Contexts for organization
 	organizationWithParentsCascadingCtx  = newContextual[bool]("organizationWithParentsCascading")
-	organizationRelAnimalsCtx            = newContextual[bool]("animal.organization.animal.fk_animal_organization_id_user")
+	organizationRelContactCtx            = newContextual[bool]("contact.organization.organization.fk_organization_contact_id_contact")
 	organizationRelOrganizationHoursCtx  = newContextual[bool]("organization.organization_hour.organization_hour.fk_organization_hour_organization_id_organization")
 	organizationRelOrganizationPhotosCtx = newContextual[bool]("organization.organization_photo.organization_photo.fk_organization_photo_organization_id_animal")
 
@@ -93,7 +96,6 @@ var (
 	// Relationship Contexts for user
 	userWithParentsCascadingCtx = newContextual[bool]("userWithParentsCascading")
 	userRelAdoptionsCtx         = newContextual[bool]("adoption.user.adoption.fk_adoption_user_id_animal")
-	userRelAnimalsCtx           = newContextual[bool]("animal.user.animal.fk_animal_user_id_user")
 	userRelUserAnimalLikesCtx   = newContextual[bool]("user.user_animal_like.user_animal_like.fk_user_animal_like_user_id_user")
 
 	// Relationship Contexts for user_animal_like

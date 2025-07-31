@@ -10,6 +10,7 @@ import (
 	"iter"
 	"time"
 
+	"github.com/aarondl/opt/null"
 	"github.com/google/uuid"
 	"github.com/stephenafamo/bob"
 	"github.com/stephenafamo/bob/dialect/psql"
@@ -156,4 +157,189 @@ func (o getUserById) subExpr(from, to int) bob.Expression {
 
 func (o getUserById) WriteSQL(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
 	return o.subExpr(0, len(getUserByIdSQL)).WriteSQL(ctx, w, d, start)
+}
+
+var listOrganizationsSQL = formattedQueries_queries[459:1129]
+
+type ListOrganizationsQuery = orm.ModQuery[*dialect.SelectQuery, listOrganizations, ListOrganizationsRow, []ListOrganizationsRow, listOrganizationsTransformer]
+
+func ListOrganizations() *ListOrganizationsQuery {
+	var expressionTypArgs listOrganizations
+
+	return &ListOrganizationsQuery{
+		Query: orm.Query[listOrganizations, ListOrganizationsRow, []ListOrganizationsRow, listOrganizationsTransformer]{
+			ExecQuery: orm.ExecQuery[listOrganizations]{
+				BaseQuery: bob.BaseQuery[listOrganizations]{
+					Expression: expressionTypArgs,
+					Dialect:    dialect.Dialect,
+					QueryType:  bob.QueryTypeSelect,
+				},
+			},
+			Scanner: func(context.Context, []string) (func(*scan.Row) (any, error), func(any) (ListOrganizationsRow, error)) {
+				return func(row *scan.Row) (any, error) {
+						var t ListOrganizationsRow
+						row.ScheduleScanByIndex(0, &t.ID)
+						row.ScheduleScanByIndex(1, &t.ContactID)
+						row.ScheduleScanByIndex(2, &t.Name)
+						row.ScheduleScanByIndex(3, &t.Website)
+						row.ScheduleScanByIndex(4, &t.MissionStatement)
+						row.ScheduleScanByIndex(5, &t.AdoptionPolicy)
+						row.ScheduleScanByIndex(6, &t.AdoptionURL)
+						row.ScheduleScanByIndex(7, &t.Distance)
+						row.ScheduleScanByIndex(8, &t.Facebook)
+						row.ScheduleScanByIndex(9, &t.Twitter)
+						row.ScheduleScanByIndex(10, &t.Youtube)
+						row.ScheduleScanByIndex(11, &t.Instagram)
+						row.ScheduleScanByIndex(12, &t.Pinterest)
+						row.ScheduleScanByIndex(13, &t.CreatedAt)
+						row.ScheduleScanByIndex(14, &t.UpdatedAt)
+						return &t, nil
+					}, func(v any) (ListOrganizationsRow, error) {
+						return *(v.(*ListOrganizationsRow)), nil
+					}
+			},
+		},
+		Mod: bob.ModFunc[*dialect.SelectQuery](func(q *dialect.SelectQuery) {
+			q.AppendSelect(expressionTypArgs.subExpr(7, 650))
+			q.SetTable(expressionTypArgs.subExpr(656, 670))
+		}),
+	}
+}
+
+type ListOrganizationsRow = struct {
+	ID               int64            `db:"id"`
+	ContactID        int64            `db:"contact_id"`
+	Name             string           `db:"name"`
+	Website          null.Val[string] `db:"website"`
+	MissionStatement null.Val[string] `db:"mission_statement"`
+	AdoptionPolicy   null.Val[string] `db:"adoption_policy"`
+	AdoptionURL      null.Val[string] `db:"adoption_url"`
+	Distance         null.Val[string] `db:"distance"`
+	Facebook         null.Val[string] `db:"facebook"`
+	Twitter          null.Val[string] `db:"twitter"`
+	Youtube          null.Val[string] `db:"youtube"`
+	Instagram        null.Val[string] `db:"instagram"`
+	Pinterest        null.Val[string] `db:"pinterest"`
+	CreatedAt        time.Time        `db:"created_at"`
+	UpdatedAt        time.Time        `db:"updated_at"`
+}
+
+type listOrganizationsTransformer = bob.SliceTransformer[ListOrganizationsRow, []ListOrganizationsRow]
+
+type listOrganizations struct{}
+
+func (o listOrganizations) args() iter.Seq[orm.ArgWithPosition] {
+	return func(yield func(arg orm.ArgWithPosition) bool) {
+	}
+}
+
+func (o listOrganizations) raw(from, to int) string {
+	return listOrganizationsSQL[from:to]
+}
+
+func (o listOrganizations) subExpr(from, to int) bob.Expression {
+	return orm.ArgsToExpression(listOrganizationsSQL, from, to, o.args())
+}
+
+func (o listOrganizations) WriteSQL(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
+	return o.subExpr(0, len(listOrganizationsSQL)).WriteSQL(ctx, w, d, start)
+}
+
+var getOrganizationByIdSQL = formattedQueries_queries[1155:1841]
+
+type GetOrganizationByIdQuery = orm.ModQuery[*dialect.SelectQuery, getOrganizationById, GetOrganizationByIdRow, []GetOrganizationByIdRow, getOrganizationByIdTransformer]
+
+func GetOrganizationById(ID int64) *GetOrganizationByIdQuery {
+	var expressionTypArgs getOrganizationById
+
+	expressionTypArgs.ID = psql.Arg(ID)
+
+	return &GetOrganizationByIdQuery{
+		Query: orm.Query[getOrganizationById, GetOrganizationByIdRow, []GetOrganizationByIdRow, getOrganizationByIdTransformer]{
+			ExecQuery: orm.ExecQuery[getOrganizationById]{
+				BaseQuery: bob.BaseQuery[getOrganizationById]{
+					Expression: expressionTypArgs,
+					Dialect:    dialect.Dialect,
+					QueryType:  bob.QueryTypeSelect,
+				},
+			},
+			Scanner: func(context.Context, []string) (func(*scan.Row) (any, error), func(any) (GetOrganizationByIdRow, error)) {
+				return func(row *scan.Row) (any, error) {
+						var t GetOrganizationByIdRow
+						row.ScheduleScanByIndex(0, &t.ID)
+						row.ScheduleScanByIndex(1, &t.ContactID)
+						row.ScheduleScanByIndex(2, &t.Name)
+						row.ScheduleScanByIndex(3, &t.Website)
+						row.ScheduleScanByIndex(4, &t.MissionStatement)
+						row.ScheduleScanByIndex(5, &t.AdoptionPolicy)
+						row.ScheduleScanByIndex(6, &t.AdoptionURL)
+						row.ScheduleScanByIndex(7, &t.Distance)
+						row.ScheduleScanByIndex(8, &t.Facebook)
+						row.ScheduleScanByIndex(9, &t.Twitter)
+						row.ScheduleScanByIndex(10, &t.Youtube)
+						row.ScheduleScanByIndex(11, &t.Instagram)
+						row.ScheduleScanByIndex(12, &t.Pinterest)
+						row.ScheduleScanByIndex(13, &t.CreatedAt)
+						row.ScheduleScanByIndex(14, &t.UpdatedAt)
+						return &t, nil
+					}, func(v any) (GetOrganizationByIdRow, error) {
+						return *(v.(*GetOrganizationByIdRow)), nil
+					}
+			},
+		},
+		Mod: bob.ModFunc[*dialect.SelectQuery](func(q *dialect.SelectQuery) {
+			q.AppendSelect(expressionTypArgs.subExpr(7, 650))
+			q.SetTable(expressionTypArgs.subExpr(656, 670))
+			q.AppendWhere(expressionTypArgs.subExpr(677, 686))
+		}),
+	}
+}
+
+type GetOrganizationByIdRow = struct {
+	ID               int64            `db:"id"`
+	ContactID        int64            `db:"contact_id"`
+	Name             string           `db:"name"`
+	Website          null.Val[string] `db:"website"`
+	MissionStatement null.Val[string] `db:"mission_statement"`
+	AdoptionPolicy   null.Val[string] `db:"adoption_policy"`
+	AdoptionURL      null.Val[string] `db:"adoption_url"`
+	Distance         null.Val[string] `db:"distance"`
+	Facebook         null.Val[string] `db:"facebook"`
+	Twitter          null.Val[string] `db:"twitter"`
+	Youtube          null.Val[string] `db:"youtube"`
+	Instagram        null.Val[string] `db:"instagram"`
+	Pinterest        null.Val[string] `db:"pinterest"`
+	CreatedAt        time.Time        `db:"created_at"`
+	UpdatedAt        time.Time        `db:"updated_at"`
+}
+
+type getOrganizationByIdTransformer = bob.SliceTransformer[GetOrganizationByIdRow, []GetOrganizationByIdRow]
+
+type getOrganizationById struct {
+	ID bob.Expression
+}
+
+func (o getOrganizationById) args() iter.Seq[orm.ArgWithPosition] {
+	return func(yield func(arg orm.ArgWithPosition) bool) {
+		if !yield(orm.ArgWithPosition{
+			Name:       "id",
+			Start:      684,
+			Stop:       686,
+			Expression: o.ID,
+		}) {
+			return
+		}
+	}
+}
+
+func (o getOrganizationById) raw(from, to int) string {
+	return getOrganizationByIdSQL[from:to]
+}
+
+func (o getOrganizationById) subExpr(from, to int) bob.Expression {
+	return orm.ArgsToExpression(getOrganizationByIdSQL, from, to, o.args())
+}
+
+func (o getOrganizationById) WriteSQL(ctx context.Context, w io.Writer, d bob.Dialect, start int) ([]any, error) {
+	return o.subExpr(0, len(getOrganizationByIdSQL)).WriteSQL(ctx, w, d, start)
 }

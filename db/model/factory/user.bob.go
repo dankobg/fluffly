@@ -49,17 +49,12 @@ type UserTemplate struct {
 
 type userR struct {
 	Adoptions       []*userRAdoptionsR
-	Animals         []*userRAnimalsR
 	UserAnimalLikes []*userRUserAnimalLikesR
 }
 
 type userRAdoptionsR struct {
 	number int
 	o      *AdoptionTemplate
-}
-type userRAnimalsR struct {
-	number int
-	o      *AnimalTemplate
 }
 type userRUserAnimalLikesR struct {
 	number int
@@ -87,19 +82,6 @@ func (t UserTemplate) setModelRels(o *models.User) {
 			rel = append(rel, related...)
 		}
 		o.R.Adoptions = rel
-	}
-
-	if t.r.Animals != nil {
-		rel := models.AnimalSlice{}
-		for _, r := range t.r.Animals {
-			related := r.o.BuildMany(r.number)
-			for _, rel := range related {
-				rel.UserID = null.From(o.ID) // h2
-				rel.R.User = o
-			}
-			rel = append(rel, related...)
-		}
-		o.R.Animals = rel
 	}
 
 	if t.r.UserAnimalLikes != nil {
@@ -216,26 +198,6 @@ func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *
 		}
 	}
 
-	isAnimalsDone, _ := userRelAnimalsCtx.Value(ctx)
-	if !isAnimalsDone && o.r.Animals != nil {
-		ctx = userRelAnimalsCtx.WithValue(ctx, true)
-		for _, r := range o.r.Animals {
-			if r.o.alreadyPersisted {
-				m.R.Animals = append(m.R.Animals, r.o.Build())
-			} else {
-				rel1, err := r.o.CreateMany(ctx, exec, r.number)
-				if err != nil {
-					return err
-				}
-
-				err = m.AttachAnimals(ctx, exec, rel1...)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
 	isUserAnimalLikesDone, _ := userRelUserAnimalLikesCtx.Value(ctx)
 	if !isUserAnimalLikesDone && o.r.UserAnimalLikes != nil {
 		ctx = userRelUserAnimalLikesCtx.WithValue(ctx, true)
@@ -243,12 +205,12 @@ func (o *UserTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *
 			if r.o.alreadyPersisted {
 				m.R.UserAnimalLikes = append(m.R.UserAnimalLikes, r.o.Build())
 			} else {
-				rel2, err := r.o.CreateMany(ctx, exec, r.number)
+				rel1, err := r.o.CreateMany(ctx, exec, r.number)
 				if err != nil {
 					return err
 				}
 
-				err = m.AttachUserAnimalLikes(ctx, exec, rel2...)
+				err = m.AttachUserAnimalLikes(ctx, exec, rel1...)
 				if err != nil {
 					return err
 				}
@@ -501,54 +463,6 @@ func (m userMods) AddExistingAdoptions(existingModels ...*models.Adoption) UserM
 func (m userMods) WithoutAdoptions() UserMod {
 	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
 		o.r.Adoptions = nil
-	})
-}
-
-func (m userMods) WithAnimals(number int, related *AnimalTemplate) UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		o.r.Animals = []*userRAnimalsR{{
-			number: number,
-			o:      related,
-		}}
-	})
-}
-
-func (m userMods) WithNewAnimals(number int, mods ...AnimalMod) UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		related := o.f.NewAnimalWithContext(ctx, mods...)
-		m.WithAnimals(number, related).Apply(ctx, o)
-	})
-}
-
-func (m userMods) AddAnimals(number int, related *AnimalTemplate) UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		o.r.Animals = append(o.r.Animals, &userRAnimalsR{
-			number: number,
-			o:      related,
-		})
-	})
-}
-
-func (m userMods) AddNewAnimals(number int, mods ...AnimalMod) UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		related := o.f.NewAnimalWithContext(ctx, mods...)
-		m.AddAnimals(number, related).Apply(ctx, o)
-	})
-}
-
-func (m userMods) AddExistingAnimals(existingModels ...*models.Animal) UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		for _, em := range existingModels {
-			o.r.Animals = append(o.r.Animals, &userRAnimalsR{
-				o: o.f.FromExistingAnimal(em),
-			})
-		}
-	})
-}
-
-func (m userMods) WithoutAnimals() UserMod {
-	return UserModFunc(func(ctx context.Context, o *UserTemplate) {
-		o.r.Animals = nil
 	})
 }
 

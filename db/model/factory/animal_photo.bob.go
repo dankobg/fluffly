@@ -6,8 +6,10 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/null"
+	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
 	"github.com/jaswdr/faker/v2"
@@ -35,12 +37,14 @@ func (mods AnimalPhotoModSlice) Apply(ctx context.Context, n *AnimalPhotoTemplat
 // AnimalPhotoTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type AnimalPhotoTemplate struct {
-	ID       func() int64
-	AnimalID func() null.Val[int64]
-	Small    func() null.Val[string]
-	Medium   func() null.Val[string]
-	Large    func() null.Val[string]
-	Full     func() null.Val[string]
+	ID        func() int64
+	AnimalID  func() null.Val[int64]
+	Small     func() null.Val[string]
+	Medium    func() null.Val[string]
+	Large     func() null.Val[string]
+	Full      func() null.Val[string]
+	CreatedAt func() time.Time
+	UpdatedAt func() time.Time
 
 	r animalPhotoR
 	f *Factory
@@ -99,6 +103,14 @@ func (o AnimalPhotoTemplate) BuildSetter() *models.AnimalPhotoSetter {
 		val := o.Full()
 		m.Full = omitnull.FromNull(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -138,6 +150,12 @@ func (o AnimalPhotoTemplate) Build() *models.AnimalPhoto {
 	}
 	if o.Full != nil {
 		m.Full = o.Full()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -284,6 +302,8 @@ func (m animalPhotoMods) RandomizeAllColumns(f *faker.Faker) AnimalPhotoMod {
 		AnimalPhotoMods.RandomMedium(f),
 		AnimalPhotoMods.RandomLarge(f),
 		AnimalPhotoMods.RandomFull(f),
+		AnimalPhotoMods.RandomCreatedAt(f),
+		AnimalPhotoMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -579,6 +599,68 @@ func (m animalPhotoMods) RandomFullNotNull(f *faker.Faker) AnimalPhotoMod {
 
 			val := random_string(f)
 			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m animalPhotoMods) CreatedAt(val time.Time) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m animalPhotoMods) CreatedAtFunc(f func() time.Time) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m animalPhotoMods) UnsetCreatedAt() AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m animalPhotoMods) RandomCreatedAt(f *faker.Faker) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m animalPhotoMods) UpdatedAt(val time.Time) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m animalPhotoMods) UpdatedAtFunc(f func() time.Time) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m animalPhotoMods) UnsetUpdatedAt() AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m animalPhotoMods) RandomUpdatedAt(f *faker.Faker) AnimalPhotoMod {
+	return AnimalPhotoModFunc(func(_ context.Context, o *AnimalPhotoTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

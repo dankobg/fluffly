@@ -12,6 +12,7 @@ import (
 	"github.com/aarondl/opt/omit"
 	"github.com/aarondl/opt/omitnull"
 	models "github.com/dankobg/fluffly/db/model"
+	"github.com/google/uuid"
 	"github.com/jaswdr/faker/v2"
 	"github.com/stephenafamo/bob"
 )
@@ -37,13 +38,14 @@ func (mods ContactModSlice) Apply(ctx context.Context, n *ContactTemplate) {
 // ContactTemplate is an object representing the database table.
 // all columns are optional and should be set by mods
 type ContactTemplate struct {
-	ID        func() int64
-	AnimalID  func() null.Val[int64]
-	AddressID func() int64
-	Phone     func() string
-	Email     func() string
-	CreatedAt func() time.Time
-	UpdatedAt func() time.Time
+	ID             func() int64
+	UserID         func() null.Val[uuid.UUID]
+	OrganizationID func() null.Val[int64]
+	AddressID      func() int64
+	Phone          func() string
+	Email          func() string
+	CreatedAt      func() time.Time
+	UpdatedAt      func() time.Time
 
 	r contactR
 	f *Factory
@@ -52,11 +54,21 @@ type ContactTemplate struct {
 }
 
 type contactR struct {
-	Animal *contactRAnimalR
+	Animals       []*contactRAnimalsR
+	Address       *contactRAddressR
+	Organizations []*contactROrganizationsR
 }
 
-type contactRAnimalR struct {
-	o *AnimalTemplate
+type contactRAnimalsR struct {
+	number int
+	o      *AnimalTemplate
+}
+type contactRAddressR struct {
+	o *AddressTemplate
+}
+type contactROrganizationsR struct {
+	number int
+	o      *OrganizationTemplate
 }
 
 // Apply mods to the ContactTemplate
@@ -69,11 +81,37 @@ func (o *ContactTemplate) Apply(ctx context.Context, mods ...ContactMod) {
 // setModelRels creates and sets the relationships on *models.Contact
 // according to the relationships in the template. Nothing is inserted into the db
 func (t ContactTemplate) setModelRels(o *models.Contact) {
-	if t.r.Animal != nil {
-		rel := t.r.Animal.o.Build()
+	if t.r.Animals != nil {
+		rel := models.AnimalSlice{}
+		for _, r := range t.r.Animals {
+			related := r.o.BuildMany(r.number)
+			for _, rel := range related {
+				rel.ContactID = o.ID // h2
+				rel.R.Contact = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Animals = rel
+	}
+
+	if t.r.Address != nil {
+		rel := t.r.Address.o.Build()
 		rel.R.Contacts = append(rel.R.Contacts, o)
-		o.AnimalID = null.From(rel.ID) // h2
-		o.R.Animal = rel
+		o.AddressID = rel.ID // h2
+		o.R.Address = rel
+	}
+
+	if t.r.Organizations != nil {
+		rel := models.OrganizationSlice{}
+		for _, r := range t.r.Organizations {
+			related := r.o.BuildMany(r.number)
+			for _, rel := range related {
+				rel.ContactID = o.ID // h2
+				rel.R.Contact = o
+			}
+			rel = append(rel, related...)
+		}
+		o.R.Organizations = rel
 	}
 }
 
@@ -82,9 +120,13 @@ func (t ContactTemplate) setModelRels(o *models.Contact) {
 func (o ContactTemplate) BuildSetter() *models.ContactSetter {
 	m := &models.ContactSetter{}
 
-	if o.AnimalID != nil {
-		val := o.AnimalID()
-		m.AnimalID = omitnull.FromNull(val)
+	if o.UserID != nil {
+		val := o.UserID()
+		m.UserID = omitnull.FromNull(val)
+	}
+	if o.OrganizationID != nil {
+		val := o.OrganizationID()
+		m.OrganizationID = omitnull.FromNull(val)
 	}
 	if o.AddressID != nil {
 		val := o.AddressID()
@@ -131,8 +173,11 @@ func (o ContactTemplate) Build() *models.Contact {
 	if o.ID != nil {
 		m.ID = o.ID()
 	}
-	if o.AnimalID != nil {
-		m.AnimalID = o.AnimalID()
+	if o.UserID != nil {
+		m.UserID = o.UserID()
+	}
+	if o.OrganizationID != nil {
+		m.OrganizationID = o.OrganizationID()
 	}
 	if o.AddressID != nil {
 		m.AddressID = o.AddressID()
@@ -174,7 +219,7 @@ func ensureCreatableContact(m *models.ContactSetter) {
 		m.AddressID = omit.From(val)
 	}
 	if !(m.Phone.IsValue()) {
-		val := random_string(nil)
+		val := random_string(nil, "30")
 		m.Phone = omit.From(val)
 	}
 	if !(m.Email.IsValue()) {
@@ -189,23 +234,44 @@ func ensureCreatableContact(m *models.ContactSetter) {
 func (o *ContactTemplate) insertOptRels(ctx context.Context, exec bob.Executor, m *models.Contact) error {
 	var err error
 
-	isAnimalDone, _ := contactRelAnimalCtx.Value(ctx)
-	if !isAnimalDone && o.r.Animal != nil {
-		ctx = contactRelAnimalCtx.WithValue(ctx, true)
-		if o.r.Animal.o.alreadyPersisted {
-			m.R.Animal = o.r.Animal.o.Build()
-		} else {
-			var rel0 *models.Animal
-			rel0, err = o.r.Animal.o.Create(ctx, exec)
-			if err != nil {
-				return err
-			}
-			err = m.AttachAnimal(ctx, exec, rel0)
-			if err != nil {
-				return err
+	isAnimalsDone, _ := contactRelAnimalsCtx.Value(ctx)
+	if !isAnimalsDone && o.r.Animals != nil {
+		ctx = contactRelAnimalsCtx.WithValue(ctx, true)
+		for _, r := range o.r.Animals {
+			if r.o.alreadyPersisted {
+				m.R.Animals = append(m.R.Animals, r.o.Build())
+			} else {
+				rel0, err := r.o.CreateMany(ctx, exec, r.number)
+				if err != nil {
+					return err
+				}
+
+				err = m.AttachAnimals(ctx, exec, rel0...)
+				if err != nil {
+					return err
+				}
 			}
 		}
+	}
 
+	isOrganizationsDone, _ := contactRelOrganizationsCtx.Value(ctx)
+	if !isOrganizationsDone && o.r.Organizations != nil {
+		ctx = contactRelOrganizationsCtx.WithValue(ctx, true)
+		for _, r := range o.r.Organizations {
+			if r.o.alreadyPersisted {
+				m.R.Organizations = append(m.R.Organizations, r.o.Build())
+			} else {
+				rel2, err := r.o.CreateMany(ctx, exec, r.number)
+				if err != nil {
+					return err
+				}
+
+				err = m.AttachOrganizations(ctx, exec, rel2...)
+				if err != nil {
+					return err
+				}
+			}
+		}
 	}
 
 	return err
@@ -218,10 +284,29 @@ func (o *ContactTemplate) Create(ctx context.Context, exec bob.Executor) (*model
 	opt := o.BuildSetter()
 	ensureCreatableContact(opt)
 
+	if o.r.Address == nil {
+		ContactMods.WithNewAddress().Apply(ctx, o)
+	}
+
+	var rel1 *models.Address
+
+	if o.r.Address.o.alreadyPersisted {
+		rel1 = o.r.Address.o.Build()
+	} else {
+		rel1, err = o.r.Address.o.Create(ctx, exec)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	opt.AddressID = omit.From(rel1.ID)
+
 	m, err := models.Contacts.Insert(opt).One(ctx, exec)
 	if err != nil {
 		return nil, err
 	}
+
+	m.R.Address = rel1
 
 	if err := o.insertOptRels(ctx, exec, m); err != nil {
 		return nil, err
@@ -301,7 +386,8 @@ type contactMods struct{}
 func (m contactMods) RandomizeAllColumns(f *faker.Faker) ContactMod {
 	return ContactModSlice{
 		ContactMods.RandomID(f),
-		ContactMods.RandomAnimalID(f),
+		ContactMods.RandomUserID(f),
+		ContactMods.RandomOrganizationID(f),
 		ContactMods.RandomAddressID(f),
 		ContactMods.RandomPhone(f),
 		ContactMods.RandomEmail(f),
@@ -342,32 +428,85 @@ func (m contactMods) RandomID(f *faker.Faker) ContactMod {
 }
 
 // Set the model columns to this value
-func (m contactMods) AnimalID(val null.Val[int64]) ContactMod {
+func (m contactMods) UserID(val null.Val[uuid.UUID]) ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
-		o.AnimalID = func() null.Val[int64] { return val }
+		o.UserID = func() null.Val[uuid.UUID] { return val }
 	})
 }
 
 // Set the Column from the function
-func (m contactMods) AnimalIDFunc(f func() null.Val[int64]) ContactMod {
+func (m contactMods) UserIDFunc(f func() null.Val[uuid.UUID]) ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
-		o.AnimalID = f
+		o.UserID = f
 	})
 }
 
 // Clear any values for the column
-func (m contactMods) UnsetAnimalID() ContactMod {
+func (m contactMods) UnsetUserID() ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
-		o.AnimalID = nil
+		o.UserID = nil
 	})
 }
 
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
 // The generated value is sometimes null
-func (m contactMods) RandomAnimalID(f *faker.Faker) ContactMod {
+func (m contactMods) RandomUserID(f *faker.Faker) ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
-		o.AnimalID = func() null.Val[int64] {
+		o.UserID = func() null.Val[uuid.UUID] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_uuid_UUID(f)
+			return null.From(val)
+		}
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is never null
+func (m contactMods) RandomUserIDNotNull(f *faker.Faker) ContactMod {
+	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
+		o.UserID = func() null.Val[uuid.UUID] {
+			if f == nil {
+				f = &defaultFaker
+			}
+
+			val := random_uuid_UUID(f)
+			return null.From(val)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m contactMods) OrganizationID(val null.Val[int64]) ContactMod {
+	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
+		o.OrganizationID = func() null.Val[int64] { return val }
+	})
+}
+
+// Set the Column from the function
+func (m contactMods) OrganizationIDFunc(f func() null.Val[int64]) ContactMod {
+	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
+		o.OrganizationID = f
+	})
+}
+
+// Clear any values for the column
+func (m contactMods) UnsetOrganizationID() ContactMod {
+	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
+		o.OrganizationID = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+// The generated value is sometimes null
+func (m contactMods) RandomOrganizationID(f *faker.Faker) ContactMod {
+	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
+		o.OrganizationID = func() null.Val[int64] {
 			if f == nil {
 				f = &defaultFaker
 			}
@@ -381,9 +520,9 @@ func (m contactMods) RandomAnimalID(f *faker.Faker) ContactMod {
 // Generates a random value for the column using the given faker
 // if faker is nil, a default faker is used
 // The generated value is never null
-func (m contactMods) RandomAnimalIDNotNull(f *faker.Faker) ContactMod {
+func (m contactMods) RandomOrganizationIDNotNull(f *faker.Faker) ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
-		o.AnimalID = func() null.Val[int64] {
+		o.OrganizationID = func() null.Val[int64] {
 			if f == nil {
 				f = &defaultFaker
 			}
@@ -451,7 +590,7 @@ func (m contactMods) UnsetPhone() ContactMod {
 func (m contactMods) RandomPhone(f *faker.Faker) ContactMod {
 	return ContactModFunc(func(_ context.Context, o *ContactTemplate) {
 		o.Phone = func() string {
-			return random_string(f)
+			return random_string(f, "30")
 		}
 	})
 }
@@ -557,38 +696,134 @@ func (m contactMods) WithParentsCascading() ContactMod {
 		ctx = contactWithParentsCascadingCtx.WithValue(ctx, true)
 		{
 
-			related := o.f.NewAnimalWithContext(ctx, AnimalMods.WithParentsCascading())
-			m.WithAnimal(related).Apply(ctx, o)
+			related := o.f.NewAddressWithContext(ctx, AddressMods.WithParentsCascading())
+			m.WithAddress(related).Apply(ctx, o)
 		}
 	})
 }
 
-func (m contactMods) WithAnimal(rel *AnimalTemplate) ContactMod {
+func (m contactMods) WithAddress(rel *AddressTemplate) ContactMod {
 	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
-		o.r.Animal = &contactRAnimalR{
+		o.r.Address = &contactRAddressR{
 			o: rel,
 		}
 	})
 }
 
-func (m contactMods) WithNewAnimal(mods ...AnimalMod) ContactMod {
+func (m contactMods) WithNewAddress(mods ...AddressMod) ContactMod {
 	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
-		related := o.f.NewAnimalWithContext(ctx, mods...)
+		related := o.f.NewAddressWithContext(ctx, mods...)
 
-		m.WithAnimal(related).Apply(ctx, o)
+		m.WithAddress(related).Apply(ctx, o)
 	})
 }
 
-func (m contactMods) WithExistingAnimal(em *models.Animal) ContactMod {
+func (m contactMods) WithExistingAddress(em *models.Address) ContactMod {
 	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
-		o.r.Animal = &contactRAnimalR{
-			o: o.f.FromExistingAnimal(em),
+		o.r.Address = &contactRAddressR{
+			o: o.f.FromExistingAddress(em),
 		}
 	})
 }
 
-func (m contactMods) WithoutAnimal() ContactMod {
+func (m contactMods) WithoutAddress() ContactMod {
 	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
-		o.r.Animal = nil
+		o.r.Address = nil
+	})
+}
+
+func (m contactMods) WithAnimals(number int, related *AnimalTemplate) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Animals = []*contactRAnimalsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m contactMods) WithNewAnimals(number int, mods ...AnimalMod) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		related := o.f.NewAnimalWithContext(ctx, mods...)
+		m.WithAnimals(number, related).Apply(ctx, o)
+	})
+}
+
+func (m contactMods) AddAnimals(number int, related *AnimalTemplate) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Animals = append(o.r.Animals, &contactRAnimalsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m contactMods) AddNewAnimals(number int, mods ...AnimalMod) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		related := o.f.NewAnimalWithContext(ctx, mods...)
+		m.AddAnimals(number, related).Apply(ctx, o)
+	})
+}
+
+func (m contactMods) AddExistingAnimals(existingModels ...*models.Animal) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		for _, em := range existingModels {
+			o.r.Animals = append(o.r.Animals, &contactRAnimalsR{
+				o: o.f.FromExistingAnimal(em),
+			})
+		}
+	})
+}
+
+func (m contactMods) WithoutAnimals() ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Animals = nil
+	})
+}
+
+func (m contactMods) WithOrganizations(number int, related *OrganizationTemplate) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Organizations = []*contactROrganizationsR{{
+			number: number,
+			o:      related,
+		}}
+	})
+}
+
+func (m contactMods) WithNewOrganizations(number int, mods ...OrganizationMod) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		related := o.f.NewOrganizationWithContext(ctx, mods...)
+		m.WithOrganizations(number, related).Apply(ctx, o)
+	})
+}
+
+func (m contactMods) AddOrganizations(number int, related *OrganizationTemplate) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Organizations = append(o.r.Organizations, &contactROrganizationsR{
+			number: number,
+			o:      related,
+		})
+	})
+}
+
+func (m contactMods) AddNewOrganizations(number int, mods ...OrganizationMod) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		related := o.f.NewOrganizationWithContext(ctx, mods...)
+		m.AddOrganizations(number, related).Apply(ctx, o)
+	})
+}
+
+func (m contactMods) AddExistingOrganizations(existingModels ...*models.Organization) ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		for _, em := range existingModels {
+			o.r.Organizations = append(o.r.Organizations, &contactROrganizationsR{
+				o: o.f.FromExistingOrganization(em),
+			})
+		}
+	})
+}
+
+func (m contactMods) WithoutOrganizations() ContactMod {
+	return ContactModFunc(func(ctx context.Context, o *ContactTemplate) {
+		o.r.Organizations = nil
 	})
 }

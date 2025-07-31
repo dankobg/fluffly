@@ -6,6 +6,7 @@ package factory
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/aarondl/opt/omit"
 	models "github.com/dankobg/fluffly/db/model"
@@ -37,6 +38,8 @@ type BreedTemplate struct {
 	ID           func() int64
 	AnimalTypeID func() int64
 	Name         func() string
+	CreatedAt    func() time.Time
+	UpdatedAt    func() time.Time
 
 	r breedR
 	f *Factory
@@ -101,6 +104,14 @@ func (o BreedTemplate) BuildSetter() *models.BreedSetter {
 		val := o.Name()
 		m.Name = omit.From(val)
 	}
+	if o.CreatedAt != nil {
+		val := o.CreatedAt()
+		m.CreatedAt = omit.From(val)
+	}
+	if o.UpdatedAt != nil {
+		val := o.UpdatedAt()
+		m.UpdatedAt = omit.From(val)
+	}
 
 	return m
 }
@@ -131,6 +142,12 @@ func (o BreedTemplate) Build() *models.Breed {
 	}
 	if o.Name != nil {
 		m.Name = o.Name()
+	}
+	if o.CreatedAt != nil {
+		m.CreatedAt = o.CreatedAt()
+	}
+	if o.UpdatedAt != nil {
+		m.UpdatedAt = o.UpdatedAt()
 	}
 
 	o.setModelRels(m)
@@ -302,6 +319,8 @@ func (m breedMods) RandomizeAllColumns(f *faker.Faker) BreedMod {
 		BreedMods.RandomID(f),
 		BreedMods.RandomAnimalTypeID(f),
 		BreedMods.RandomName(f),
+		BreedMods.RandomCreatedAt(f),
+		BreedMods.RandomUpdatedAt(f),
 	}
 }
 
@@ -394,6 +413,68 @@ func (m breedMods) RandomName(f *faker.Faker) BreedMod {
 	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
 		o.Name = func() string {
 			return random_string(f, "255")
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m breedMods) CreatedAt(val time.Time) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.CreatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m breedMods) CreatedAtFunc(f func() time.Time) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.CreatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m breedMods) UnsetCreatedAt() BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.CreatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m breedMods) RandomCreatedAt(f *faker.Faker) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.CreatedAt = func() time.Time {
+			return random_time_Time(f)
+		}
+	})
+}
+
+// Set the model columns to this value
+func (m breedMods) UpdatedAt(val time.Time) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.UpdatedAt = func() time.Time { return val }
+	})
+}
+
+// Set the Column from the function
+func (m breedMods) UpdatedAtFunc(f func() time.Time) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.UpdatedAt = f
+	})
+}
+
+// Clear any values for the column
+func (m breedMods) UnsetUpdatedAt() BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.UpdatedAt = nil
+	})
+}
+
+// Generates a random value for the column using the given faker
+// if faker is nil, a default faker is used
+func (m breedMods) RandomUpdatedAt(f *faker.Faker) BreedMod {
+	return BreedModFunc(func(_ context.Context, o *BreedTemplate) {
+		o.UpdatedAt = func() time.Time {
+			return random_time_Time(f)
 		}
 	})
 }

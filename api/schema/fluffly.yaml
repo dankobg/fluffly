@@ -8,13 +8,140 @@ tags:
   - name: fluffly
     description: Everything about fluffly
 paths:
-  /health/alive:
+  /organizations:
     get:
+      operationId: listOrganizations
+      summary: List organizations
+      description: List organizations that help animals
       tags:
         - fluffly
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organization"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      operationId: createOrganization
+      summary: Create organization
+      description: Create an organization that helps adopt animals
+      tags:
+        - fluffly
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+          description: recoveryCodeForIdentity
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+  "/organizations/{id}":
+    get:
+      operationId: getOrganization
+      summary: Get organization by id
+      description: Return a specific organization by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The organization id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+          description: identitySchema
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    patch:
+      operationId: updateOrganization
+      summary: Update organization
+      description: Update an organization that helps adopt animals
+      tags:
+        - fluffly
+      parameters:
+        - description: The organization id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrganizationBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+          description: recoveryCodeForIdentity
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    delete:
+      operationId: deleteOrganization
+      summary: Delete organization by id
+      description: Delete a specific organization by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The organization id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          $ref: "#/components/responses/EmptyResponse"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/GenericError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+  /health/alive:
+    get:
+      operationId: getHealthAlive
       summary: Check if server is healthy
       description: Checks if the server is healthy
-      operationId: getHealthAlive
+      tags:
+        - fluffly
       responses:
         "200":
           description: Successful operation
@@ -26,11 +153,11 @@ paths:
           $ref: "#/components/responses/UnexpectedError"
   /health/ready:
     get:
-      tags:
-        - fluffly
+      operationId: getHealthReady
       summary: Check if server is ready
       description: Checks if the server is ready
-      operationId: getHealthReady
+      tags:
+        - fluffly
       responses:
         "200":
           description: Successful operation
@@ -1566,6 +1693,722 @@ components:
         message:
           type: string
           description: Error message
+    User:
+      type: object
+      required:
+        - identity
+      properties:
+        identity:
+          $ref: "#/components/schemas/Identity"
+
+    Country:
+      type: object
+      required:
+        - id
+        - name
+        - iso_code
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Country id
+        name:
+          type: string
+          description: Country name
+        iso_code:
+          type: boolean
+          description: Country 3 letter iso_code
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateCountryBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Country name
+        iso_code:
+          type: boolean
+          description: Country 3 letter iso_code
+    UpdateCountryBody:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Country name
+        iso_code:
+          type: boolean
+          description: Country 3 letter iso_code
+    Address:
+      type: object
+      required:
+        - id
+        - address_line_1
+        - city
+        - country
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Country id
+        unit_number:
+          type: string
+          description: Unit number
+        street_number:
+          type: string
+          description: Street number
+        address_line_1:
+          type: string
+          description: Address line 1
+        address_line_2:
+          type: string
+          description: Address line 2 (more details)
+        city:
+          type: string
+          description: City
+        region:
+          type: string
+          description: Region
+        postal_code:
+          type: string
+          description: Postal code
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          multipleOf: 0.000001
+          description: Latitude
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          multipleOf: 0.000001
+          description: Longitude
+        note:
+          type: string
+          description: Some info about address if needed
+        country:
+          $ref: "#/components/schemas/Country"
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateAddressBody:
+      type: object
+      required:
+        - address_line_1
+        - city
+        - country
+      properties:
+        unit_number:
+          type: string
+          description: Unit number
+        street_number:
+          type: string
+          description: Street number
+        address_line_1:
+          type: string
+          description: Address line 1
+        address_line_2:
+          type: string
+          description: Address line 2 (more details)
+        city:
+          type: string
+          description: City
+        region:
+          type: string
+          description: Region
+        postal_code:
+          type: string
+          description: Postal code
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          multipleOf: 0.000001
+          description: Latitude
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          multipleOf: 0.000001
+          description: Longitude
+        note:
+          type: string
+          description: Some info about address if needed
+        country:
+          $ref: "#/components/schemas/CreateCountryBody"
+    UpdateAddressBody:
+      type: object
+      properties:
+        unit_number:
+          type: string
+          description: Unit number
+          nullable: true
+        street_number:
+          type: string
+          description: Street number
+          nullable: true
+        address_line_1:
+          type: string
+          description: Address line 1
+        address_line_2:
+          type: string
+          description: Address line 2 (more details)
+          nullable: true
+        city:
+          type: string
+          description: City
+        region:
+          type: string
+          description: Region
+          nullable: true
+        postal_code:
+          type: string
+          description: Postal code
+          nullable: true
+        lat:
+          type: number
+          minimum: -90
+          maximum: 90
+          multipleOf: 0.000001
+          description: Latitude
+          nullable: true
+        lng:
+          type: number
+          minimum: -180
+          maximum: 180
+          multipleOf: 0.000001
+          description: Longitude
+          nullable: true
+        note:
+          type: string
+          description: Some info about address if needed
+          nullable: true
+        country:
+          $ref: "#/components/schemas/UpdateCountryBody"
+    Contact:
+      type: object
+      required:
+        - id
+        - phone
+        - email
+        - address
+      properties:
+        # user_id:
+        #   format: uuid
+        #   type: string
+        #   description: User id
+        # organization_id:
+        #   format: int64
+        #   type: integer
+        #   description: Organization id
+        # TODO: maybe just put ids and some info whethere its user | organization
+        user:
+          $ref: "#/components/schemas/User"
+          nullable: true
+        organization:
+          $ref: "#/components/schemas/Organization"
+          nullable: true
+        phone:
+          type: string
+          description: Phone number
+        email:
+          type: string
+          description: E-Mail
+        address:
+          $ref: "#/components/schemas/Address"
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateContactBody:
+      type: object
+      required:
+        - phone
+        - email
+        - address
+      properties:
+        # oneOf:
+        #   - required:
+        #       - user_id
+        #     properties:
+        #       user_id:
+        #         format: uuid
+        #         type: string
+        #       organization_id:
+        #         type: integer
+        #         format: int64
+        #         nullable: true
+        #     not:
+        #       required:
+        #         - organization_id
+        #   - required:
+        #       - organization_id
+        #     properties:
+        #       organization_id:
+        #         format: int64
+        #         type: integer
+        #       user_id:
+        #         type: string
+        #         format: uuid
+        #         nullable: true
+        #     not:
+        #       required:
+        #         - user_id
+        user_id:
+          format: uuid
+          type: string
+          description: User id
+          nullable: true
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+          nullable: true
+        phone:
+          type: string
+          description: Contact phone
+        email:
+          type: string
+          description: Contact E-Mail
+        address:
+          $ref: "#/components/schemas/CreateAddressBody"
+    UpdateContactBody:
+      type: object
+      properties:
+        user_id:
+          format: uuid
+          type: string
+          description: User id
+          nullable: true
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+          nullable: true
+        phone:
+          type: string
+          description: Contact phone
+          nullable: true
+        email:
+          type: string
+          description: Contact E-Mail
+          nullable: true
+        address:
+          $ref: "#/components/schemas/UpdateAddressBody"
+    AnimalType:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal type id
+        name:
+          type: string
+          description: Animal type name
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    Breed:
+      type: object
+      required:
+        - id
+        - animal_type_id
+        - name
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Breed id
+        animal_type_id:
+          format: int64
+          type: integer
+          description: Animal type id
+        name:
+          type: string
+          description: Breed name
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    AnimalSpecies:
+      type: object
+      required:
+        - id
+        - animal_type_id
+        - name
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal species id
+        animal_type_id:
+          format: int64
+          type: integer
+          description: Animal type id
+        name:
+          type: string
+          description: Animal species name
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateOrganizationBody:
+      type: object
+      required:
+        - contact_id
+        - name
+      properties:
+        contact_id:
+          format: int64
+          type: integer
+          description: Contact id
+        name:
+          type: string
+          description: Organization name
+        website:
+          type: string
+          description: Organization website
+          nullable: true
+        mission_statement:
+          type: string
+          description: Organization mission statement
+          nullable: true
+        adoption_policy:
+          type: string
+          description: Organization adoption policy
+          nullable: true
+        adoption_url:
+          type: string
+          description: Organization adoption url
+          nullable: true
+        distance:
+          type: string
+          description: Organization distance
+          nullable: true
+        facebook:
+          type: string
+          description: Organization facebook
+          nullable: true
+        twitter:
+          type: string
+          description: Organization twitter
+          nullable: true
+        youtube:
+          type: string
+          description: Organization youtube
+          nullable: true
+        instagram:
+          type: string
+          description: Organization instagram
+          nullable: true
+        pinterest:
+          type: string
+          description: Organization pinterest
+          nullable: true
+    UpdateOrganizationBody:
+      type: object
+      properties:
+        # contact_id:
+        #   format: int64
+        #   type: integer
+        #   description: Contact id
+        name:
+          type: string
+          description: Organization name
+          nullable: true
+        website:
+          type: string
+          description: Organization website
+          nullable: true
+        mission_statement:
+          type: string
+          description: Organization mission statement
+          nullable: true
+        adoption_policy:
+          type: string
+          description: Organization adoption policy
+          nullable: true
+        adoption_url:
+          type: string
+          description: Organization adoption url
+          nullable: true
+        distance:
+          type: string
+          description: Organization distance
+          nullable: true
+        facebook:
+          type: string
+          description: Organization facebook
+          nullable: true
+        twitter:
+          type: string
+          description: Organization twitter
+          nullable: true
+        youtube:
+          type: string
+          description: Organization youtube
+          nullable: true
+        instagram:
+          type: string
+          description: Organization instagram
+          nullable: true
+        pinterest:
+          type: string
+          description: Organization pinterest
+          nullable: true
+    Organization:
+      type: object
+      required:
+        - id
+        - contact_id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Organization id
+        contact_id:
+          format: int64
+          type: integer
+          description: Contact id
+        name:
+          type: string
+          description: Organization name
+        website:
+          type: string
+          description: Organization website
+        mission_statement:
+          type: string
+          description: Organization mission statement
+        adoption_policy:
+          type: string
+          description: Organization adoption policy
+        adoption_url:
+          type: string
+          description: Organization adoption url
+        distance:
+          type: string
+          description: Organization distance
+        facebook:
+          type: string
+          description: Organization facebook
+        twitter:
+          type: string
+          description: Organization twitter
+        youtube:
+          type: string
+          description: Organization youtube
+        instagram:
+          type: string
+          description: Organization instagram
+        pinterest:
+          type: string
+          description: Organization pinterest
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    OrganizationHour:
+      type: object
+      required:
+        - id
+        - contact_id
+        - name
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Organization Hour id
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+        monday:
+          type: string
+          description: Monday work hours
+        tuesday:
+          type: string
+          description: Tuesday work hours
+        wednesday:
+          type: string
+          description: Wednesday work hours
+        thursday:
+          type: string
+          description: Thursday work hours
+        friday:
+          type: string
+          description: Friday work hours
+        saturday:
+          type: string
+          description: Saturday work hours
+        sunday:
+          type: string
+          description: Sunday work hours
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    OrganizationPhoto:
+      type: object
+      required:
+        - id
+        - organization_id
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Organization photo id
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+        small:
+          type: string
+          description: Small photo url
+        medium:
+          type: string
+          description: Medium photo url
+        large:
+          type: string
+          description: Large photo url
+        full:
+          type: string
+          description: Full photo url
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    Animal:
+      type: object
+      required:
+        - id
+        - contact_id
+        - type_id
+        - breed_id
+        - species_id
+        - name
+        - age
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal id
+        contact_id:
+          format: int64
+          type: integer
+          description: Contact id
+        type_id:
+          format: int64
+          type: integer
+          description: Animal type id
+        breed_id:
+          format: int64
+          type: integer
+          description: Breed id
+        species_id:
+          format: int64
+          type: integer
+          description: Animal species id
+        name:
+          type: string
+          description: Animal name
+        gender:
+          type: string
+          enum:
+            - m
+            - f
+          description: Animal gender
+        hemaphrodite:
+          type: boolean
+          description: Animal is hemaphrodite
+        age:
+          type: string
+          description: Animal age
+          enum:
+            - baby
+            - young
+            - adult
+            - senior
+        image_url:
+          type: string
+          description: Animal image url
+        description:
+          type: string
+          description: Animal description
+        status:
+          type: string
+          description: Animal adoption status
+          enum:
+            - pending
+            - adopted
+        status_changed_at:
+          format: date-time
+          type: string
+          description: Status chaged at timestamp
+        distance:
+          type: string
+          description: Distance from you
+        adopted_at:
+          format: date-time
+          type: string
+          description: Adopted at timestamp
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
     Healthy:
       type: object
       required:
