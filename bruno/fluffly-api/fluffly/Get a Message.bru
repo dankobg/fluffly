@@ -1,0 +1,15 @@
+meta {
+  name: Get a Message
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/courier/messages/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}

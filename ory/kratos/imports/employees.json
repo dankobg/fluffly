@@ -3,6 +3,7 @@
     "schema_id": "employee",
     "traits": {
       "email": "fluffly.app@gmail.com",
+      "username": "fluffly",
       "first_name": "fluffly",
       "last_name": "Admin"
     },
@@ -26,6 +27,7 @@
     "schema_id": "employee",
     "traits": {
       "email": "dankopetrovic.bgd@gmail.com",
+      "username": "danko",
       "first_name": "Danko",
       "last_name": "Petrovic"
     },

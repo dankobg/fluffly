@@ -1,0 +1,31 @@
+meta {
+  name: Update organization
+  type: http
+  seq: 19
+}
+
+patch {
+  url: {{baseUrl}}/organizations/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "adoption_policy": "",
+    "adoption_url": "",
+    "distance": "",
+    "facebook": "",
+    "instagram": "",
+    "mission_statement": "",
+    "name": "",
+    "pinterest": "",
+    "twitter": "",
+    "website": "",
+    "youtube": ""
+  }
+}

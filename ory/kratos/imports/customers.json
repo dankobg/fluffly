@@ -3,8 +3,9 @@
     "schema_id": "customer",
     "traits": {
       "email": "test@test.com",
-      "first_name": "Test",
-      "last_name": "Test"
+      "username": "test",
+      "first_name": "Test first",
+      "last_name": "Test last"
     },
     "verifiable_addresses": [
       {
@@ -25,13 +26,14 @@
   {
     "schema_id": "customer",
     "traits": {
-      "email": "aleksandar.bogdanov@bancaintesa.rs",
-      "first_name": "Test",
-      "last_name": "Test"
+      "email": "fluffly@dev.com",
+      "username": "dev",
+      "first_name": "Dev first",
+      "last_name": "Dev last"
     },
     "verifiable_addresses": [
       {
-        "value": "aleksandar.bogdanov@bancaintesa.rs",
+        "value": "fluffy@dev.com",
         "verified": true,
         "via": "email",
         "status": "completed"

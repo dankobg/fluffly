@@ -11,8 +11,6 @@ import (
 )
 
 func (a *ApiHandler) SetupRoutes() http.Handler {
-	a.Log.Debug("setting up routes")
-
 	mux := http.NewServeMux()
 
 	// debug routes

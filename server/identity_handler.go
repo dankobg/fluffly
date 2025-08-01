@@ -134,7 +134,7 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 					CreatedAt: verAddr.CreatedAt,
 					UpdatedAt: verAddr.UpdatedAt,
 				}
-				if !verAddr.VerifiedAt.IsNull() {
+				if verAddr.VerifiedAt.IsSpecified() && !verAddr.VerifiedAt.IsNull() {
 					verifiableAddress.VerifiedAt = ptr.Of(verAddr.VerifiedAt.MustGet().UTC())
 				}
 				verifiableAddresses = append(verifiableAddresses, verifiableAddress)

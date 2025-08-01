@@ -1,0 +1,49 @@
+meta {
+  name: Create organization
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/organizations
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "adoption_policy": "asdsad",
+    "adoption_url": "saddas",
+    "contact": {
+      "address": {
+        "address_line_1": "addr 1",
+        "address_line_2": "stan 5",
+        "city": "Beograd",
+        "country": {
+          "iso_code": "",
+          "name": ""
+        },
+        "lat": "",
+        "lng": "",
+        "note": "",
+        "postal_code": "",
+        "region": "",
+        "street_number": "",
+        "unit_number": ""
+      },
+      "email": "",
+      "organization_id": 0,
+      "phone": "",
+      "user_id": ""
+    },
+    "distance": "",
+    "facebook": "",
+    "instagram": "",
+    "mission_statement": "",
+    "name": "",
+    "pinterest": "",
+    "twitter": "",
+    "website": "",
+    "youtube": ""
+  }
+}

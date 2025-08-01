@@ -1,0 +1,57 @@
+meta {
+  name: Update an Identity
+  type: http
+  seq: 11
+}
+
+put {
+  url: {{baseUrl}}/identities/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  {
+    "credentials": {
+      "oidc": {
+        "config": {
+          "providers": [
+            {
+              "organization": "",
+              "provider": "",
+              "subject": "",
+              "use_auto_link": false
+            }
+          ]
+        }
+      },
+      "password": {
+        "config": {
+          "hashed_password": "",
+          "password": "",
+          "use_password_migration_hook": false
+        }
+      },
+      "saml": {
+        "config": {
+          "providers": [
+            {
+              "organization": "",
+              "provider": "",
+              "subject": ""
+            }
+          ]
+        }
+      }
+    },
+    "metadata_admin": "",
+    "metadata_public": "",
+    "schema_id": "",
+    "state": "",
+    "traits": {}
+  }
+}

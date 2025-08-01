@@ -3,7 +3,7 @@ servers:
   - url: "http://localhost:6969/api/v1"
 info:
   version: 1.0.0
-  title: Fluffly schema
+  title: Fluffly API
 tags:
   - name: fluffly
     description: Everything about fluffly
@@ -1718,7 +1718,7 @@ components:
           type: string
           description: Country name
         iso_code:
-          type: boolean
+          type: string
           description: Country 3 letter iso_code
         created_at:
           format: date-time
@@ -1735,7 +1735,7 @@ components:
           type: string
           description: Country name
         iso_code:
-          type: boolean
+          type: string
           description: Country 3 letter iso_code
     UpdateCountryBody:
       type: object
@@ -1744,7 +1744,7 @@ components:
           type: string
           description: Country name
         iso_code:
-          type: boolean
+          type: string
           description: Country 3 letter iso_code
     Address:
       type: object
@@ -2090,13 +2090,9 @@ components:
     CreateOrganizationBody:
       type: object
       required:
-        - contact_id
         - name
+        - contact
       properties:
-        contact_id:
-          format: int64
-          type: integer
-          description: Contact id
         name:
           type: string
           description: Organization name
@@ -2140,6 +2136,8 @@ components:
           type: string
           description: Organization pinterest
           nullable: true
+        contact:
+          $ref: "#/components/schemas/CreateContactBody"
     UpdateOrganizationBody:
       type: object
       properties:

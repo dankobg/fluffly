@@ -12,12 +12,15 @@ create table "user" (
 create table "country" (
   "id" bigint not null generated always as identity,
   "name" text not null,
-  "iso_code" varchar(3) not null,
+  "iso_alpha2" varchar(2) not null,
+  "iso_alpha3" varchar(3) not null,
+  "iso_numeric" varchar(3) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
   primary key ("id"),
   constraint "uq_country_name" unique ("name"),
-  constraint "uq_country_iso_code" unique ("iso_code")
+  constraint "uq_country_iso_alpha2" unique ("iso_alpha2"),
+  constraint "uq_country_iso_alpha3" unique ("iso_alpha3")
 );
 
 create table "address" (

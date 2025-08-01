@@ -16,8 +16,8 @@ import (
 
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
 	organizationSetter := model.OrganizationSetter{
-		ContactID: omit.From(request.Body.ContactID),
-		Name:      omit.From(request.Body.Name),
+		// ContactID: omit.From(request.Body.ContactID),
+		Name: omit.From(request.Body.Name),
 	}
 	if request.Body.Website.IsSpecified() {
 		organizationSetter.Website = omitnull.From(request.Body.Website.MustGet())

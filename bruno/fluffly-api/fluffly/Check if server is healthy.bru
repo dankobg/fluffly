@@ -1,0 +1,11 @@
+meta {
+  name: Check if server is healthy
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/health/alive
+  body: none
+  auth: none
+}
