@@ -19,7 +19,7 @@ require (
 	github.com/lmittmann/tint v1.1.2
 	github.com/oapi-codegen/nullable v1.1.0
 	github.com/oapi-codegen/runtime v1.1.2
-	github.com/ory/client-go v1.20.22
+	github.com/ory/client-go v1.21.1
 	github.com/ory/keto/proto v0.13.0-alpha.0
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/shopspring/decimal v1.4.0
