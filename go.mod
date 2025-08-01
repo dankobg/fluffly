@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
-	github.com/alecthomas/kong v1.12.0
+	github.com/alecthomas/kong v1.12.1
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
