@@ -1700,7 +1700,18 @@ components:
       properties:
         identity:
           $ref: "#/components/schemas/Identity"
-
+    Latitude:
+      type: number
+      minimum: -90
+      maximum: 90
+      multipleOf: 0.000001
+      description: Latitude
+    Longitude:
+      type: number
+      minimum: -180
+      maximum: 180
+      multipleOf: 0.000001
+      description: Longitude
     Country:
       type: object
       required:
@@ -1782,17 +1793,9 @@ components:
           type: string
           description: Postal code
         lat:
-          type: number
-          minimum: -90
-          maximum: 90
-          multipleOf: 0.000001
-          description: Latitude
+          $ref: "#/components/schemas/Latitude"
         lng:
-          type: number
-          minimum: -180
-          maximum: 180
-          multipleOf: 0.000001
-          description: Longitude
+          $ref: "#/components/schemas/Longitude"
         note:
           type: string
           description: Some info about address if needed
@@ -1835,17 +1838,9 @@ components:
           type: string
           description: Postal code
         lat:
-          type: number
-          minimum: -90
-          maximum: 90
-          multipleOf: 0.000001
-          description: Latitude
+          $ref: "#/components/schemas/Latitude"
         lng:
-          type: number
-          minimum: -180
-          maximum: 180
-          multipleOf: 0.000001
-          description: Longitude
+          $ref: "#/components/schemas/Longitude"
         note:
           type: string
           description: Some info about address if needed
