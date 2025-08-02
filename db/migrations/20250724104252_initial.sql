@@ -115,6 +115,8 @@ create table "organization_social" (
   "organization_id" bigint not null,
   "platform" text not null,
   "url" text not null,
+  "created_at" timestamptz not null default current_timestamp,
+  "updated_at" timestamptz not null default current_timestamp,
   constraint "pk_organization_social_organization_id_platform" primary key ("organization_id", "platform"),
   constraint "fk_organization_social_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );

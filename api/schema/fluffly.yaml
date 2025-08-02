@@ -2094,43 +2094,32 @@ components:
         website:
           type: string
           description: Organization website
-          nullable: true
         mission_statement:
           type: string
           description: Organization mission statement
-          nullable: true
         adoption_policy:
           type: string
           description: Organization adoption policy
-          nullable: true
         adoption_url:
           type: string
           description: Organization adoption url
-          nullable: true
         distance:
           type: string
           description: Organization distance
-          nullable: true
-        facebook:
-          type: string
-          description: Organization facebook
-          nullable: true
-        twitter:
-          type: string
-          description: Organization twitter
-          nullable: true
-        youtube:
-          type: string
-          description: Organization youtube
-          nullable: true
-        instagram:
-          type: string
-          description: Organization instagram
-          nullable: true
-        pinterest:
-          type: string
-          description: Organization pinterest
-          nullable: true
+        socials:
+          type: array
+          items:
+            type: object
+            required:
+              - platform
+              - url
+            properties:
+              platform:
+                type: string
+                description: Social platform
+              url:
+                type: string
+                description: Social platform url
         contact:
           $ref: "#/components/schemas/CreateContactBody"
     UpdateOrganizationBody:
@@ -2164,26 +2153,26 @@ components:
           type: string
           description: Organization distance
           nullable: true
-        facebook:
+        # @TODO: socials: ?????????????
+    OrganizationSocial:
+      type: object
+      required:
+        - organization_id
+        - platform
+        - url
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Organization id
+        platform:
           type: string
-          description: Organization facebook
-          nullable: true
-        twitter:
+          description: Social platform
+        url:
           type: string
-          description: Organization twitter
-          nullable: true
-        youtube:
-          type: string
-          description: Organization youtube
-          nullable: true
-        instagram:
-          type: string
-          description: Organization instagram
-          nullable: true
-        pinterest:
-          type: string
-          description: Organization pinterest
-          nullable: true
+          description: Social platform url
     Organization:
       type: object
       required:
@@ -2215,21 +2204,10 @@ components:
         distance:
           type: string
           description: Organization distance
-        facebook:
-          type: string
-          description: Organization facebook
-        twitter:
-          type: string
-          description: Organization twitter
-        youtube:
-          type: string
-          description: Organization youtube
-        instagram:
-          type: string
-          description: Organization instagram
-        pinterest:
-          type: string
-          description: Organization pinterest
+        socials:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationSocial"
         contact:
           $ref: "#/components/schemas/Contact"
         created_at:
