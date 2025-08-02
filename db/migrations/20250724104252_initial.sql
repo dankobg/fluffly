@@ -6,7 +6,7 @@ create table "user" (
   "id" uuid not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id")
+  constraint "pk_user_id" primary key ("id")
 );
 
 create table "country" (
@@ -17,20 +17,20 @@ create table "country" (
   "iso_numeric" varchar(3) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
+  constraint "pk_country_id" primary key ("id"),
   constraint "uq_country_name" unique ("name"),
   constraint "uq_country_iso_alpha2" unique ("iso_alpha2"),
-  constraint "uq_country_iso_alpha3" unique ("iso_alpha3")
+  constraint "uq_country_iso_alpha3" unique ("iso_alpha3"),
+  constraint "uq_country_iso_numeric" unique ("iso_numeric")
 );
 
 create table "address" (
   "id" bigint not null generated always as identity,
-  "country_id" bigint,
+  "country_id" bigint not null,
   "unit_number" varchar(255),
   "street_number" varchar(255),
-  "address_line_1" varchar(255),
-  "address_line_2" varchar(255),
-  "city" varchar(255),
+  "street_address" varchar(255) not null,
+  "city" varchar(255) not null,
   "region" varchar(255),
   "postal_code" varchar(50),
   "lat" decimal(9, 6),
@@ -38,8 +38,8 @@ create table "address" (
   "note" text,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_address_country_id_country" foreign key ("country_id") references "country" ("id") on delete cascade
+  constraint "pk_address_id" primary key ("id"),
+  constraint "fk_address_country_id" foreign key ("country_id") references "country" ("id") on delete cascade
 );
 
 create table "contact" (
@@ -51,9 +51,11 @@ create table "contact" (
   "email" text not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_contact_address_id_animal" foreign key ("address_id") references "address" ("id") on delete cascade,
-  constraint "fk_contact_user_or_organization_present" check (
+  constraint "pk_contact_id" primary key ("id"),
+  constraint "uq_contact_user_id" unique ("user_id"),
+  constraint "uq_contact_organization_id" unique ("organization_id"),
+  constraint "fk_contact_address_id" foreign key ("address_id") references "address" ("id") on delete cascade,
+  constraint "ck_contact_user_or_organization_present" check (
     (user_id is not null and organization_id is null) or
     (user_id is null and organization_id is not null)
   )
@@ -64,7 +66,7 @@ create table "animal_type" (
   "name" varchar(100) not null unique,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id")
+  constraint "pk_animal_type_id" primary key ("id")
 );
 
 create table "breed" (
@@ -73,9 +75,9 @@ create table "breed" (
   "name" varchar(255) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "uq_breed_animal_type_id_name_animal" unique ("animal_type_id", "name"),
-  constraint "fk_breed_animal_type_id_animal" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
+  constraint "pk_breed_id" primary key ("id"),
+  constraint "uq_breed_animal_type_id" unique ("animal_type_id", "name"),
+  constraint "fk_breed_animal_type_id" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
 );
 
 create table "animal_species" (
@@ -84,9 +86,9 @@ create table "animal_species" (
   "name" varchar(255) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "uq_animal_species_animal_type_id_name_animal" unique ("animal_type_id", "name"),
-  constraint "fk_animal_species_animal_type_id_animal" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
+  constraint "pk_animal_species_id" primary key ("id"),
+  constraint "uq_animal_species_animal_type_id" unique ("animal_type_id", "name"),
+  constraint "fk_animal_species_animal_type_id" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
 );
 
 create table "organization" (
@@ -98,15 +100,18 @@ create table "organization" (
   "adoption_policy" text,
   "adoption_url" text,
   "distance" varchar(20),
-  "facebook" text,
-  "twitter" text,
-  "youtube" text,
-  "instagram" text,
-  "pinterest" text,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_organization_contact_id_contact" foreign key ("contact_id") references "contact" ("id") on delete cascade
+  constraint "pk_organization_id" primary key ("id"),
+  constraint "fk_organization_contact_id" foreign key ("contact_id") references "contact" ("id") on delete cascade
+);
+
+create table "organization_social" (
+  "organization_id" bigint not null,
+  "platform" text not null,
+  "url" text not null,
+  constraint "pk_organization_social_organization_id_platform" primary key ("organization_id", "platform"),
+  constraint "fk_organization_social_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
 
 create table "organization_hour" (
@@ -121,8 +126,15 @@ create table "organization_hour" (
   "sunday" varchar(30),
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint fk_organization_hour_organization_id_organization foreign key ("organization_id") references "organization" ("id") on delete cascade
+  constraint "pk_organization_hour_id" primary key ("id"),
+  constraint "uq_organization_hour_organization_id" unique ("organization_id"),
+  constraint "fk_organization_hour_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade,
+  constraint ck_organization_hour_provided check (
+    coalesce(
+      nullif(trim(monday), ''), nullif(trim(tuesday), ''), nullif(trim(wednesday), ''), 
+      nullif(trim(thursday), ''), nullif(trim(friday), ''), nullif(trim(saturday), ''), nullif(trim(sunday), '')
+    ) is not null
+  )
 );
 
 create table "organization_photo" (
@@ -134,8 +146,8 @@ create table "organization_photo" (
   "full" text,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_organization_photo_organization_id_animal" foreign key ("organization_id") references "organization" ("id") on delete cascade
+  constraint "pk_organization_photo_id" primary key ("id"),
+  constraint "fk_organization_photo_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
 
 create table "animal" (
@@ -158,8 +170,8 @@ create table "animal" (
   "adopted_at" timestamptz,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_animal_contact_id_contact" foreign key ("contact_id") references "contact" ("id") on delete cascade
+  constraint "pk_animal_id" primary key ("id"),
+  constraint "fk_animal_contact_id" foreign key ("contact_id") references "contact" ("id") on delete cascade
   
   -- @TODO: handle properties unique for each species
   -- -- attributes
@@ -182,18 +194,18 @@ create table "animal_breed" (
   "primary" boolean not null default false,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("animal_id", "breed_id"),
-  constraint "fk_animal_breed_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade,
-  constraint "fk_animal_breed_breed_id_animal" foreign key ("breed_id") references "breed" ("id") on delete cascade
+  constraint "pk_animal_breed_animal_id_breed_id" primary key ("animal_id", "breed_id"),
+  constraint "fk_animal_breed_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade,
+  constraint "fk_animal_breed_breed_id" foreign key ("breed_id") references "breed" ("id") on delete cascade
 );
 
 create table user_animal_like (
   "user_id" uuid not null,
   "animal_id" bigint not null,
   "liked_at" timestamptz not null default now(),
-  primary key ("user_id", "animal_id"),
-  constraint "fk_user_animal_like_user_id_user" foreign key ("user_id") references "user" ("id") on delete cascade,
-  constraint "fk_user_animal_like_animal_id_user" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_user_animal_like_user_id_animal_id" primary key ("user_id", "animal_id"),
+  constraint "fk_user_animal_like_user_id" foreign key ("user_id") references "user" ("id") on delete cascade,
+  constraint "fk_user_animal_like_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "tag" (
@@ -202,8 +214,8 @@ create table "tag" (
   "name" varchar(255),
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_tag_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_tag_id" primary key ("id"),
+  constraint "fk_tag_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "color" (
@@ -212,8 +224,8 @@ create table "color" (
   "color" varchar(255) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_color_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_color_id" primary key ("id"),
+  constraint "fk_color_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "microchip" (
@@ -225,9 +237,9 @@ create table "microchip" (
   "location" varchar(100),
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "uq_microchip_animal" unique ("animal_id"),
-  constraint "fk_microchip_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_microchip_id" primary key ("id"),
+  constraint "uq_microchip_animal_id" unique ("animal_id"),
+  constraint "fk_microchip_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "animal_photo" (
@@ -239,56 +251,58 @@ create table "animal_photo" (
   "full" text,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_animal_photo_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_animal_photo_id" primary key ("id"),
+  constraint "fk_animal_photo_id_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "animal_video" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "url" text,
+  "url" text not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_animal_video_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade
+  constraint "pk_animal_video_id" primary key ("id"),
+  constraint "fk_animal_video_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade
 );
 
 create table "adoption" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "user_id" uuid,
+  "contact_id" bigint,
+  -- "user_id" uuid,
   "adopted_at" timestamptz not null default now(),
   "returned_at" timestamptz,
   "notes" text,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  primary key ("id"),
-  constraint "fk_adoption_animal_id_animal" foreign key ("animal_id") references "animal" ("id") on delete cascade,
-  constraint "fk_adoption_user_id_animal" foreign key ("user_id") references "user" ("id") on delete set null
+  constraint "pk_adoption_id" primary key ("id"),
+  constraint "fk_adoption_animal_id" foreign key ("animal_id") references "animal" ("id") on delete cascade,
+  constraint "fk_adoption_contact_id" foreign key ("contact_id") references "contact" ("id") on delete set null
+  -- constraint "fk_adoption_user_id_user" foreign key ("user_id") references "user" ("id") on delete set null
 );
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 drop table if exists "user" cascade;
+drop table if exists "country" cascade;
+drop table if exists "address" cascade;
+drop table if exists "contact" cascade;
 drop table if exists "animal_type" cascade;
-drop table if exists "animal_breed" cascade;
 drop table if exists "breed" cascade;
 drop table if exists "animal_species" cascade;
 drop table if exists "organization" cascade;
+drop table if exists "organization_social" cascade;
 drop table if exists "organization_hour" cascade;
 drop table if exists "organization_photo" cascade;
 drop table if exists "animal" cascade;
 drop table if exists "animal_breed" cascade;
 drop table if exists "user_animal_like" cascade;
-drop table if exists "contact" cascade;
 drop table if exists "tag" cascade;
 drop table if exists "color" cascade;
 drop table if exists "microchip" cascade;
 drop table if exists "animal_photo" cascade;
 drop table if exists "animal_video" cascade;
 drop table if exists "adoption" cascade;
-drop table if exists "address" cascade;
-drop table if exists "country" cascade;
 drop type if exists "gender";
 -- +goose StatementEnd

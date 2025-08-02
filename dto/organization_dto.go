@@ -7,8 +7,8 @@ import (
 
 func OrganizationToResponse(organization model.Organization) api.Organization {
 	return api.Organization{
-		ID:               organization.ID,
-		ContactID:        organization.ContactID,
+		ID: organization.ID,
+		// ContactID:        organization.ContactID,
 		Name:             organization.Name,
 		AdoptionPolicy:   organization.AdoptionPolicy.Ptr(),
 		AdoptionURL:      organization.AdoptionURL.Ptr(),

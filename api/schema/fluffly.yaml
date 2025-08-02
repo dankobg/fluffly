@@ -2193,8 +2193,8 @@ components:
       type: object
       required:
         - id
-        - contact_id
         - name
+        - contact
         - created_at
         - updated_at
       properties:
@@ -2202,10 +2202,6 @@ components:
           format: int64
           type: integer
           description: Organization id
-        contact_id:
-          format: int64
-          type: integer
-          description: Contact id
         name:
           type: string
           description: Organization name
@@ -2239,6 +2235,8 @@ components:
         pinterest:
           type: string
           description: Organization pinterest
+        contact:
+          $ref: "#/components/schemas/Contact"
         created_at:
           format: date-time
           type: string
