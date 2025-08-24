@@ -1,0 +1,61 @@
+meta {
+  name: Create organization
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{baseUrl}}/organizations
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "adoption_policy": "",
+    "adoption_url": "",
+    "contact": {
+      "address": {
+        "city": "",
+        "country_id": 0,
+        "lat": "",
+        "lng": "",
+        "note": "",
+        "postal_code": "",
+        "region": "",
+        "street_address": "",
+        "street_number": "",
+        "unit_number": ""
+      },
+      "email": "",
+      "phone": ""
+    },
+    "distance": "",
+    "mission_statement": "",
+    "name": "",
+    "photos": [
+      {
+        "full": "",
+        "large": "",
+        "medium": "",
+        "small": ""
+      }
+    ],
+    "socials": [
+      {
+        "platform": "",
+        "url": ""
+      }
+    ],
+    "website": "",
+    "work_hour": {
+      "friday": "",
+      "monday": "",
+      "saturday": "",
+      "sunday": "",
+      "thursday": "",
+      "tuesday": "",
+      "wednesday": ""
+    }
+  }
+}

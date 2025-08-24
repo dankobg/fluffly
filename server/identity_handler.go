@@ -6,7 +6,7 @@ import (
 
 	"github.com/aarondl/opt/omit"
 	api "github.com/dankobg/fluffly/api/gen"
-	"github.com/dankobg/fluffly/db/model"
+	"github.com/dankobg/fluffly/db/dbmodel"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/google/uuid"
@@ -163,7 +163,7 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 	if err != nil {
 		return nil, err
 	}
-	if _, err := a.persistor.User().Create(ctx, model.UserSetter{ID: omit.From(identityID)}); err != nil {
+	if _, err := a.persistor.User().Create(ctx, dbmodel.UserSetter{ID: omit.From(identityID)}); err != nil {
 		return nil, err
 	}
 	return api.CreateIdentity201JSONResponse(resp), nil

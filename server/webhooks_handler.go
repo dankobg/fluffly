@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/aarondl/opt/omit"
-	"github.com/dankobg/fluffly/db/model"
+	"github.com/dankobg/fluffly/db/dbmodel"
 	"github.com/google/uuid"
 	orykratos "github.com/ory/client-go"
 	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
@@ -40,7 +40,7 @@ func (a *ApiHandler) registrationAfterPassword(w http.ResponseWriter, r *http.Re
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if _, err := a.persistor.User().Create(r.Context(), model.UserSetter{ID: omit.From(identityID)}); err != nil {
+	if _, err := a.persistor.User().Create(r.Context(), dbmodel.UserSetter{ID: omit.From(identityID)}); err != nil {
 		a.Log.Error("failed to create new user", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to create user", http.StatusBadRequest)
 		return
@@ -80,7 +80,7 @@ func (a *ApiHandler) registrationAfterOidc(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if _, err := a.persistor.User().Create(r.Context(), model.UserSetter{ID: omit.From(identityID)}); err != nil {
+	if _, err := a.persistor.User().Create(r.Context(), dbmodel.UserSetter{ID: omit.From(identityID)}); err != nil {
 		a.Log.Error("failed to create new user", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to create user", http.StatusBadRequest)
 		return

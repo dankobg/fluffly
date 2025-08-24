@@ -1,0 +1,15 @@
+meta {
+  name: Deactivate a Session
+  type: http
+  seq: 30
+}
+
+delete {
+  url: {{baseUrl}}/sessions/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 
+}

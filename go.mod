@@ -23,7 +23,7 @@ require (
 	github.com/ory/keto/proto v0.13.0-alpha.0
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/shopspring/decimal v1.4.0
-	github.com/stephenafamo/bob v0.38.1-0.20250722094724-08202428a120
+	github.com/stephenafamo/bob v0.40.2
 	github.com/stephenafamo/scan v0.7.0
 	github.com/wasilibs/go-pgquery v0.0.0-20250409022910-10ac41983c07
 	github.com/wneessen/go-mail v0.6.2
@@ -43,7 +43,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/knadh/koanf/maps v0.1.2 // indirect
-	github.com/lib/pq v1.10.7 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect

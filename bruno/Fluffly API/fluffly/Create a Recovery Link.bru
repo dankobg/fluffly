@@ -1,0 +1,22 @@
+meta {
+  name: Create a Recovery Link
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/recovery/link
+  body: json
+  auth: none
+}
+
+params:query {
+  ~return_to: 
+}
+
+body:json {
+  {
+    "expires_in": "",
+    "identity_id": ""
+  }
+}

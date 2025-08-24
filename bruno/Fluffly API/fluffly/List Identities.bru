@@ -1,0 +1,22 @@
+meta {
+  name: List Identities
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/identities
+  body: none
+  auth: none
+}
+
+params:query {
+  ~page_size: 
+  ~page_token: 
+  ~consistency: 
+  ~ids: 
+  ~credentials_identifier: 
+  ~preview_credentials_identifier_similar: 
+  ~include_credential: 
+  ~organization_id: 
+}

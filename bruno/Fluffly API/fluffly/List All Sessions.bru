@@ -1,0 +1,18 @@
+meta {
+  name: List All Sessions
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/sessions
+  body: none
+  auth: none
+}
+
+params:query {
+  ~page_size: 
+  ~page_token: 
+  ~active: 
+  ~expand: 
+}

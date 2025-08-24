@@ -1,0 +1,24 @@
+meta {
+  name: Update country
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/countries/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 254
+}
+
+body:json {
+  {
+    "iso_alpha2": "KK",
+    "iso_alpha3": "KKK",
+    "iso_numeric": "998",
+    "name": "Bozooo"
+  }
+}

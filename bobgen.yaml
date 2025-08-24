@@ -1,8 +1,6 @@
 psql:
   dsn: "postgres://test:test@localhost:5432/test?sslmode=disable"
   driver: "github.com/jackc/pgx/v5/stdlib"
-  output: "db/model"
-  pkgname: "model"
   uuid_pkg: "google"
   wipe: true
   queries:
@@ -37,3 +35,32 @@ psql:
     session_devices:
     session_token_exchanges:
     sessions:
+
+plugins_preset: "all"
+plugins:
+  dbinfo:
+    disabled: false
+    pkgname: "dbinfo"
+    destination: "./db/dbinfo"
+  enums:
+    disabled: false
+    pkgname: "dbenum"
+    destination: "./db/dbenum"
+  models:
+    disabled: false
+    pkgname: "dbmodel"
+    destination: "./db/dbmodel"
+  factory:
+    disabled: false
+    pkgname: "dbfactory"
+    destination: "./db/dbfactory"
+  dberrors:
+    disabled: false
+    pkgname: "dberrors"
+    destination: "./db/dberrors"
+  where:
+    disabled: false
+  loaders:
+    disabled: false
+  joins:
+    disabled: false

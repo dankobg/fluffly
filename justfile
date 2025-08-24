@@ -40,11 +40,11 @@ default:
 # install needed tools
 tools-install:
 	go get -tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-	go get -tool github.com/stephenafamo/bob/gen/bobgen-psql@08202428a120d26097136c41841fc636afa236a1
+	go get -tool github.com/stephenafamo/bob/gen/bobgen-psql@latest
 
 # generate bob sql
 gen-sql:
-  bobgen-psql -c ./bobgen.yaml
+	bobgen-psql -c ./bobgen.yaml
 
 # Generate openapi server
 gen-openapi:

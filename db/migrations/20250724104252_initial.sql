@@ -95,7 +95,8 @@ create table "organization" (
   "distance" varchar(20),
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  constraint "pk_organization_id" primary key ("id")
+  constraint "pk_organization_id" primary key ("id"),
+  constraint "uq_organization_name" unique ("name")
 );
 
 create table "organization_contact" (
@@ -121,7 +122,7 @@ create table "organization_social" (
   constraint "fk_organization_social_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
 
-create table "organization_hour" (
+create table "organization_work_hour" (
   "id" bigint not null generated always as identity,
   "organization_id" bigint,
   "monday" varchar(30),
@@ -133,10 +134,10 @@ create table "organization_hour" (
   "sunday" varchar(30),
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
-  constraint "pk_organization_hour_id" primary key ("id"),
-  constraint "uq_organization_hour_organization_id" unique ("organization_id"),
-  constraint "fk_organization_hour_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade,
-  constraint "ck_organization_hour_provided" check (
+  constraint "pk_organization_work_hour_id" primary key ("id"),
+  constraint "uq_organization_work_hour_organization_id" unique ("organization_id"),
+  constraint "fk_organization_work_hour_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade,
+  constraint "ck_organization_work_hour_provided" check (
     coalesce(
       nullif(trim(monday), ''), nullif(trim(tuesday), ''), nullif(trim(wednesday), ''), 
       nullif(trim(thursday), ''), nullif(trim(friday), ''), nullif(trim(saturday), ''), nullif(trim(sunday), '')
@@ -311,7 +312,7 @@ drop table if exists "breed" cascade;
 drop table if exists "animal_species" cascade;
 drop table if exists "organization" cascade;
 drop table if exists "organization_social" cascade;
-drop table if exists "organization_hour" cascade;
+drop table if exists "organization_work_hour" cascade;
 drop table if exists "organization_photo" cascade;
 drop table if exists "animal" cascade;
 drop table if exists "animal_breed" cascade;

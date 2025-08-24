@@ -1,6 +1,7 @@
 openapi: 3.0.2
 servers:
   - url: "http://localhost:6969/api/v1"
+    description: Fluffly development server
 info:
   version: 1.0.0
   title: Fluffly API
@@ -8,6 +9,133 @@ tags:
   - name: fluffly
     description: Everything about fluffly
 paths:
+  /countries:
+    get:
+      operationId: listCountries
+      summary: List countries
+      description: List countries
+      tags:
+        - fluffly
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Country"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+    post:
+      operationId: createCountry
+      summary: Create country
+      description: Create a country
+      tags:
+        - fluffly
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCountryBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Country"
+          description: recoveryCodeForIdentity
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+  "/countries/{id}":
+    get:
+      operationId: getCountry
+      summary: Get country by id
+      description: Return a specific country by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The country id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Country"
+          description: identitySchema
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    patch:
+      operationId: updateCountry
+      summary: Update country
+      description: Update a country
+      tags:
+        - fluffly
+      parameters:
+        - description: The country id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCountryBody"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Country"
+          description: recoveryCodeForIdentity
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    delete:
+      operationId: deleteCountry
+      summary: Delete country by id
+      description: Delete a specific country by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The country id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          $ref: "#/components/responses/EmptyResponse"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/GenericError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
   /organizations:
     get:
       operationId: listOrganizations
@@ -1717,7 +1845,9 @@ components:
       required:
         - id
         - name
-        - iso_code
+        - iso_alpha2
+        - iso_alpha3
+        - iso_numeric
         - created_at
         - updated_at
       properties:
@@ -1728,9 +1858,15 @@ components:
         name:
           type: string
           description: Country name
-        iso_code:
+        iso_alpha2:
+          type: string
+          description: Country 2 letter iso_code
+        iso_alpha3:
           type: string
           description: Country 3 letter iso_code
+        iso_numeric:
+          type: string
+          description: Country numeric iso_code
         created_at:
           format: date-time
           type: string
@@ -1741,27 +1877,44 @@ components:
           description: Updated at timestamp
     CreateCountryBody:
       type: object
+      required:
+        - name
+        - iso_alpha2
+        - iso_alpha3
+        - iso_numeric
       properties:
         name:
           type: string
           description: Country name
-        iso_code:
+        iso_alpha2:
+          type: string
+          description: Country 2 letter iso_code
+        iso_alpha3:
           type: string
           description: Country 3 letter iso_code
+        iso_numeric:
+          type: string
+          description: Country numeric iso_code
     UpdateCountryBody:
       type: object
       properties:
         name:
           type: string
           description: Country name
-        iso_code:
+        iso_alpha2:
+          type: string
+          description: Country 2 letter iso_code
+        iso_alpha3:
           type: string
           description: Country 3 letter iso_code
+        iso_numeric:
+          type: string
+          description: Country numeric iso_code
     Address:
       type: object
       required:
         - id
-        - address_line_1
+        - street_address
         - city
         - country
         - created_at
@@ -1777,12 +1930,9 @@ components:
         street_number:
           type: string
           description: Street number
-        address_line_1:
+        street_address:
           type: string
-          description: Address line 1
-        address_line_2:
-          type: string
-          description: Address line 2 (more details)
+          description: Street address
         city:
           type: string
           description: City
@@ -1812,7 +1962,7 @@ components:
     CreateAddressBody:
       type: object
       required:
-        - address_line_1
+        - street_address
         - city
         - country
       properties:
@@ -1822,12 +1972,9 @@ components:
         street_number:
           type: string
           description: Street number
-        address_line_1:
+        street_address:
           type: string
-          description: Address line 1
-        address_line_2:
-          type: string
-          description: Address line 2 (more details)
+          description: Street address
         city:
           type: string
           description: City
@@ -1844,8 +1991,10 @@ components:
         note:
           type: string
           description: Some info about address if needed
-        country:
-          $ref: "#/components/schemas/CreateCountryBody"
+        country_id:
+          format: int64
+          type: integer
+          description: Country id
     UpdateAddressBody:
       type: object
       properties:
@@ -1903,21 +2052,6 @@ components:
         - email
         - address
       properties:
-        # user_id:
-        #   format: uuid
-        #   type: string
-        #   description: User id
-        # organization_id:
-        #   format: int64
-        #   type: integer
-        #   description: Organization id
-        # TODO: maybe just put ids and some info whethere its user | organization
-        user:
-          $ref: "#/components/schemas/User"
-          nullable: true
-        organization:
-          $ref: "#/components/schemas/Organization"
-          nullable: true
         phone:
           type: string
           description: Phone number
@@ -1934,50 +2068,13 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
-    CreateContactBody:
+    CreateOrganizationContactBody:
       type: object
       required:
         - phone
         - email
         - address
       properties:
-        # oneOf:
-        #   - required:
-        #       - user_id
-        #     properties:
-        #       user_id:
-        #         format: uuid
-        #         type: string
-        #       organization_id:
-        #         type: integer
-        #         format: int64
-        #         nullable: true
-        #     not:
-        #       required:
-        #         - organization_id
-        #   - required:
-        #       - organization_id
-        #     properties:
-        #       organization_id:
-        #         format: int64
-        #         type: integer
-        #       user_id:
-        #         type: string
-        #         format: uuid
-        #         nullable: true
-        #     not:
-        #       required:
-        #         - user_id
-        user_id:
-          format: uuid
-          type: string
-          description: User id
-          nullable: true
-        organization_id:
-          format: int64
-          type: integer
-          description: Organization id
-          nullable: true
         phone:
           type: string
           description: Contact phone
@@ -2094,18 +2191,33 @@ components:
         website:
           type: string
           description: Organization website
+          nullable: true
         mission_statement:
           type: string
           description: Organization mission statement
+          nullable: true
         adoption_policy:
           type: string
           description: Organization adoption policy
+          nullable: true
         adoption_url:
           type: string
           description: Organization adoption url
+          nullable: true
         distance:
           type: string
           description: Organization distance
+          nullable: true
+        contact:
+          $ref: "#/components/schemas/CreateOrganizationContactBody"
+        work_hour:
+          $ref: "#/components/schemas/CreateOrganizationWorkHourBody"
+          nullable: true
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateOrganizationPhotoBody"
+          nullable: true
         socials:
           type: array
           items:
@@ -2120,8 +2232,7 @@ components:
               url:
                 type: string
                 description: Social platform url
-        contact:
-          $ref: "#/components/schemas/CreateContactBody"
+          nullable: true
     UpdateOrganizationBody:
       type: object
       properties:
@@ -2179,6 +2290,8 @@ components:
         - id
         - name
         - contact
+        - socials
+        - photos
         - created_at
         - updated_at
       properties:
@@ -2204,12 +2317,18 @@ components:
         distance:
           type: string
           description: Organization distance
+        contact:
+          $ref: "#/components/schemas/Contact"
+        work_hour:
+          $ref: "#/components/schemas/OrganizationWorkHour"
         socials:
           type: array
           items:
             $ref: "#/components/schemas/OrganizationSocial"
-        contact:
-          $ref: "#/components/schemas/Contact"
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationPhoto"
         created_at:
           format: date-time
           type: string
@@ -2218,11 +2337,11 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
-    OrganizationHour:
+    OrganizationWorkHour:
       type: object
       required:
         - id
-        - contact_id
+        - organization_id
         - name
       properties:
         id:
@@ -2262,6 +2381,56 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
+    CreateOrganizationWorkHourBody:
+      type: object
+      properties:
+        monday:
+          type: string
+          description: Monday work hours
+          nullable: true
+        tuesday:
+          type: string
+          description: Tuesday work hours
+          nullable: true
+        wednesday:
+          type: string
+          description: Wednesday work hours
+          nullable: true
+        thursday:
+          type: string
+          description: Thursday work hours
+          nullable: true
+        friday:
+          type: string
+          description: Friday work hours
+          nullable: true
+        saturday:
+          type: string
+          description: Saturday work hours
+          nullable: true
+        sunday:
+          type: string
+          description: Sunday work hours
+          nullable: true
+    CreateOrganizationPhotoBody:
+      type: object
+      properties:
+        small:
+          type: string
+          description: Small photo url
+          nullable: true
+        medium:
+          type: string
+          description: Medium photo url
+          nullable: true
+        large:
+          type: string
+          description: Large photo url
+          nullable: true
+        full:
+          type: string
+          description: Full photo url
+          nullable: true
     OrganizationPhoto:
       type: object
       required:
@@ -3254,7 +3423,7 @@ components:
 
             saml CredentialsTypeSAML
 
-            link_recovery CredentialsTypeRecoveryLink 
+            link_recovery CredentialsTypeRecoveryLink
             CredentialsTypeRecoveryLink is a special credential type linked to
             the link strategy (recovery flow).  It is not used within the
             credentials object itself.

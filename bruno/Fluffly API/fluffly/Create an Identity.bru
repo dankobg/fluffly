@@ -1,0 +1,75 @@
+meta {
+  name: Create an Identity
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/identities
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "credentials": {
+      "oidc": {
+        "config": {
+          "providers": [
+            {
+              "organization": "",
+              "provider": "",
+              "subject": "",
+              "use_auto_link": false
+            }
+          ]
+        }
+      },
+      "password": {
+        "config": {
+          "hashed_password": "",
+          "password": "",
+          "use_password_migration_hook": false
+        }
+      },
+      "saml": {
+        "config": {
+          "providers": [
+            {
+              "organization": "",
+              "provider": "",
+              "subject": ""
+            }
+          ]
+        }
+      }
+    },
+    "metadata_admin": "",
+    "metadata_public": "",
+    "organization_id": "",
+    "recovery_addresses": [
+      {
+        "created_at": "",
+        "id": "",
+        "updated_at": "",
+        "value": "",
+        "via": ""
+      }
+    ],
+    "schema_id": "",
+    "state": "",
+    "traits": {},
+    "verifiable_addresses": [
+      {
+        "created_at": "",
+        "id": "",
+        "status": "",
+        "updated_at": "",
+        "value": "",
+        "verified": false,
+        "verified_at": "",
+        "via": ""
+      }
+    ]
+  }
+}

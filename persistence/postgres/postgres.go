@@ -66,6 +66,10 @@ func (ps *PgPersistor) Organization() persistence.OrganizationPersistor {
 	return NewPgOrganizationPersistor(ps)
 }
 
+func (ps *PgPersistor) Country() persistence.CountryPersistor {
+	return NewPgCountryPersistor(ps)
+}
+
 func WithTx(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) error) (err error) {
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {

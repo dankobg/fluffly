@@ -57,7 +57,6 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	if err != nil {
 		panic("error loading openapi spec: " + err.Error())
 	}
-	openapi.Servers = nil
 
 	openapiB, err := openapi.MarshalJSON()
 	if err != nil {

@@ -1,0 +1,19 @@
+meta {
+  name: Create a Recovery Code
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/recovery/code
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "expires_in": "",
+    "flow_type": "",
+    "identity_id": ""
+  }
+}
