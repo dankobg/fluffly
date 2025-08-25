@@ -17,7 +17,7 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 				Config:      &v.Config,
 				Identifiers: &v.Identifiers,
 				Type:        (*api.IdentityCredentialsType)(v.Type),
-				Version:     new(int64),
+				Version:     v.Version,
 				CreatedAt:   v.CreatedAt,
 				UpdatedAt:   v.UpdatedAt,
 			}

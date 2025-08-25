@@ -169,11 +169,11 @@ create table "animal" (
   "gender" gender,
   "hermaphrodite" boolean not null default false,
   "age" varchar(20) not null,
-  "coat_length" varchar(30),
-  "size" varchar(30) not null,
+  "size" varchar(20) not null,
   "image_url" text not null,
   "description" text,
   "distance" varchar,
+  "attributes" jsonb,
   "status" varchar(30),
   "status_changed_at" timestamptz,
   "adopted_at" timestamptz,
@@ -186,20 +186,6 @@ create table "animal" (
     ("user_id" is not null and "organization_id" is null) or
     ("user_id" is null and "organization_id" is not null)
   )
-  
-  -- @TODO: handle properties unique for each species
-  -- -- attributes
-  -- spayed_neutered boolean default false,
-  -- house_trained boolean default false,
-  -- declawed boolean default false,
-  -- vaccinated boolean default false,
-  -- special_needs boolean default false,
-  -- "shots_current" boolean,
-  -- good_with_kids boolean default true,
-  -- good_with_cats boolean default true,
-  -- good_with_dogs boolean default true,
-  -- -- color
-  -- -- contact
 );
 
 create table "animal_breed" (
