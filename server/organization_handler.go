@@ -151,7 +151,20 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 	if err != nil {
 		return nil, fmt.Errorf("failed to update an organization: %w", err)
 	}
-	resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
+	// resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
+	resp := api.UpdateOrganization201JSONResponse(api.Organization{
+		AdoptionPolicy:   organization.AdoptionPolicy.Ptr(),
+		AdoptionURL:      organization.AdoptionURL.Ptr(),
+		Distance:         organization.Distance.Ptr(),
+		ID:               organization.ID,
+		MissionStatement: organization.MissionStatement.Ptr(),
+		Name:             organization.Name,
+		Website:          organization.Website.Ptr(),
+		CreatedAt:        organization.CreatedAt,
+		UpdatedAt:        organization.UpdatedAt,
+		Photos:           []api.OrganizationPhoto{},
+		Socials:          []api.OrganizationSocial{},
+	})
 	return resp, nil
 }
 
