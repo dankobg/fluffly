@@ -95,7 +95,7 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 }
 
 func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryRequestObject) (api.GetCountryResponseObject, error) {
-	countryRow, err := a.persistor.Country().Get(ctx, request.ID)
+	country, err := a.persistor.Country().Get(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil
@@ -103,13 +103,13 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 		return nil, fmt.Errorf("failed to get an country by id: %w", err)
 	}
 	resp := api.GetCountry200JSONResponse(api.Country{
-		ID:         countryRow.ID,
-		Name:       countryRow.Name,
-		IsoAlpha2:  countryRow.IsoAlpha2,
-		IsoAlpha3:  countryRow.IsoAlpha3,
-		IsoNumeric: countryRow.IsoNumeric,
-		CreatedAt:  countryRow.CreatedAt,
-		UpdatedAt:  countryRow.UpdatedAt,
+		ID:         country.ID,
+		Name:       country.Name,
+		IsoAlpha2:  country.IsoAlpha2,
+		IsoAlpha3:  country.IsoAlpha3,
+		IsoNumeric: country.IsoNumeric,
+		CreatedAt:  country.CreatedAt,
+		UpdatedAt:  country.UpdatedAt,
 	})
 	return resp, nil
 }

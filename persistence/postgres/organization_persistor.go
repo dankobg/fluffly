@@ -64,9 +64,18 @@ func (p *PgOrganizationPersistor) Create(ctx context.Context, in persistence.Org
 				return fmt.Errorf("failed to insert organization social platforms: %w", err)
 			}
 		}
+
+		country, err := dbmodel.FindCountry(ctx, p.db, in.Address.CountryID.MustGet())
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		insertedOrg.R.OrganizationWorkHour = insertedWorkHour
 		insertedOrg.R.OrganizationContact = insertedContact
 		insertedOrg.R.OrganizationContact.R.Address = insertedAddress
+		if country != nil {
+			insertedOrg.R.OrganizationContact.R.Address.R.Country = country
+		}
 		insertedOrg.R.OrganizationPhotos = insertedPhotos
 		insertedOrg.R.OrganizationSocials = insertedSocials
 		org = insertedOrg
