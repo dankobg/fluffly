@@ -216,17 +216,11 @@ mg-fix name *flags: _require_goose
 # Check migration files without running them
 mg-validate name *flags: _require_goose
 	goose postgres "{{db_uri}}" -dir "{{migrations_dir}}" validate {{name}} {{flags}}
-		
-# # start from scratch in dev (clean all -> migrate -> seed_common)
-# mg-fresh:
-# 	just mg-schema clean
-# 	rm -rf ./db/migrations/*.sql
-# 	just mg-hash
-# 	just mg-diff initial
-# 	just mg-apply --allow-dirty
-# 	just dc-up kratos-migrate keto-migrate
-# 	just mg-seed
 
+# migrate clean and up to latest
+mg-fresh:
+	just mg-reset
+	just mg-up
 
 # ----------------------------------------------------------------------------
 

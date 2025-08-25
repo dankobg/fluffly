@@ -67,7 +67,7 @@ func (p *PgOrganizationPersistor) Create(ctx context.Context, in persistence.Org
 
 		country, err := dbmodel.FindCountry(ctx, p.db, in.Address.CountryID.MustGet())
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("failed to get a country: %v\n", err)
 		}
 
 		insertedOrg.R.OrganizationWorkHour = insertedWorkHour
