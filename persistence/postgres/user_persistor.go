@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dankobg/fluffly/db/dbmodel"
-	"github.com/dankobg/fluffly/db/queries"
+	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
 )
 
@@ -22,50 +23,62 @@ func NewPgUserPersistor(ps *PgPersistor) *PgUserPersistor {
 	}
 }
 
-func (p *PgUserPersistor) Create(ctx context.Context, in dbmodel.UserSetter) (dbmodel.User, error) {
-	insertedUser, err := dbmodel.Users.Insert(&in).One(ctx, p.db)
-	if err != nil {
-		return dbmodel.User{}, fmt.Errorf("failed to create a user: %w", err)
+func (pu *PgUserPersistor) ListUsers(ctx context.Context) ([]model.User, error) {
+	q := p.SELECT(t.User.AllColumns).
+		FROM(t.User)
+	var dest []model.User
+	if err := q.QueryContext(ctx, pu.db, &dest); err != nil {
+		return nil, err
 	}
-	return *insertedUser, nil
+	return dest, nil
 }
 
-func (p *PgUserPersistor) Update(ctx context.Context, userID uuid.UUID, in dbmodel.UserSetter) (dbmodel.User, error) {
-	updatedUser, err := dbmodel.Users.Update(in.UpdateMod(), dbmodel.UpdateWhere.Users.ID.EQ(userID)).One(ctx, p.db)
-	if err != nil {
-		return dbmodel.User{}, fmt.Errorf("failed to update a user: %w", err)
+func (pu *PgUserPersistor) GetUserByID(ctx context.Context, userID uuid.UUID) (model.User, error) {
+	q := p.SELECT(t.User.AllColumns).
+		FROM(t.User).
+		WHERE(t.User.ID.EQ(p.UUID(userID)))
+	var dest model.User
+	if err := q.QueryContext(ctx, pu.db, &dest); err != nil {
+		return model.User{}, err
 	}
-	return *updatedUser, nil
+	return dest, nil
 }
 
-func (p *PgUserPersistor) Delete(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
-	_, err := dbmodel.Users.Delete(dbmodel.DeleteWhere.Users.ID.EQ(userID)).Exec(ctx, p.db)
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("failed to delete a user: %w", err)
+func (pu *PgUserPersistor) DeleteUserByID(ctx context.Context, userID uuid.UUID) (uuid.UUID, error) {
+	q := t.User.DELETE().WHERE(t.User.ID.EQ(p.UUID(userID)))
+	if _, err := q.ExecContext(ctx, pu.db); err != nil {
+		return uuid.Nil, fmt.Errorf("failed to delete an user: %w", err)
 	}
 	return userID, nil
 }
 
-func (p *PgUserPersistor) Get(ctx context.Context, userID uuid.UUID) (dbmodel.User, error) {
-	user, err := dbmodel.FindUser(ctx, p.db, userID)
-	if err != nil {
-		return dbmodel.User{}, fmt.Errorf("failed to get a user: %w", err)
+func (pu *PgUserPersistor) CreateUser(ctx context.Context, in persistence.UserSetter) (model.User, error) {
+	cols, m := in.ToModel()
+
+	myCols := t.User.MutableColumns.Except(t.User.CreatedAt, t.User.UpdatedAt)
+	_ = myCols
+	q := t.User.INSERT(cols).
+		MODEL(m).
+		RETURNING(t.User.AllColumns)
+
+	var dest model.User
+	if err := q.QueryContext(ctx, pu.db, &dest); err != nil {
+		return dest, fmt.Errorf("failed to create an user: %w", err)
 	}
-	return *user, nil
+	return dest, nil
 }
 
-func (p *PgUserPersistor) List(ctx context.Context) ([]dbmodel.User, error) {
-	userRows, err := queries.ListUsers().All(ctx, p.db)
-	users := make([]dbmodel.User, len(userRows))
-	if err != nil {
-		return users, fmt.Errorf("failed to list users: %w", err)
+func (pu *PgUserPersistor) UpdateUser(ctx context.Context, userID uuid.UUID, in persistence.UserSetter) (model.User, error) {
+	cols, m := in.ToModel(true)
+
+	q := t.User.UPDATE(cols).
+		MODEL(m).
+		WHERE(t.User.ID.EQ(p.UUID(userID))).
+		RETURNING(t.User.AllColumns)
+
+	var dest model.User
+	if err := q.QueryContext(ctx, pu.db, &dest); err != nil {
+		return dest, fmt.Errorf("failed to update an user: %w", err)
 	}
-	for i, ur := range userRows {
-		users[i] = dbmodel.User{
-			ID:        ur.ID,
-			CreatedAt: ur.CreatedAt,
-			UpdatedAt: ur.UpdatedAt,
-		}
-	}
-	return nil, nil
+	return dest, nil
 }

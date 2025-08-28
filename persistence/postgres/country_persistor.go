@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dankobg/fluffly/db/dbmodel"
-	"github.com/dankobg/fluffly/db/queries"
+	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	p "github.com/go-jet/jet/v2/postgres"
 )
 
 var _ persistence.CountryPersistor = (*PgCountryPersistor)(nil)
@@ -21,54 +22,62 @@ func NewPgCountryPersistor(ps *PgPersistor) *PgCountryPersistor {
 	}
 }
 
-func (p *PgCountryPersistor) Create(ctx context.Context, in dbmodel.CountrySetter) (*dbmodel.Country, error) {
-	insertedCountry, err := dbmodel.Countries.Insert(&in).One(ctx, p.db)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create a country: %w", err)
+func (pc *PgCountryPersistor) ListCountries(ctx context.Context) ([]model.Country, error) {
+	q := p.SELECT(t.Country.AllColumns).
+		FROM(t.Country)
+	var dest []model.Country
+	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
+		return nil, err
 	}
-	return insertedCountry, nil
+	return dest, nil
 }
 
-func (p *PgCountryPersistor) Update(ctx context.Context, countryID int64, in dbmodel.CountrySetter) (*dbmodel.Country, error) {
-	updatedCountry, err := dbmodel.Countries.Update(in.UpdateMod(), dbmodel.UpdateWhere.Countries.ID.EQ(countryID)).One(ctx, p.db)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update a country: %w", err)
+func (pc *PgCountryPersistor) GetCountryByID(ctx context.Context, countryID int64) (model.Country, error) {
+	q := p.SELECT(t.Country.AllColumns).
+		FROM(t.Country).
+		WHERE(t.Country.ID.EQ(p.Int64(countryID)))
+	var dest model.Country
+	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
+		return model.Country{}, err
 	}
-	return updatedCountry, nil
+	return dest, nil
 }
 
-func (p *PgCountryPersistor) Delete(ctx context.Context, countryID int64) (int64, error) {
-	_, err := dbmodel.Countries.Delete(dbmodel.DeleteWhere.Countries.ID.EQ(countryID)).Exec(ctx, p.db)
-	if err != nil {
-		return 0, fmt.Errorf("failed to delete a country: %w", err)
+func (pc *PgCountryPersistor) DeleteCountryByID(ctx context.Context, countryID int64) (int64, error) {
+	q := t.Country.DELETE().WHERE(t.Country.ID.EQ(p.Int64(countryID)))
+	if _, err := q.ExecContext(ctx, pc.db); err != nil {
+		return 0, fmt.Errorf("failed to delete an country: %w", err)
 	}
 	return countryID, nil
 }
 
-func (p *PgCountryPersistor) Get(ctx context.Context, countryID int64) (*dbmodel.Country, error) {
-	country, err := dbmodel.FindCountry(ctx, p.db, countryID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get a country: %w", err)
+func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in persistence.CountrySetter) (model.Country, error) {
+	cols, m := in.ToModel()
+
+	myCols := t.Country.MutableColumns.Except(t.Country.CreatedAt, t.Country.UpdatedAt)
+	_ = myCols
+	q := t.Country.INSERT(cols).
+		MODEL(m).
+		RETURNING(t.Country.AllColumns)
+
+	var dest model.Country
+	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
+		return dest, fmt.Errorf("failed to create an country: %w", err)
 	}
-	return country, nil
+	return dest, nil
 }
 
-func (p *PgCountryPersistor) List(ctx context.Context) (dbmodel.CountrySlice, error) {
-	countryRows, err := queries.ListCountries().All(ctx, p.db)
-	countries := make([]*dbmodel.Country, len(countryRows))
-	if err != nil {
-		return countries, fmt.Errorf("failed to list countries: %w", err)
+func (pc *PgCountryPersistor) UpdateCountry(ctx context.Context, countryID int64, in persistence.CountrySetter) (model.Country, error) {
+	cols, m := in.ToModel(true)
+
+	q := t.Country.UPDATE(cols).
+		MODEL(m).
+		WHERE(t.Country.ID.EQ(p.Int64(countryID))).
+		RETURNING(t.Country.AllColumns)
+
+	var dest model.Country
+	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
+		return dest, fmt.Errorf("failed to update an country: %w", err)
 	}
-	for i, country := range countryRows {
-		countries[i] = &dbmodel.Country{
-			ID:         country.ID,
-			Name:       country.Name,
-			IsoAlpha2:  country.IsoAlpha2,
-			IsoAlpha3:  country.IsoAlpha3,
-			IsoNumeric: country.IsoNumeric,
-			CreatedAt:  country.CreatedAt,
-			UpdatedAt:  country.UpdatedAt,
-		}
-	}
-	return countries, nil
+	return dest, nil
 }

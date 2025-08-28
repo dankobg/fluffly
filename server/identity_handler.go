@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/aarondl/opt/omit"
 	api "github.com/dankobg/fluffly/api/gen"
-	"github.com/dankobg/fluffly/db/dbmodel"
 	"github.com/dankobg/fluffly/dto"
+	"github.com/dankobg/fluffly/persistence"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/google/uuid"
+	"github.com/oapi-codegen/nullable"
 	"github.com/ory/client-go"
 )
 
@@ -163,7 +163,7 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 	if err != nil {
 		return nil, err
 	}
-	if _, err := a.persistor.User().Create(ctx, dbmodel.UserSetter{ID: omit.From(identityID)}); err != nil {
+	if _, err := a.persistor.User().CreateUser(ctx, persistence.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
 		return nil, err
 	}
 	return api.CreateIdentity201JSONResponse(resp), nil

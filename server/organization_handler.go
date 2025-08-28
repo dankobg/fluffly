@@ -7,169 +7,141 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
 	api "github.com/dankobg/fluffly/api/gen"
-	"github.com/dankobg/fluffly/db/dbmodel"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence"
-	"github.com/shopspring/decimal"
+	"github.com/oapi-codegen/nullable"
 )
 
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
-	organizationSetter := &dbmodel.OrganizationSetter{
-		Name: omit.From(request.Body.Name),
-	}
-	if request.Body.Website.IsSpecified() {
-		organizationSetter.Website = omitnull.From(request.Body.Website.MustGet())
-	}
-	if request.Body.MissionStatement.IsSpecified() {
-		organizationSetter.MissionStatement = omitnull.From(request.Body.MissionStatement.MustGet())
-	}
-	if request.Body.AdoptionPolicy.IsSpecified() {
-		organizationSetter.AdoptionPolicy = omitnull.From(request.Body.AdoptionPolicy.MustGet())
-	}
-	if request.Body.AdoptionURL.IsSpecified() {
-		organizationSetter.AdoptionURL = omitnull.From(request.Body.AdoptionURL.MustGet())
-	}
-	if request.Body.Distance.IsSpecified() {
-		organizationSetter.Distance = omitnull.From(request.Body.Distance.MustGet())
+	var organizationCreateSetter persistence.OrganizationCreateSetter
+
+	organizationCreateSetter.Organization = persistence.OrganizationSetter{
+		Name:             nullable.NewNullableWithValue(request.Body.Name),
+		Website:          request.Body.Website,
+		MissionStatement: request.Body.MissionStatement,
+		AdoptionPolicy:   request.Body.AdoptionPolicy,
+		AdoptionURL:      request.Body.AdoptionURL,
+		Distance:         request.Body.Distance,
 	}
 
-	organizationWorkHourSetter := &dbmodel.OrganizationWorkHourSetter{}
+	organizationCreateSetter.Contact = persistence.OrganizationContactSetter{
+		Phone: nullable.NewNullableWithValue(request.Body.Contact.Phone),
+		Email: nullable.NewNullableWithValue(request.Body.Contact.Email),
+	}
+
+	organizationCreateSetter.Address = persistence.AddressSetter{
+		CountryID:     nullable.NewNullableWithValue(*request.Body.Contact.Address.CountryID),
+		UnitNumber:    nullable.NewNullableWithValue(*request.Body.Contact.Address.UnitNumber),
+		StreetNumber:  nullable.NewNullableWithValue(*request.Body.Contact.Address.StreetNumber),
+		StreetAddress: nullable.NewNullableWithValue(request.Body.Contact.Address.StreetAddress),
+		City:          nullable.NewNullableWithValue(request.Body.Contact.Address.City),
+		Region:        nullable.NewNullableWithValue(*request.Body.Contact.Address.Region),
+		PostalCode:    nullable.NewNullableWithValue(*request.Body.Contact.Address.PostalCode),
+		Lat:           nullable.NewNullableWithValue(float64(*request.Body.Contact.Address.Lat)),
+		Lng:           nullable.NewNullableWithValue(float64(*request.Body.Contact.Address.Lng)),
+		Note:          nullable.NewNullableWithValue(*request.Body.Contact.Address.Note),
+	}
+
 	if request.Body.WorkHour != nil {
-		if request.Body.WorkHour.Monday.IsSpecified() {
-			organizationWorkHourSetter.Monday = omitnull.From(request.Body.WorkHour.Monday.MustGet())
-		}
-		if request.Body.WorkHour.Tuesday.IsSpecified() {
-			organizationWorkHourSetter.Tuesday = omitnull.From(request.Body.WorkHour.Tuesday.MustGet())
-		}
-		if request.Body.WorkHour.Wednesday.IsSpecified() {
-			organizationWorkHourSetter.Wednesday = omitnull.From(request.Body.WorkHour.Wednesday.MustGet())
-		}
-		if request.Body.WorkHour.Thursday.IsSpecified() {
-			organizationWorkHourSetter.Thursday = omitnull.From(request.Body.WorkHour.Thursday.MustGet())
-		}
-		if request.Body.WorkHour.Friday.IsSpecified() {
-			organizationWorkHourSetter.Friday = omitnull.From(request.Body.WorkHour.Friday.MustGet())
-		}
-		if request.Body.WorkHour.Saturday.IsSpecified() {
-			organizationWorkHourSetter.Saturday = omitnull.From(request.Body.WorkHour.Saturday.MustGet())
-		}
-		if request.Body.WorkHour.Sunday.IsSpecified() {
-			organizationWorkHourSetter.Sunday = omitnull.From(request.Body.WorkHour.Sunday.MustGet())
-		}
+		organizationCreateSetter.WorkHour = nullable.NewNullableWithValue(persistence.OrganizationWorkHourSetter{
+			Monday:    request.Body.WorkHour.Monday,
+			Tuesday:   request.Body.WorkHour.Tuesday,
+			Wednesday: request.Body.WorkHour.Wednesday,
+			Thursday:  request.Body.WorkHour.Thursday,
+			Friday:    request.Body.WorkHour.Friday,
+			Saturday:  request.Body.WorkHour.Saturday,
+			Sunday:    request.Body.WorkHour.Sunday,
+		})
 	}
 
-	addressSetter := &dbmodel.AddressSetter{
-		CountryID:     omit.From[int64](198),
-		UnitNumber:    omitnull.From(*request.Body.Contact.Address.UnitNumber),
-		StreetNumber:  omitnull.From(*request.Body.Contact.Address.StreetNumber),
-		StreetAddress: omit.From(request.Body.Contact.Address.StreetAddress),
-		City:          omit.From(request.Body.Contact.Address.City),
-		Region:        omitnull.From(*request.Body.Contact.Address.Region),
-		PostalCode:    omitnull.From(*request.Body.Contact.Address.PostalCode),
-		Lat:           omitnull.From(decimal.NewFromFloat32(*request.Body.Contact.Address.Lat)),
-		LNG:           omitnull.From(decimal.NewFromFloat32(*request.Body.Contact.Address.Lng)),
-		Note:          omitnull.From(*request.Body.Contact.Address.Note),
-	}
-
-	organizationContactSetter := &dbmodel.OrganizationContactSetter{
-		Phone: omit.From(request.Body.Contact.Phone),
-		Email: omit.From(request.Body.Contact.Email),
-	}
-
-	organizationPhotoSetters := make([]*dbmodel.OrganizationPhotoSetter, 0)
-	if request.Body.Photos.IsSpecified() {
+	if request.Body.Photos.IsSpecified() && !request.Body.Photos.IsNull() {
+		organizationPhotoSetters := make([]persistence.OrganizationPhotoSetter, 0)
 		for _, photo := range request.Body.Photos.MustGet() {
-			photoSetter := &dbmodel.OrganizationPhotoSetter{}
+			photoSetter := persistence.OrganizationPhotoSetter{}
 			if photo.Small.IsSpecified() {
-				photoSetter.Small = omitnull.From(photo.Small.MustGet())
+				photoSetter.Small = photo.Small
 			}
 			if photo.Medium.IsSpecified() {
-				photoSetter.Medium = omitnull.From(photo.Medium.MustGet())
+				photoSetter.Medium = photo.Medium
 			}
 			if photo.Large.IsSpecified() {
-				photoSetter.Large = omitnull.From(photo.Large.MustGet())
+				photoSetter.Large = photo.Large
 			}
 			if photo.Full.IsSpecified() {
-				photoSetter.Full = omitnull.From(photo.Full.MustGet())
+				photoSetter.Full = photo.Full
 			}
 			organizationPhotoSetters = append(organizationPhotoSetters, photoSetter)
 		}
+		organizationCreateSetter.Photos = nullable.NewNullableWithValue(organizationPhotoSetters)
 	}
 
-	organizationSocialsSetters := make([]*dbmodel.OrganizationSocialSetter, 0)
-	if request.Body.Socials.IsSpecified() {
-		for _, social := range request.Body.Socials.MustGet() {
-			organizationSocialsSetters = append(organizationSocialsSetters, &dbmodel.OrganizationSocialSetter{
-				Platform: omit.From(social.Platform),
-				URL:      omit.From(social.URL),
-			})
+	if request.Body.Socials.IsSpecified() && !request.Body.Socials.IsNull() {
+		organizationSocialsSetters := make([]persistence.OrganizationSocialSetter, 0)
+		if request.Body.Socials.IsSpecified() {
+			for _, social := range request.Body.Socials.MustGet() {
+				organizationSocialsSetters = append(organizationSocialsSetters, persistence.OrganizationSocialSetter{
+					Platform: nullable.NewNullableWithValue(social.Platform),
+					URL:      nullable.NewNullableWithValue(social.URL),
+				})
+			}
 		}
-		organizationSetter.Website = omitnull.From(request.Body.Website.MustGet())
+		organizationCreateSetter.Socials = nullable.NewNullableWithValue(organizationSocialsSetters)
 	}
 
-	organization, err := a.persistor.Organization().Create(ctx, persistence.OrganizationCreate{
-		Org:      organizationSetter,
-		Address:  addressSetter,
-		Contact:  organizationContactSetter,
-		WorkHour: organizationWorkHourSetter,
-		Photos:   organizationPhotoSetters,
-		Socials:  organizationSocialsSetters,
-	})
+	organization, err := a.persistor.Organization().CreateOrganization(ctx, organizationCreateSetter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create an organization: %w", err)
 	}
-
 	resp := api.CreateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
 	return resp, nil
 }
 
 func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateOrganizationRequestObject) (api.UpdateOrganizationResponseObject, error) {
-	organizationSetter := dbmodel.OrganizationSetter{}
-	if request.Body.Name.IsSpecified() && !request.Body.Name.IsNull() {
-		organizationSetter.Name = omit.From(request.Body.Name.MustGet())
-	}
-	if request.Body.Website.IsSpecified() {
-		organizationSetter.Website = omitnull.From(request.Body.Website.MustGet())
-	}
-	if request.Body.MissionStatement.IsSpecified() {
-		organizationSetter.MissionStatement = omitnull.From(request.Body.MissionStatement.MustGet())
-	}
-	if request.Body.AdoptionPolicy.IsSpecified() {
-		organizationSetter.AdoptionPolicy = omitnull.From(request.Body.AdoptionPolicy.MustGet())
-	}
-	if request.Body.AdoptionURL.IsSpecified() {
-		organizationSetter.AdoptionURL = omitnull.From(request.Body.AdoptionURL.MustGet())
-	}
-	if request.Body.Distance.IsSpecified() {
-		organizationSetter.Distance = omitnull.From(request.Body.Distance.MustGet())
-	}
+	return api.UpdateOrganization201JSONResponse{}, nil
+	// organizationSetter := persistence.OrganizationSetter{}
+	// if request.Body.Name.IsSpecified() && !request.Body.Name.IsNull() {
+	// 	organizationSetter.Name = nullable.NewNullableWithValue(request.Body.Name.MustGet())
+	// }
+	// if request.Body.Website.IsSpecified() {
+	// 	organizationSetter.Website = request.Body.Website
+	// }
+	// if request.Body.MissionStatement.IsSpecified() {
+	// 	organizationSetter.MissionStatement = request.Body.MissionStatement
+	// }
+	// if request.Body.AdoptionPolicy.IsSpecified() {
+	// 	organizationSetter.AdoptionPolicy = request.Body.AdoptionPolicy
+	// }
+	// if request.Body.AdoptionURL.IsSpecified() {
+	// 	organizationSetter.AdoptionURL = request.Body.AdoptionURL
+	// }
+	// if request.Body.Distance.IsSpecified() {
+	// 	organizationSetter.Distance = request.Body.Distance
+	// }
 
-	organization, err := a.persistor.Organization().Update(ctx, request.ID, organizationSetter)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update an organization: %w", err)
-	}
-	// resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
-	resp := api.UpdateOrganization201JSONResponse(api.Organization{
-		AdoptionPolicy:   organization.AdoptionPolicy.Ptr(),
-		AdoptionURL:      organization.AdoptionURL.Ptr(),
-		Distance:         organization.Distance.Ptr(),
-		ID:               organization.ID,
-		MissionStatement: organization.MissionStatement.Ptr(),
-		Name:             organization.Name,
-		Website:          organization.Website.Ptr(),
-		CreatedAt:        organization.CreatedAt,
-		UpdatedAt:        organization.UpdatedAt,
-		Photos:           []api.OrganizationPhoto{},
-		Socials:          []api.OrganizationSocial{},
-	})
-	return resp, nil
+	// organization, err := a.persistor.Organization().UpdateOrganization(ctx, request.ID, organizationSetter)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to update an organization: %w", err)
+	// }
+	// // resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
+	// resp := api.UpdateOrganization201JSONResponse(api.Organization{
+	// 	AdoptionPolicy:   organization.AdoptionPolicy.Ptr(),
+	// 	AdoptionURL:      organization.AdoptionURL.Ptr(),
+	// 	Distance:         organization.Distance.Ptr(),
+	// 	ID:               organization.ID,
+	// 	MissionStatement: organization.MissionStatement.Ptr(),
+	// 	Name:             organization.Name,
+	// 	Website:          organization.Website.Ptr(),
+	// 	CreatedAt:        organization.CreatedAt,
+	// 	UpdatedAt:        organization.UpdatedAt,
+	// 	Photos:           []api.OrganizationPhoto{},
+	// 	Socials:          []api.OrganizationSocial{},
+	// })
+	// return resp, nil
 }
 
 func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteOrganizationRequestObject) (api.DeleteOrganizationResponseObject, error) {
-	_, err := a.persistor.Organization().Delete(ctx, request.ID)
+	_, err := a.persistor.Organization().DeleteOrganizationByID(ctx, request.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete an organization by id: %w", err)
 	}
@@ -178,25 +150,25 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 }
 
 func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganizationRequestObject) (api.GetOrganizationResponseObject, error) {
-	organizationRow, err := a.persistor.Organization().Get(ctx, request.ID)
+	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return api.GetOrganization404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Organization not found"}}, nil
 		}
 		return nil, fmt.Errorf("failed to get an organization by id: %w", err)
 	}
-	resp := api.GetOrganization200JSONResponse(dto.GetOrganizationByIdRowToResponse(organizationRow))
+	resp := api.GetOrganization200JSONResponse(dto.OrganizationWithJoinDataToResponse(organizationWithJoinData))
 	return resp, nil
 }
 
 func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrganizationsRequestObject) (api.ListOrganizationsResponseObject, error) {
-	organizations, err := a.persistor.Organization().List(ctx)
+	organizations, err := a.persistor.Organization().ListOrganizations(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list organizations: %w", err)
 	}
 	resp := make(api.ListOrganizations200JSONResponse, len(organizations))
-	for i, org := range organizations {
-		resp[i] = dto.ListOrganizationsRowToResponse(org)
+	for i, organizationWithJoinData := range organizations {
+		resp[i] = dto.OrganizationWithJoinDataToResponse(organizationWithJoinData)
 	}
 	return resp, nil
 }

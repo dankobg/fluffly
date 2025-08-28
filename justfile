@@ -40,11 +40,12 @@ default:
 # install needed tools
 tools-install:
 	go get -tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-	go get -tool github.com/stephenafamo/bob/gen/bobgen-psql@latest
+	go get -tool github.com/go-jet/jet/v2/cmd/jet@latest
 
-# generate bob sql
+# generate sql
 gen-sql:
-	bobgen-psql -c ./bobgen.yaml
+	jet -dsn={{db_uri}} -schema=public -path=./db/gen -ignore-tables continuity_containers,courier_message_dispatches,courier_messages,goose_db_version,identities,identity_credential_identifiers,identity_credential_types,identity_credentials,identity_login_codes,identity_recovery_addresses,identity_recovery_codes,identity_recovery_tokens,identity_registration_codes,identity_verifiable_addresses,identity_verification_codes,identity_verification_tokens,keto_relation_tuples,keto_uuid_mappings,networks,schema_migration,selfservice_errors,selfservice_login_flows,selfservice_recovery_flows,selfservice_registration_flows,selfservice_settings_flows,selfservice_verification_flows,session_devices,session_token_exchanges,sessions
+
 
 # Generate openapi server
 gen-openapi:

@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aarondl/opt/omit"
 	api "github.com/dankobg/fluffly/api/gen"
-	"github.com/dankobg/fluffly/db/dbmodel"
+	"github.com/dankobg/fluffly/persistence"
+	"github.com/oapi-codegen/nullable"
 )
 
 func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountryRequestObject) (api.CreateCountryResponseObject, error) {
-	countrySetter := dbmodel.CountrySetter{
-		Name:       omit.From(request.Body.Name),
-		IsoAlpha2:  omit.From(request.Body.IsoAlpha2),
-		IsoAlpha3:  omit.From(request.Body.IsoAlpha3),
-		IsoNumeric: omit.From(request.Body.IsoNumeric),
+	countrySetter := persistence.CountrySetter{
+		Name:       nullable.NewNullableWithValue(request.Body.Name),
+		IsoAlpha2:  nullable.NewNullableWithValue(request.Body.IsoAlpha2),
+		IsoAlpha3:  nullable.NewNullableWithValue(request.Body.IsoAlpha3),
+		IsoNumeric: nullable.NewNullableWithValue(request.Body.IsoNumeric),
 	}
-	country, err := a.persistor.Country().Create(ctx, countrySetter)
+	country, err := a.persistor.Country().CreateCountry(ctx, countrySetter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update an country: %w", err)
 	}
@@ -36,20 +36,20 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 }
 
 func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountryRequestObject) (api.UpdateCountryResponseObject, error) {
-	countrySetter := dbmodel.CountrySetter{}
+	countrySetter := persistence.CountrySetter{}
 	if request.Body.Name != nil {
-		countrySetter.Name = omit.From(*request.Body.Name)
+		countrySetter.Name = nullable.NewNullableWithValue(*request.Body.Name)
 	}
 	if request.Body.IsoAlpha2 != nil {
-		countrySetter.IsoAlpha2 = omit.From(*request.Body.IsoAlpha2)
+		countrySetter.IsoAlpha2 = nullable.NewNullableWithValue(*request.Body.IsoAlpha2)
 	}
 	if request.Body.IsoAlpha3 != nil {
-		countrySetter.IsoAlpha3 = omit.From(*request.Body.IsoAlpha3)
+		countrySetter.IsoAlpha3 = nullable.NewNullableWithValue(*request.Body.IsoAlpha3)
 	}
 	if request.Body.IsoNumeric != nil {
-		countrySetter.IsoNumeric = omit.From(*request.Body.IsoNumeric)
+		countrySetter.IsoNumeric = nullable.NewNullableWithValue(*request.Body.IsoNumeric)
 	}
-	country, err := a.persistor.Country().Update(ctx, request.ID, countrySetter)
+	country, err := a.persistor.Country().UpdateCountry(ctx, request.ID, countrySetter)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update an country: %w", err)
 	}
@@ -66,7 +66,7 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 }
 
 func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountryRequestObject) (api.DeleteCountryResponseObject, error) {
-	_, err := a.persistor.Country().Delete(ctx, request.ID)
+	_, err := a.persistor.Country().DeleteCountryByID(ctx, request.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete a country by id: %w", err)
 	}
@@ -75,7 +75,7 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 }
 
 func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountriesRequestObject) (api.ListCountriesResponseObject, error) {
-	countries, err := a.persistor.Country().List(ctx)
+	countries, err := a.persistor.Country().ListCountries(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list countries: %w", err)
 	}
@@ -95,7 +95,7 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 }
 
 func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryRequestObject) (api.GetCountryResponseObject, error) {
-	country, err := a.persistor.Country().Get(ctx, request.ID)
+	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil

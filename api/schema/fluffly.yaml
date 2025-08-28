@@ -2264,22 +2264,25 @@ components:
     OrganizationSocial:
       type: object
       required:
-        - organization_id
         - platform
         - url
         - created_at
         - updated_at
       properties:
-        id:
-          format: int64
-          type: integer
-          description: Organization id
         platform:
           type: string
           description: Social platform
         url:
           type: string
           description: Social platform url
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
     Organization:
       type: object
       required:
@@ -2339,6 +2342,8 @@ components:
         - id
         - organization_id
         - name
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64
@@ -2432,6 +2437,8 @@ components:
       required:
         - id
         - organization_id
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64

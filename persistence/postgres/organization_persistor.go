@@ -2,14 +2,14 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
-	"github.com/aarondl/opt/omit"
-	"github.com/aarondl/opt/omitnull"
-	"github.com/dankobg/fluffly/db/dbmodel"
-	"github.com/dankobg/fluffly/db/queries"
+	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
-	"github.com/stephenafamo/bob"
+	p "github.com/go-jet/jet/v2/postgres"
+	"github.com/oapi-codegen/nullable"
 )
 
 var _ persistence.OrganizationPersistor = (*PgOrganizationPersistor)(nil)
@@ -24,97 +24,246 @@ func NewPgOrganizationPersistor(ps *PgPersistor) *PgOrganizationPersistor {
 	}
 }
 
-func (p *PgOrganizationPersistor) Create(ctx context.Context, in persistence.OrganizationCreate) (*dbmodel.Organization, error) {
-	var org *dbmodel.Organization
-	txErr := p.db.RunInTx(ctx, nil, func(ctx context.Context, tx bob.Executor) error {
-		insertedOrg, err := dbmodel.Organizations.Insert(in.Org).One(ctx, tx)
-		if err != nil {
+func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context) ([]persistence.OrganizationWithJoinData, error) {
+	q := p.SELECT(
+		t.Organization.AllColumns,
+		t.OrganizationContact.AllColumns,
+		t.Address.AllColumns,
+		t.Country.AllColumns,
+		t.OrganizationWorkHour.AllColumns,
+		t.OrganizationPhoto.AllColumns,
+		t.OrganizationSocial.AllColumns,
+	).
+		FROM(
+			t.Organization.
+				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
+				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
+				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
+				LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID)).
+				LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID)),
+		).
+		GROUP_BY(
+			t.Organization.ID,
+			t.OrganizationContact.ID,
+			t.Address.ID,
+			t.Country.ID,
+			t.OrganizationWorkHour.ID,
+			t.OrganizationPhoto.ID,
+			t.OrganizationSocial.OrganizationID,
+			t.OrganizationSocial.Platform,
+		)
+	var dest []persistence.OrganizationWithJoinData
+	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
+
+type Filters struct {
+	WithContact  bool
+	WithWorkHour bool
+	WithPhotos   bool
+	WithSocials  bool
+}
+
+func (po *PgOrganizationPersistor) ListOrganizationsWithDynamicFilters(ctx context.Context, filters Filters) ([]persistence.OrganizationWithJoinData, error) {
+	var (
+		selectClause  p.ProjectionList
+		fromClause    p.ReadableTable = t.Organization
+		groupByClause                 = []p.GroupByClause{t.Organization.ID}
+	)
+
+	if filters.WithContact {
+		selectClause = append(selectClause, t.OrganizationContact.AllColumns, t.Address.AllColumns, t.Country.AllColumns)
+		fromClause = fromClause.
+			LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
+			LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
+			LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID))
+		groupByClause = append(groupByClause, t.OrganizationContact.ID, t.Address.ID, t.Country.ID)
+	}
+	if filters.WithWorkHour {
+		selectClause = append(selectClause, t.OrganizationWorkHour.AllColumns)
+		fromClause = fromClause.LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID))
+		groupByClause = append(groupByClause, t.OrganizationWorkHour.ID)
+	}
+	if filters.WithPhotos {
+		selectClause = append(selectClause, t.OrganizationPhoto.AllColumns)
+		fromClause = fromClause.LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID))
+		groupByClause = append(groupByClause, t.OrganizationPhoto.ID)
+	}
+	if filters.WithSocials {
+		selectClause = append(selectClause, t.OrganizationSocial.AllColumns)
+		fromClause = fromClause.LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID))
+		groupByClause = append(groupByClause, t.OrganizationSocial.OrganizationID, t.OrganizationSocial.Platform)
+	}
+
+	q := p.SELECT(t.Organization.AllColumns, selectClause...).
+		FROM(fromClause).
+		GROUP_BY(groupByClause...)
+
+	var dest []persistence.OrganizationWithJoinData
+	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
+
+func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, organizationID int64) (persistence.OrganizationWithJoinData, error) {
+	q := p.SELECT(
+		t.Organization.AllColumns,
+		t.OrganizationContact.AllColumns,
+		t.Address.AllColumns,
+		t.Country.AllColumns,
+		t.OrganizationWorkHour.AllColumns,
+		t.OrganizationPhoto.AllColumns,
+		t.OrganizationSocial.AllColumns,
+	).
+		FROM(
+			t.Organization.
+				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
+				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
+				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
+				LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID)).
+				LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID)),
+		).
+		WHERE(t.Organization.ID.EQ(p.Int64(organizationID))).
+		GROUP_BY(
+			t.Organization.ID,
+			t.OrganizationContact.ID,
+			t.Address.ID,
+			t.Country.ID,
+			t.OrganizationWorkHour.ID,
+			t.OrganizationPhoto.ID,
+			t.OrganizationSocial.OrganizationID,
+			t.OrganizationSocial.Platform,
+		)
+	var dest persistence.OrganizationWithJoinData
+	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+		return persistence.OrganizationWithJoinData{}, err
+	}
+	return dest, nil
+}
+
+func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in persistence.OrganizationCreateSetter) (model.Organization, error) {
+	var insertedOrganization model.Organization
+
+	txErr := po.WithTx(ctx, func(tx *sql.Tx) error {
+		orgCols, org := in.Organization.ToModel()
+		q1 := t.Organization.INSERT(orgCols).
+			MODEL(org).
+			RETURNING(t.Organization.AllColumns)
+		if err := q1.QueryContext(ctx, tx, &insertedOrganization); err != nil {
 			return fmt.Errorf("failed to insert an organization: %w", err)
 		}
-		insertedAddress, err := dbmodel.Addresses.Insert(in.Address).One(ctx, tx)
-		if err != nil {
+
+		var insertedAddress model.Address
+		addrCols, addr := in.Address.ToModel()
+		q2 := t.Address.INSERT(addrCols).
+			MODEL(addr).
+			RETURNING(t.Address.AllColumns)
+		if err := q2.QueryContext(ctx, tx, &insertedAddress); err != nil {
 			return fmt.Errorf("failed to insert organization address: %w", err)
 		}
-		in.Contact.OrganizationID = omit.From(insertedOrg.ID)
-		in.Contact.AddressID = omit.From(insertedAddress.ID)
-		in.WorkHour.OrganizationID = omitnull.From(insertedOrg.ID)
-		for _, photo := range in.Photos {
-			photo.OrganizationID = omitnull.From(insertedOrg.ID)
-		}
-		for _, social := range in.Socials {
-			social.OrganizationID = omit.From(insertedOrg.ID)
-		}
-		insertedContact, err := dbmodel.OrganizationContacts.Insert(in.Contact).One(ctx, tx)
-		if err != nil {
+
+		var insertedContact model.OrganizationContact
+		in.Contact.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+		in.Contact.AddressID = nullable.NewNullableWithValue(insertedAddress.ID)
+		contactCols, contact := in.Contact.ToModel()
+		q3 := t.OrganizationContact.INSERT(contactCols).
+			MODEL(contact).
+			RETURNING(t.OrganizationContact.AllColumns)
+		if err := q3.QueryContext(ctx, tx, &insertedContact); err != nil {
 			return fmt.Errorf("failed to insert organization contact: %w", err)
 		}
-		insertedWorkHour, err := dbmodel.OrganizationWorkHours.Insert(in.WorkHour).One(ctx, tx)
-		if err != nil {
-			return fmt.Errorf("failed to insert organization work hour: %w", err)
-		}
-		var insertedPhotos dbmodel.OrganizationPhotoSlice
-		if len(in.Photos) > 0 {
-			if insertedPhotos, err = dbmodel.OrganizationPhotos.Insert(bob.ToMods(in.Photos...)).All(ctx, tx); err != nil {
-				return fmt.Errorf("failed to insert organization photos: %w", err)
-			}
-		}
-		var insertedSocials dbmodel.OrganizationSocialSlice
-		if len(in.Socials) > 0 {
-			if insertedSocials, err = dbmodel.OrganizationSocials.Insert(bob.ToMods(in.Socials...)).All(ctx, tx); err != nil {
-				return fmt.Errorf("failed to insert organization social platforms: %w", err)
+
+		if in.WorkHour.IsSpecified() && !in.WorkHour.IsNull() {
+			var insertedWorkHour model.OrganizationWorkHour
+			inWorkHour := in.WorkHour.MustGet()
+			inWorkHour.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+			workHourCols, workHour := inWorkHour.ToModel()
+			q4 := t.OrganizationWorkHour.INSERT(workHourCols).
+				MODEL(workHour).
+				RETURNING(t.OrganizationWorkHour.AllColumns)
+			if err := q4.QueryContext(ctx, tx, &insertedWorkHour); err != nil {
+				return fmt.Errorf("failed to insert organization work hour: %w", err)
 			}
 		}
 
-		country, err := dbmodel.FindCountry(ctx, p.db, in.Address.CountryID.MustGet())
-		if err != nil {
-			fmt.Printf("failed to get a country: %v\n", err)
+		if in.Photos.IsSpecified() && !in.Photos.IsNull() {
+			photosInput := in.Photos.MustGet()
+			if len(photosInput) > 0 {
+				var insertedPhotos []model.OrganizationPhoto
+				photos := make([]model.OrganizationPhoto, len(photosInput))
+				var photoCols p.ColumnList
+				for i, photo := range photosInput {
+					photo.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+					cols, m := photo.ToModel()
+					if i == 0 {
+						photoCols = cols
+					}
+					photos[i] = m
+				}
+				q5 := t.OrganizationPhoto.INSERT(photoCols).
+					MODELS(photos).
+					RETURNING(t.OrganizationPhoto.AllColumns)
+				if err := q5.QueryContext(ctx, tx, &insertedPhotos); err != nil {
+					return fmt.Errorf("failed to insert organization photos: %w", err)
+				}
+			}
 		}
 
-		insertedOrg.R.OrganizationWorkHour = insertedWorkHour
-		insertedOrg.R.OrganizationContact = insertedContact
-		insertedOrg.R.OrganizationContact.R.Address = insertedAddress
-		if country != nil {
-			insertedOrg.R.OrganizationContact.R.Address.R.Country = country
+		if in.Socials.IsSpecified() && !in.Socials.IsNull() {
+			socialsInput := in.Socials.MustGet()
+			if len(socialsInput) > 0 {
+				var insertedSocials []model.OrganizationSocial
+				socials := make([]model.OrganizationSocial, len(socialsInput))
+				var socialsCols p.ColumnList
+				for i, social := range socialsInput {
+					social.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+					cols, m := social.ToModel()
+					if i == 0 {
+						socialsCols = cols
+					}
+					socials[i] = m
+				}
+				q6 := t.OrganizationSocial.INSERT(socialsCols).
+					MODELS(socials).
+					RETURNING(t.OrganizationSocial.AllColumns)
+				if err := q6.QueryContext(ctx, tx, &insertedSocials); err != nil {
+					return fmt.Errorf("failed to insert organization social platforms: %w", err)
+				}
+			}
 		}
-		insertedOrg.R.OrganizationPhotos = insertedPhotos
-		insertedOrg.R.OrganizationSocials = insertedSocials
-		org = insertedOrg
+
 		return nil
 	})
 	if txErr != nil {
-		return nil, txErr
+		return model.Organization{}, txErr
 	}
-	return org, nil
+	return insertedOrganization, nil
 }
 
-func (p *PgOrganizationPersistor) Update(ctx context.Context, organizationID int64, in dbmodel.OrganizationSetter) (*dbmodel.Organization, error) {
-	updatedOrganization, err := dbmodel.Organizations.Update(in.UpdateMod(), dbmodel.UpdateWhere.Organizations.ID.EQ(organizationID)).One(ctx, p.db)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update an organization: %w", err)
+func (po *PgOrganizationPersistor) UpdateOrganization(ctx context.Context, organizationID int64, in persistence.OrganizationSetter) (model.Organization, error) {
+	cols, m := in.ToModel(true)
+
+	q := t.Organization.UPDATE(cols).
+		MODEL(m).
+		WHERE(t.Organization.ID.EQ(p.Int64(organizationID))).
+		RETURNING(t.Organization.AllColumns)
+
+	var dest model.Organization
+	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+		return dest, fmt.Errorf("failed to update an organization: %w", err)
 	}
-	return updatedOrganization, nil
+	return dest, nil
 }
 
-func (p *PgOrganizationPersistor) Delete(ctx context.Context, organizationID int64) (int64, error) {
-	_, err := dbmodel.Organizations.Delete(dbmodel.DeleteWhere.Organizations.ID.EQ(organizationID)).Exec(ctx, p.db)
-	if err != nil {
+func (po *PgOrganizationPersistor) DeleteOrganizationByID(ctx context.Context, organizationID int64) (int64, error) {
+	q := t.Organization.DELETE().WHERE(t.Organization.ID.EQ(p.Int64(organizationID)))
+	if _, err := q.ExecContext(ctx, po.db); err != nil {
 		return 0, fmt.Errorf("failed to delete an organization: %w", err)
 	}
 	return organizationID, nil
-}
-
-func (p *PgOrganizationPersistor) Get(ctx context.Context, organizationID int64) (queries.GetOrganizationByIdRow, error) {
-	organizationRow, err := queries.GetOrganizationById(organizationID).One(ctx, p.db)
-	if err != nil {
-		return queries.GetOrganizationByIdRow{}, fmt.Errorf("failed to list organizations: %w", err)
-	}
-	return organizationRow, nil
-}
-
-func (p *PgOrganizationPersistor) List(ctx context.Context) (queries.AllListOrganizationsRow, error) {
-	organizationRows, err := queries.ListOrganizations().All(ctx, p.db)
-	if err != nil {
-		return queries.AllListOrganizationsRow{}, fmt.Errorf("failed to list organizations: %w", err)
-	}
-	return organizationRows, nil
 }

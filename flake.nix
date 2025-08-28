@@ -42,7 +42,7 @@
                 air
                 goose
                 oapi-codegen
-                # go-jet
+                go-jet
                 # just
                 # nodejs_24
                 # caddy

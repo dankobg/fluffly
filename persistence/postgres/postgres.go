@@ -13,17 +13,16 @@ import (
 	"github.com/dankobg/fluffly/config"
 	"github.com/dankobg/fluffly/persistence"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/stephenafamo/bob"
 )
 
 // var _ persistence.Persistor = (*PgPersistor)(nil)
 
 type PgPersistor struct {
-	db bob.DB
+	db *sql.DB
 }
 
 // Connect creates the new connection
-func Connect(dbSettings config.DatabaseConfig) (bob.DB, error) {
+func Connect(dbSettings config.DatabaseConfig) (*sql.DB, error) {
 	dsn := url.URL{
 		Scheme:   "postgresql",
 		User:     url.UserPassword(dbSettings.User, dbSettings.Password),
@@ -32,10 +31,10 @@ func Connect(dbSettings config.DatabaseConfig) (bob.DB, error) {
 		RawQuery: url.Values{"sslmode": []string{dbSettings.SSLMode}}.Encode(),
 	}
 
-	var bobdb bob.DB
+	var db *sql.DB
 	var err error
 
-	bobdb, err = bob.Open("pgx", dsn.String())
+	db, err = sql.Open("pgx", dsn.String())
 	for err != nil {
 		log.Printf("failed to connect to database")
 
@@ -43,18 +42,18 @@ func Connect(dbSettings config.DatabaseConfig) (bob.DB, error) {
 			dbSettings.RetriesNum--
 			log.Printf("retrying the database connection. retries left: (%d)", dbSettings.RetriesNum)
 			time.Sleep(dbSettings.RetriesDelay)
-			bobdb, err = bob.Open("pgx", dsn.String())
+			db, err = sql.Open("pgx", dsn.String())
 			continue
 		}
 
-		return bob.DB{}, fmt.Errorf("failed to connect to the database: %w", err)
+		return nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
-	return bobdb, nil
+	return db, nil
 }
 
 // New creates the new persistence
-func New(db bob.DB) *PgPersistor {
+func New(db *sql.DB) *PgPersistor {
 	return &PgPersistor{db: db}
 }
 
@@ -70,8 +69,8 @@ func (ps *PgPersistor) Country() persistence.CountryPersistor {
 	return NewPgCountryPersistor(ps)
 }
 
-func WithTx(ctx context.Context, db *sql.DB, fn func(tx *sql.Tx) error) (err error) {
-	tx, err := db.BeginTx(ctx, nil)
+func (ps *PgPersistor) WithTx(ctx context.Context, fn func(tx *sql.Tx) error) (err error) {
+	tx, err := ps.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
