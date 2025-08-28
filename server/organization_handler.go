@@ -98,46 +98,21 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 }
 
 func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateOrganizationRequestObject) (api.UpdateOrganizationResponseObject, error) {
-	return api.UpdateOrganization201JSONResponse{}, nil
-	// organizationSetter := persistence.OrganizationSetter{}
-	// if request.Body.Name.IsSpecified() && !request.Body.Name.IsNull() {
-	// 	organizationSetter.Name = nullable.NewNullableWithValue(request.Body.Name.MustGet())
-	// }
-	// if request.Body.Website.IsSpecified() {
-	// 	organizationSetter.Website = request.Body.Website
-	// }
-	// if request.Body.MissionStatement.IsSpecified() {
-	// 	organizationSetter.MissionStatement = request.Body.MissionStatement
-	// }
-	// if request.Body.AdoptionPolicy.IsSpecified() {
-	// 	organizationSetter.AdoptionPolicy = request.Body.AdoptionPolicy
-	// }
-	// if request.Body.AdoptionURL.IsSpecified() {
-	// 	organizationSetter.AdoptionURL = request.Body.AdoptionURL
-	// }
-	// if request.Body.Distance.IsSpecified() {
-	// 	organizationSetter.Distance = request.Body.Distance
-	// }
+	organizationSetter := persistence.OrganizationSetter{
+		Name:             request.Body.Name,
+		Website:          request.Body.Website,
+		MissionStatement: request.Body.MissionStatement,
+		AdoptionPolicy:   request.Body.AdoptionPolicy,
+		AdoptionURL:      request.Body.AdoptionURL,
+		Distance:         request.Body.Distance,
+	}
 
-	// organization, err := a.persistor.Organization().UpdateOrganization(ctx, request.ID, organizationSetter)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to update an organization: %w", err)
-	// }
-	// // resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
-	// resp := api.UpdateOrganization201JSONResponse(api.Organization{
-	// 	AdoptionPolicy:   organization.AdoptionPolicy.Ptr(),
-	// 	AdoptionURL:      organization.AdoptionURL.Ptr(),
-	// 	Distance:         organization.Distance.Ptr(),
-	// 	ID:               organization.ID,
-	// 	MissionStatement: organization.MissionStatement.Ptr(),
-	// 	Name:             organization.Name,
-	// 	Website:          organization.Website.Ptr(),
-	// 	CreatedAt:        organization.CreatedAt,
-	// 	UpdatedAt:        organization.UpdatedAt,
-	// 	Photos:           []api.OrganizationPhoto{},
-	// 	Socials:          []api.OrganizationSocial{},
-	// })
-	// return resp, nil
+	organization, err := a.persistor.Organization().UpdateOrganization(ctx, request.ID, organizationSetter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update an organization: %w", err)
+	}
+	resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
+	return resp, nil
 }
 
 func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteOrganizationRequestObject) (api.DeleteOrganizationResponseObject, error) {
