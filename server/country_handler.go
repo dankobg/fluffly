@@ -25,15 +25,7 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 	if err != nil {
 		return nil, fmt.Errorf("failed to update an country: %w", err)
 	}
-	resp := api.CreateCountry201JSONResponse(api.Country{
-		ID:         country.ID,
-		Name:       country.Name,
-		IsoAlpha2:  country.IsoAlpha2,
-		IsoAlpha3:  country.IsoAlpha3,
-		IsoNumeric: country.IsoNumeric,
-		CreatedAt:  country.CreatedAt,
-		UpdatedAt:  country.UpdatedAt,
-	})
+	resp := api.CreateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
 }
 
@@ -55,15 +47,7 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 	if err != nil {
 		return nil, fmt.Errorf("failed to update an country: %w", err)
 	}
-	resp := api.UpdateCountry201JSONResponse(api.Country{
-		ID:         country.ID,
-		Name:       country.Name,
-		IsoAlpha2:  country.IsoAlpha2,
-		IsoAlpha3:  country.IsoAlpha3,
-		IsoNumeric: country.IsoNumeric,
-		CreatedAt:  country.CreatedAt,
-		UpdatedAt:  country.UpdatedAt,
-	})
+	resp := api.UpdateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
 }
 
