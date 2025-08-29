@@ -54,9 +54,6 @@ func (pu *PgUserPersistor) DeleteUserByID(ctx context.Context, userID uuid.UUID)
 
 func (pu *PgUserPersistor) CreateUser(ctx context.Context, in persistence.UserSetter) (model.User, error) {
 	cols, m := in.ToModel()
-
-	myCols := t.User.MutableColumns.Except(t.User.CreatedAt, t.User.UpdatedAt)
-	_ = myCols
 	q := t.User.INSERT(cols).
 		MODEL(m).
 		RETURNING(t.User.AllColumns)

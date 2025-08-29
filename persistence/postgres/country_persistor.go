@@ -72,9 +72,6 @@ func (pc *PgCountryPersistor) DeleteCountryByID(ctx context.Context, countryID i
 
 func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in persistence.CountrySetter) (model.Country, error) {
 	cols, m := in.ToModel()
-
-	myCols := t.Country.MutableColumns.Except(t.Country.CreatedAt, t.Country.UpdatedAt)
-	_ = myCols
 	q := t.Country.INSERT(cols).
 		MODEL(m).
 		RETURNING(t.Country.AllColumns)
