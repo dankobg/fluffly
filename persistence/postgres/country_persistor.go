@@ -85,7 +85,6 @@ func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in persistence.
 
 func (pc *PgCountryPersistor) UpdateCountry(ctx context.Context, countryID int64, in persistence.CountrySetter) (model.Country, error) {
 	cols, m := in.ToModel(true)
-
 	q := t.Country.UPDATE(cols).
 		MODEL(m).
 		WHERE(t.Country.ID.EQ(p.Int64(countryID))).
