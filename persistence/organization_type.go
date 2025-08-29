@@ -3,12 +3,17 @@ package persistence
 import (
 	"time"
 
+	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/ptr"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/oapi-codegen/nullable"
 )
+
+type OrganizationFilters struct {
+	Pagination *api.PaginationParams
+}
 
 type OrganizationWithJoinData struct {
 	model.Organization
@@ -20,8 +25,8 @@ type OrganizationWithJoinData struct {
 		}
 	}
 	WorkHour model.OrganizationWorkHour
-	Photos   []model.OrganizationPhoto
-	Socials  []model.OrganizationSocial
+	Photos   []model.OrganizationPhoto  `json_column:"photos"`
+	Socials  []model.OrganizationSocial `json_column:"socials"`
 }
 
 type OrganizationCreateSetter struct {

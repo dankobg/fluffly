@@ -10,6 +10,7 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
 
@@ -137,13 +138,19 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 }
 
 func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrganizationsRequestObject) (api.ListOrganizationsResponseObject, error) {
-	organizations, err := a.persistor.Organization().ListOrganizations(ctx)
+	var filters persistence.OrganizationFilters
+	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
+	organizations, err := a.persistor.Organization().ListOrganizations(ctx, filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list organizations: %w", err)
 	}
-	resp := make(api.ListOrganizations200JSONResponse, len(organizations))
-	for i, organizationWithJoinData := range organizations {
-		resp[i] = dto.OrganizationWithJoinDataToResponse(organizationWithJoinData)
+	organizationsData := make([]api.Organization, len(organizations.Data))
+	for i, organizationWithJoinData := range organizations.Data {
+		organizationsData[i] = dto.OrganizationWithJoinDataToResponse(organizationWithJoinData)
+	}
+	resp := api.ListOrganizations200JSONResponse{
+		Data: organizationsData,
+		Meta: getPaginationMeta(request.Params.Page, request.Params.PageSize, organizations.TotalCount),
 	}
 	return resp, nil
 }

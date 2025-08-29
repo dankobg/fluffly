@@ -24,24 +24,31 @@ func NewPgOrganizationPersistor(ps *PgPersistor) *PgOrganizationPersistor {
 	}
 }
 
-func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context) ([]persistence.OrganizationWithJoinData, error) {
+func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filters persistence.OrganizationFilters) (persistence.PagedResult[persistence.OrganizationWithJoinData], error) {
 	q := p.SELECT(
 		t.Organization.AllColumns,
 		t.OrganizationContact.AllColumns,
 		t.Address.AllColumns,
 		t.Country.AllColumns,
 		t.OrganizationWorkHour.AllColumns,
-		t.OrganizationPhoto.AllColumns,
-		t.OrganizationSocial.AllColumns,
+		p.SELECT_JSON_ARR(
+			t.OrganizationPhoto.AllColumns).
+			FROM(t.OrganizationPhoto).
+			WHERE(t.OrganizationPhoto.OrganizationID.EQ(p.Int64(1))).
+			AS("photos"),
+		p.SELECT_JSON_ARR(
+			t.OrganizationSocial.AllColumns).
+			FROM(t.OrganizationSocial).
+			WHERE(t.OrganizationSocial.OrganizationID.EQ(p.Int64(1))).
+			AS("socials"),
+		getSelectTotalCount(filters.Pagination),
 	).
 		FROM(
 			t.Organization.
 				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
 				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
 				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
-				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
-				LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID)).
-				LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID)),
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)),
 		).
 		GROUP_BY(
 			t.Organization.ID,
@@ -49,64 +56,26 @@ func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context) ([]per
 			t.Address.ID,
 			t.Country.ID,
 			t.OrganizationWorkHour.ID,
-			t.OrganizationPhoto.ID,
-			t.OrganizationSocial.OrganizationID,
-			t.OrganizationSocial.Platform,
 		)
-	var dest []persistence.OrganizationWithJoinData
+	q = getLimitOffset(q, filters.Pagination)
+
+	var dest []struct {
+		persistence.OrganizationWithJoinData
+		TotalCount int64 `db:"total_count"`
+	}
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
-		return nil, err
+		return persistence.PagedResult[persistence.OrganizationWithJoinData]{}, err
 	}
-	return dest, nil
-}
-
-type Filters struct {
-	WithContact  bool
-	WithWorkHour bool
-	WithPhotos   bool
-	WithSocials  bool
-}
-
-func (po *PgOrganizationPersistor) ListOrganizationsWithDynamicFilters(ctx context.Context, filters Filters) ([]persistence.OrganizationWithJoinData, error) {
-	var (
-		selectClause  p.ProjectionList
-		fromClause    p.ReadableTable = t.Organization
-		groupByClause                 = []p.GroupByClause{t.Organization.ID}
-	)
-
-	if filters.WithContact {
-		selectClause = append(selectClause, t.OrganizationContact.AllColumns, t.Address.AllColumns, t.Country.AllColumns)
-		fromClause = fromClause.
-			LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
-			LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
-			LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID))
-		groupByClause = append(groupByClause, t.OrganizationContact.ID, t.Address.ID, t.Country.ID)
+	result := persistence.PagedResult[persistence.OrganizationWithJoinData]{
+		Data: make([]persistence.OrganizationWithJoinData, len(dest)),
 	}
-	if filters.WithWorkHour {
-		selectClause = append(selectClause, t.OrganizationWorkHour.AllColumns)
-		fromClause = fromClause.LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID))
-		groupByClause = append(groupByClause, t.OrganizationWorkHour.ID)
+	for i, row := range dest {
+		result.Data[i] = row.OrganizationWithJoinData
 	}
-	if filters.WithPhotos {
-		selectClause = append(selectClause, t.OrganizationPhoto.AllColumns)
-		fromClause = fromClause.LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID))
-		groupByClause = append(groupByClause, t.OrganizationPhoto.ID)
+	if len(dest) > 0 {
+		result.TotalCount = dest[0].TotalCount
 	}
-	if filters.WithSocials {
-		selectClause = append(selectClause, t.OrganizationSocial.AllColumns)
-		fromClause = fromClause.LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID))
-		groupByClause = append(groupByClause, t.OrganizationSocial.OrganizationID, t.OrganizationSocial.Platform)
-	}
-
-	q := p.SELECT(t.Organization.AllColumns, selectClause...).
-		FROM(fromClause).
-		GROUP_BY(groupByClause...)
-
-	var dest []persistence.OrganizationWithJoinData
-	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
-		return nil, err
-	}
-	return dest, nil
+	return result, nil
 }
 
 func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, organizationID int64) (persistence.OrganizationWithJoinData, error) {
@@ -116,17 +85,23 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 		t.Address.AllColumns,
 		t.Country.AllColumns,
 		t.OrganizationWorkHour.AllColumns,
-		t.OrganizationPhoto.AllColumns,
-		t.OrganizationSocial.AllColumns,
+		p.SELECT_JSON_ARR(
+			t.OrganizationPhoto.AllColumns).
+			FROM(t.OrganizationPhoto).
+			WHERE(t.OrganizationPhoto.OrganizationID.EQ(p.Int64(1))).
+			AS("photos"),
+		p.SELECT_JSON_ARR(
+			t.OrganizationSocial.AllColumns).
+			FROM(t.OrganizationSocial).
+			WHERE(t.OrganizationSocial.OrganizationID.EQ(p.Int64(1))).
+			AS("socials"),
 	).
 		FROM(
 			t.Organization.
 				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
 				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
 				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
-				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
-				LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID)).
-				LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID)),
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)),
 		).
 		WHERE(t.Organization.ID.EQ(p.Int64(organizationID))).
 		GROUP_BY(
@@ -135,9 +110,6 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 			t.Address.ID,
 			t.Country.ID,
 			t.OrganizationWorkHour.ID,
-			t.OrganizationPhoto.ID,
-			t.OrganizationSocial.OrganizationID,
-			t.OrganizationSocial.Platform,
 		)
 	var dest persistence.OrganizationWithJoinData
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
@@ -267,3 +239,52 @@ func (po *PgOrganizationPersistor) DeleteOrganizationByID(ctx context.Context, o
 	}
 	return organizationID, nil
 }
+
+// type Filters struct {
+// 	WithContact  bool
+// 	WithWorkHour bool
+// 	WithPhotos   bool
+// 	WithSocials  bool
+// }
+
+// func (po *PgOrganizationPersistor) DYNAMIC_LIST_ORGANIZATIONS(ctx context.Context, filters Filters) ([]persistence.OrganizationWithJoinData, error) {
+// 	var (
+// 		selectClause  p.ProjectionList
+// 		fromClause    p.ReadableTable = t.Organization
+// 		groupByClause                 = []p.GroupByClause{t.Organization.ID}
+// 	)
+
+// 	if filters.WithContact {
+// 		selectClause = append(selectClause, t.OrganizationContact.AllColumns, t.Address.AllColumns, t.Country.AllColumns)
+// 		fromClause = fromClause.
+// 			LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
+// 			LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
+// 			LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID))
+// 		groupByClause = append(groupByClause, t.OrganizationContact.ID, t.Address.ID, t.Country.ID)
+// 	}
+// 	if filters.WithWorkHour {
+// 		selectClause = append(selectClause, t.OrganizationWorkHour.AllColumns)
+// 		fromClause = fromClause.LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID))
+// 		groupByClause = append(groupByClause, t.OrganizationWorkHour.ID)
+// 	}
+// 	if filters.WithPhotos {
+// 		selectClause = append(selectClause, t.OrganizationPhoto.AllColumns)
+// 		fromClause = fromClause.LEFT_JOIN(t.OrganizationPhoto, t.Organization.ID.EQ(t.OrganizationPhoto.OrganizationID))
+// 		groupByClause = append(groupByClause, t.OrganizationPhoto.ID)
+// 	}
+// 	if filters.WithSocials {
+// 		selectClause = append(selectClause, t.OrganizationSocial.AllColumns)
+// 		fromClause = fromClause.LEFT_JOIN(t.OrganizationSocial, t.Organization.ID.EQ(t.OrganizationSocial.OrganizationID))
+// 		groupByClause = append(groupByClause, t.OrganizationSocial.OrganizationID, t.OrganizationSocial.Platform)
+// 	}
+
+// 	q := p.SELECT(t.Organization.AllColumns, selectClause...).
+// 		FROM(fromClause).
+// 		GROUP_BY(groupByClause...)
+
+// 	var dest []persistence.OrganizationWithJoinData
+// 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+// 		return nil, err
+// 	}
+// 	return dest, nil
+// }

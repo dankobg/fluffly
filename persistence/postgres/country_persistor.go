@@ -22,14 +22,33 @@ func NewPgCountryPersistor(ps *PgPersistor) *PgCountryPersistor {
 	}
 }
 
-func (pc *PgCountryPersistor) ListCountries(ctx context.Context) ([]model.Country, error) {
-	q := p.SELECT(t.Country.AllColumns).
+func (pc *PgCountryPersistor) ListCountries(ctx context.Context, filters persistence.CountryFilters) (persistence.PagedResult[model.Country], error) {
+	q := p.SELECT(
+		t.Country.AllColumns,
+		getSelectTotalCount(filters.Pagination),
+	).
 		FROM(t.Country)
-	var dest []model.Country
-	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
-		return nil, err
+	q = getLimitOffset(q, filters.Pagination)
+
+	var dest []struct {
+		model.Country
+		TotalCount int64 `db:"total_count"`
 	}
-	return dest, nil
+	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
+		return persistence.PagedResult[model.Country]{}, err
+	}
+
+	result := persistence.PagedResult[model.Country]{
+		Data: make([]model.Country, len(dest)),
+	}
+	for i, row := range dest {
+		result.Data[i] = row.Country
+	}
+	if len(dest) > 0 {
+		result.TotalCount = dest[0].TotalCount
+	}
+
+	return result, nil
 }
 
 func (pc *PgCountryPersistor) GetCountryByID(ctx context.Context, countryID int64) (model.Country, error) {

@@ -3,11 +3,16 @@ package persistence
 import (
 	"time"
 
+	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/oapi-codegen/nullable"
 )
+
+type CountryFilters struct {
+	Pagination *api.PaginationParams
+}
 
 type CountrySetter struct {
 	Name       nullable.Nullable[string]    `json:"name"`

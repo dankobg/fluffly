@@ -9,6 +9,7 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
 
@@ -75,13 +76,15 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 }
 
 func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountriesRequestObject) (api.ListCountriesResponseObject, error) {
-	countries, err := a.persistor.Country().ListCountries(ctx)
+	var filters persistence.CountryFilters
+	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
+	countries, err := a.persistor.Country().ListCountries(ctx, filters)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list countries: %w", err)
 	}
-	resp := make(api.ListCountries200JSONResponse, len(countries))
-	for i, country := range countries {
-		resp[i] = api.Country{
+	countriesData := make([]api.Country, len(countries.Data))
+	for i, country := range countries.Data {
+		countriesData[i] = api.Country{
 			ID:         country.ID,
 			Name:       country.Name,
 			IsoAlpha2:  country.IsoAlpha2,
@@ -90,6 +93,10 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 			CreatedAt:  country.CreatedAt,
 			UpdatedAt:  country.UpdatedAt,
 		}
+	}
+	resp := api.ListCountries200JSONResponse{
+		Data: countriesData,
+		Meta: getPaginationMeta(request.Params.Page, request.Params.PageSize, countries.TotalCount),
 	}
 	return resp, nil
 }

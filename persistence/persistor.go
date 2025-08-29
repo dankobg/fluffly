@@ -16,7 +16,7 @@ type UserPersistor interface {
 }
 
 type OrganizationPersistor interface {
-	ListOrganizations(ctx context.Context) ([]OrganizationWithJoinData, error)
+	ListOrganizations(ctx context.Context, filters OrganizationFilters) (PagedResult[OrganizationWithJoinData], error)
 	GetOrganizationByID(ctx context.Context, organizationID int64) (OrganizationWithJoinData, error)
 	CreateOrganization(ctx context.Context, in OrganizationCreateSetter) (model.Organization, error)
 	UpdateOrganization(ctx context.Context, organizationID int64, in OrganizationSetter) (model.Organization, error)
@@ -24,7 +24,7 @@ type OrganizationPersistor interface {
 }
 
 type CountryPersistor interface {
-	ListCountries(ctx context.Context) ([]model.Country, error)
+	ListCountries(ctx context.Context, filters CountryFilters) (PagedResult[model.Country], error)
 	GetCountryByID(ctx context.Context, countryID int64) (model.Country, error)
 	CreateCountry(ctx context.Context, in CountrySetter) (model.Country, error)
 	UpdateCountry(ctx context.Context, countryID int64, in CountrySetter) (model.Country, error)

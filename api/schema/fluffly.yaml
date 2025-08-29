@@ -16,15 +16,26 @@ paths:
       description: List countries
       tags:
         - fluffly
+      parameters:
+        - $ref: "#/components/parameters/PaginationPage"
+        - $ref: "#/components/parameters/PaginationPageSize"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Country"
+                type: object
+                required:
+                  - data
+                  - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Country"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
         default:
           $ref: "#/components/responses/UnexpectedError"
     post:
@@ -141,15 +152,26 @@ paths:
       description: List organizations that help animals
       tags:
         - fluffly
+      parameters:
+        - $ref: "#/components/parameters/PaginationPage"
+        - $ref: "#/components/parameters/PaginationPageSize"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Organization"
+                type: object
+                required:
+                  - data
+                  - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Organization"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
         default:
           $ref: "#/components/responses/UnexpectedError"
     post:
@@ -1770,6 +1792,22 @@ components:
 
         typically 201 or 204
 
+  parameters:
+    PaginationPage:
+      in: query
+      name: page
+      required: false
+      schema:
+        $ref: "#/components/schemas/PaginationPage"
+      description: Page number (1-based)
+    PaginationPageSize:
+      in: query
+      name: page_size
+      required: false
+      schema:
+        $ref: "#/components/schemas/PaginationPageSize"
+      description: Number of items per page
+
   schemas:
     UUID:
       type: string
@@ -1817,6 +1855,41 @@ components:
         message:
           type: string
           description: Error message
+    PaginationPage:
+      type: integer
+      minimum: 1
+      default: 1
+      description: Page number (1-based)
+    PaginationPageSize:
+      type: integer
+      minimum: 1
+      maximum: 1000
+      default: 50
+      description: Number of items per page
+    PaginationMeta:
+      type: object
+      required:
+        - page
+        - page_size
+        - total
+      properties:
+        page:
+          $ref: "#/components/schemas/PaginationPage"
+        page_size:
+          $ref: "#/components/schemas/PaginationPageSize"
+        total:
+          type: integer
+          format: int64
+    PaginationParams:
+      type: object
+      required:
+        - page
+        - page_size
+      properties:
+        page:
+          $ref: "#/components/schemas/PaginationPage"
+        page_size:
+          $ref: "#/components/schemas/PaginationPageSize"
     User:
       type: object
       required:
