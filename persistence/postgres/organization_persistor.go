@@ -34,12 +34,12 @@ func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filter
 		p.SELECT_JSON_ARR(
 			t.OrganizationPhoto.AllColumns).
 			FROM(t.OrganizationPhoto).
-			WHERE(t.OrganizationPhoto.OrganizationID.EQ(p.Int64(1))).
+			WHERE(t.OrganizationPhoto.OrganizationID.EQ(t.Organization.ID)).
 			AS("photos"),
 		p.SELECT_JSON_ARR(
 			t.OrganizationSocial.AllColumns).
 			FROM(t.OrganizationSocial).
-			WHERE(t.OrganizationSocial.OrganizationID.EQ(p.Int64(1))).
+			WHERE(t.OrganizationSocial.OrganizationID.EQ(t.Organization.ID)).
 			AS("socials"),
 		getSelectTotalCount(filters.Pagination),
 	).
@@ -88,12 +88,12 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 		p.SELECT_JSON_ARR(
 			t.OrganizationPhoto.AllColumns).
 			FROM(t.OrganizationPhoto).
-			WHERE(t.OrganizationPhoto.OrganizationID.EQ(p.Int64(1))).
+			WHERE(t.OrganizationPhoto.OrganizationID.EQ(t.Organization.ID)).
 			AS("photos"),
 		p.SELECT_JSON_ARR(
 			t.OrganizationSocial.AllColumns).
 			FROM(t.OrganizationSocial).
-			WHERE(t.OrganizationSocial.OrganizationID.EQ(p.Int64(1))).
+			WHERE(t.OrganizationSocial.OrganizationID.EQ(t.Organization.ID)).
 			AS("socials"),
 	).
 		FROM(
