@@ -219,7 +219,6 @@ func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in pe
 
 func (po *PgOrganizationPersistor) UpdateOrganization(ctx context.Context, organizationID int64, in persistence.OrganizationSetter) (model.Organization, error) {
 	cols, m := in.ToModel(true)
-
 	q := t.Organization.UPDATE(cols).
 		MODEL(m).
 		WHERE(t.Organization.ID.EQ(p.Int64(organizationID))).
