@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	api "github.com/dankobg/fluffly/api/gen"
+	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
@@ -84,15 +85,7 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 	}
 	countriesData := make([]api.Country, len(countries.Data))
 	for i, country := range countries.Data {
-		countriesData[i] = api.Country{
-			ID:         country.ID,
-			Name:       country.Name,
-			IsoAlpha2:  country.IsoAlpha2,
-			IsoAlpha3:  country.IsoAlpha3,
-			IsoNumeric: country.IsoNumeric,
-			CreatedAt:  country.CreatedAt,
-			UpdatedAt:  country.UpdatedAt,
-		}
+		countriesData[i] = dto.CountryToResponse(country)
 	}
 	resp := api.ListCountries200JSONResponse{
 		Data: countriesData,
@@ -109,14 +102,6 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 		}
 		return nil, fmt.Errorf("failed to get an country by id: %w", err)
 	}
-	resp := api.GetCountry200JSONResponse(api.Country{
-		ID:         country.ID,
-		Name:       country.Name,
-		IsoAlpha2:  country.IsoAlpha2,
-		IsoAlpha3:  country.IsoAlpha3,
-		IsoNumeric: country.IsoNumeric,
-		CreatedAt:  country.CreatedAt,
-		UpdatedAt:  country.UpdatedAt,
-	})
+	resp := api.GetCountry200JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
 }
