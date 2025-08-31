@@ -118,7 +118,7 @@ selfservice:
             - hook: web_hook
               config:
                 method: POST
-                url: http://host.docker.internal:6969/api/v1/webhooks/kratos/registration_after_password
+                url: http://host.docker.internal:6969/webhooks/kratos/registration_after_password
                 body: file:///etc/config/kratos/hooks/registration.after.password.jsonnet
                 response:
                   ignore: false
@@ -135,7 +135,7 @@ selfservice:
             - hook: web_hook
               config:
                 method: POST
-                url: http://host.docker.internal:6969/api/v1/webhooks/kratos/registration_after_oidc
+                url: http://host.docker.internal:6969/webhooks/kratos/registration_after_oidc
                 body: file:///etc/config/kratos/hooks/registration.after.oidc.jsonnet
                 response:
                   ignore: false

@@ -34,16 +34,12 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 
 	cors, err := NewCORS(a.Cfg.Cors)
 	if err != nil {
-		panic("middleware failed: " + err.Error())
+		panic("could not create cors middleware: " + err.Error())
 	}
 
-	mux.HandleFunc("GET /api/v1/lol", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("lol route"))
-	})
-
-	mux.HandleFunc("POST /api/v1/webhooks/kratos/registration_after_password", a.registrationAfterPassword)
-	mux.HandleFunc("POST /api/v1/webhooks/kratos/registration_after_oidc", a.registrationAfterOidc)
+	// @TODO: add another thing instead of api/v1
+	mux.HandleFunc("POST /webhooks/kratos/registration_after_password", a.registrationAfterPassword)
+	mux.HandleFunc("POST /webhooks/kratos/registration_after_oidc", a.registrationAfterOidc)
 
 	openapi, err := api.GetSwagger()
 	if err != nil {
@@ -74,7 +70,6 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
 		SilenceServersWarning: true,
 	})
-	_ = oapiMiddleware
 
 	middlewareChain := MiddlewareChain(
 		PanicRecovery,
@@ -82,10 +77,11 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 		BodyLimit(10<<20),
 		cors,
 		a.AttachSessionData,
-		// oapiMiddleware,
 	)
 
+	oapiMux := http.NewServeMux()
 	apiSrv := api.NewStrictHandler(a, make([]api.StrictMiddlewareFunc, 0))
-	oapiHandler := api.HandlerFromMuxWithBaseURL(apiSrv, mux, "/api/v1")
-	return middlewareChain(oapiHandler)
+	oapiHandler := api.HandlerFromMuxWithBaseURL(apiSrv, oapiMux, "/api/v1")
+	mux.Handle("/api/v1/", oapiMiddleware(oapiHandler))
+	return middlewareChain(mux)
 }
