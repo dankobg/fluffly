@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
@@ -23,7 +23,18 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 	}
 	country, err := a.persistor.Country().CreateCountry(ctx, countrySetter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update an country: %w", err)
+		msg := "could not create a country"
+		var e1 postgres.ErrCountryUniqueViolation
+		if errors.As(err, &e1) {
+			msg += ", duplicate " + e1.Name
+			return api.CreateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		var e2 postgres.IntegrityViolationError
+		if errors.As(err, &e2) {
+			msg += ", country integrity error"
+			return api.CreateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		return nil, fmt.Errorf("failed to create a country")
 	}
 	resp := api.CreateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
@@ -45,7 +56,18 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 	}
 	country, err := a.persistor.Country().UpdateCountry(ctx, request.ID, countrySetter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update an country: %w", err)
+		msg := "could not update a country"
+		var e1 postgres.ErrCountryUniqueViolation
+		if errors.As(err, &e1) {
+			msg += ", duplicate " + e1.Name
+			return api.UpdateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		var e2 postgres.IntegrityViolationError
+		if errors.As(err, &e2) {
+			msg += ", country integrity error"
+			return api.UpdateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		return nil, fmt.Errorf("could not update a country")
 	}
 	resp := api.UpdateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
@@ -81,10 +103,10 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryRequestObject) (api.GetCountryResponseObject, error) {
 	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, postgres.ErrCountryNotFound) {
 			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil
 		}
-		return nil, fmt.Errorf("failed to get an country by id: %w", err)
+		return nil, fmt.Errorf("failed to get a country by id: %w", err)
 	}
 	resp := api.GetCountry200JSONResponse(dto.CountryToResponse(country))
 	return resp, nil

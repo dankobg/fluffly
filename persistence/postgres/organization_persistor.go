@@ -3,12 +3,16 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
 	p "github.com/go-jet/jet/v2/postgres"
+	"github.com/go-jet/jet/v2/qrm"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/oapi-codegen/nullable"
 )
 
@@ -22,6 +26,34 @@ func NewPgOrganizationPersistor(ps *PgPersistor) *PgOrganizationPersistor {
 	return &PgOrganizationPersistor{
 		PgPersistor: ps,
 	}
+}
+
+type ErrOrganizationIntegrityViolation struct{ errIntegrityViolation }
+type ErrOrganizationUniqueViolation struct{ errUniqueViolation }
+type ErrOrganizationForeignKeyViolation struct{ errForeignKeyViolation }
+
+var (
+	ErrOrganizationNotFound                   = errors.New("organization not found")
+	errOrganizationIntegrity                  = ErrOrganizationIntegrityViolation{}
+	errOrganizationUniqueName                 = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "name"}}
+	errOrganizationContactForeignKeyUserID    = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.user_id"}}
+	errOrganizationContactForeignKeyAddressID = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.address_id"}}
+)
+
+func convertOrganizationPgError(pgErr *pgconn.PgError) error {
+	if pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		switch pgErr.ConstraintName {
+		case "uq_organization_name":
+			return errOrganizationUniqueName
+		case "fk_organization_contact_user_id":
+			return errOrganizationContactForeignKeyUserID
+		case "fk_organization_contact_address_id":
+			return errOrganizationContactForeignKeyAddressID
+		}
+
+		return errOrganizationIntegrity
+	}
+	return pgErr
 }
 
 func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filters persistence.OrganizationFilters) (persistence.PagedResult[persistence.OrganizationWithJoinData], error) {
@@ -113,7 +145,10 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 		)
 	var dest persistence.OrganizationWithJoinData
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
-		return persistence.OrganizationWithJoinData{}, err
+		if errors.Is(err, qrm.ErrNoRows) {
+			return dest, ErrOrganizationNotFound
+		}
+		return dest, err
 	}
 	return dest, nil
 }
@@ -212,6 +247,10 @@ func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in pe
 		return nil
 	})
 	if txErr != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(txErr, &pgErr) {
+			return model.Organization{}, convertOrganizationPgError(pgErr)
+		}
 		return model.Organization{}, txErr
 	}
 	return insertedOrganization, nil
@@ -226,6 +265,10 @@ func (po *PgOrganizationPersistor) UpdateOrganization(ctx context.Context, organ
 
 	var dest model.Organization
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return dest, convertOrganizationPgError(pgErr)
+		}
 		return dest, fmt.Errorf("failed to update an organization: %w", err)
 	}
 	return dest, nil

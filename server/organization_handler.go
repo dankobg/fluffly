@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,6 +9,7 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
@@ -92,7 +92,18 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 
 	organization, err := a.persistor.Organization().CreateOrganization(ctx, organizationCreateSetter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create an organization: %w", err)
+		msg := "could not create an organzation"
+		var e1 postgres.ErrOrganizationUniqueViolation
+		if errors.As(err, &e1) {
+			msg += ", duplicate " + e1.Name
+			return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		var e2 postgres.IntegrityViolationError
+		if errors.As(err, &e2) {
+			msg += ", organization integrity error"
+			return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		return nil, fmt.Errorf("failed to create an organzation")
 	}
 	resp := api.CreateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
 	return resp, nil
@@ -110,7 +121,18 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 
 	organization, err := a.persistor.Organization().UpdateOrganization(ctx, request.ID, organizationSetter)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update an organization: %w", err)
+		msg := "could not update an organzation"
+		var e1 postgres.ErrOrganizationUniqueViolation
+		if errors.As(err, &e1) {
+			msg += ", duplicate " + e1.Name
+			return api.UpdateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		var e2 postgres.IntegrityViolationError
+		if errors.As(err, &e2) {
+			msg += ", organization integrity error"
+			return api.UpdateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		return nil, fmt.Errorf("failed to update an organzation")
 	}
 	resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
 	return resp, nil
@@ -128,7 +150,7 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganizationRequestObject) (api.GetOrganizationResponseObject, error) {
 	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, postgres.ErrOrganizationNotFound) {
 			return api.GetOrganization404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Organization not found"}}, nil
 		}
 		return nil, fmt.Errorf("failed to get an organization by id: %w", err)

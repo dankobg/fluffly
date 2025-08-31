@@ -5,12 +5,12 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/countries
+  url: {{baseUrl}}/countries?page=1&page_size=1000
   body: none
   auth: none
 }
 
 params:query {
   ~page: 1
-  ~page_size: 10
+  ~page_size: 1000
 }
