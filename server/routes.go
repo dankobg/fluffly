@@ -8,6 +8,7 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/data"
+	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
 func (a *ApiHandler) SetupRoutes() http.Handler {
@@ -35,15 +36,6 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	if err != nil {
 		panic("middleware failed: " + err.Error())
 	}
-
-	middlewareChain := MiddlewareChain(
-		PanicRecovery,
-		RequestID,
-		BodyLimit(10<<20),
-		cors,
-		a.AttachSessionData,
-	)
-	// @TODO: add rate limit mw
 
 	mux.HandleFunc("GET /api/v1/lol", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -78,6 +70,20 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	mux.HandleFunc("GET /docs/stoplight", a.openapiStoplightPage)
 	mux.HandleFunc("GET /docs/scalar", a.openapiScalarPage)
 	mux.HandleFunc("GET /docs/swagger", a.openapiSwaggerPage)
+
+	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
+		SilenceServersWarning: true,
+	})
+	_ = oapiMiddleware
+
+	middlewareChain := MiddlewareChain(
+		PanicRecovery,
+		RequestID,
+		BodyLimit(10<<20),
+		cors,
+		a.AttachSessionData,
+		// oapiMiddleware,
+	)
 
 	apiSrv := api.NewStrictHandler(a, make([]api.StrictMiddlewareFunc, 0))
 	oapiHandler := api.HandlerFromMuxWithBaseURL(apiSrv, mux, "/api/v1")
