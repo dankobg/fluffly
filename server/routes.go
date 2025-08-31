@@ -67,10 +67,6 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 	mux.HandleFunc("GET /docs/scalar", a.openapiScalarPage)
 	mux.HandleFunc("GET /docs/swagger", a.openapiSwaggerPage)
 
-	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
-		SilenceServersWarning: true,
-	})
-
 	middlewareChain := MiddlewareChain(
 		PanicRecovery,
 		RequestID,
@@ -78,6 +74,10 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 		cors,
 		a.AttachSessionData,
 	)
+
+	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
+		SilenceServersWarning: true,
+	})
 
 	oapiMux := http.NewServeMux()
 	apiSrv := api.NewStrictHandler(a, make([]api.StrictMiddlewareFunc, 0))
