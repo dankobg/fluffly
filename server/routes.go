@@ -37,7 +37,7 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 		panic("could not create cors middleware: " + err.Error())
 	}
 
-	// @TODO: add another thing instead of api/v1
+	// webhooks
 	mux.HandleFunc("POST /webhooks/kratos/registration_after_password", a.registrationAfterPassword)
 	mux.HandleFunc("POST /webhooks/kratos/registration_after_oidc", a.registrationAfterOidc)
 
