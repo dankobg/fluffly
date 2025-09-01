@@ -6,8 +6,10 @@ import (
 	"net/http"
 	"net/http/pprof"
 
+	"github.com/dankobg/fluffly/api/format"
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/data"
+	"github.com/getkin/kin-openapi/openapi3"
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
@@ -75,6 +77,7 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 		a.AttachSessionData,
 	)
 
+	openapi3.DefineStringFormatValidator("uri", format.NewURIValidator())
 	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
 		SilenceServersWarning: true,
 	})

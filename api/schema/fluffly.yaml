@@ -2302,7 +2302,7 @@ components:
           description: Organization name
         website:
           type: string
-          minLength: 1
+          format: uri
           description: Organization website
           nullable: true
         mission_statement:
@@ -2317,7 +2317,7 @@ components:
           nullable: true
         adoption_url:
           type: string
-          minLength: 1
+          format: uri
           description: Organization adoption url
           nullable: true
         distance:
@@ -2354,7 +2354,7 @@ components:
           nullable: true
         website:
           type: string
-          minLength: 1
+          format: uri
           description: Organization website
           nullable: true
         mission_statement:
@@ -2369,7 +2369,7 @@ components:
           nullable: true
         adoption_url:
           type: string
-          minLength: 1
+          format: uri
           description: Organization adoption url
           nullable: true
         distance:
@@ -2542,22 +2542,22 @@ components:
       properties:
         small:
           type: string
-          minLength: 1
+          format: uri
           description: Small photo url
           nullable: true
         medium:
           type: string
-          minLength: 1
+          format: uri
           description: Medium photo url
           nullable: true
         large:
           type: string
-          minLength: 1
+          format: uri
           description: Large photo url
           nullable: true
         full:
           type: string
-          minLength: 1
+          format: uri
           description: Full photo url
           nullable: true
     CreateOrganizationSocialBody:
@@ -2572,7 +2572,7 @@ components:
           description: Social platform
         url:
           type: string
-          minLength: 1
+          format: uri
           description: Social platform url
     OrganizationPhoto:
       type: object
@@ -2592,15 +2592,19 @@ components:
           description: Organization id
         small:
           type: string
+          format: uri
           description: Small photo url
         medium:
           type: string
+          format: uri
           description: Medium photo url
         large:
           type: string
+          format: uri
           description: Large photo url
         full:
           type: string
+          format: uri
           description: Full photo url
         created_at:
           format: date-time
