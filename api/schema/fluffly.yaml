@@ -51,6 +51,7 @@ paths:
               $ref: "#/components/schemas/CreateCountryBody"
       responses:
         "201":
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -110,6 +111,7 @@ paths:
               $ref: "#/components/schemas/UpdateCountryBody"
       responses:
         "201":
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -187,6 +189,7 @@ paths:
               $ref: "#/components/schemas/CreateOrganizationBody"
       responses:
         "201":
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -246,6 +249,7 @@ paths:
               $ref: "#/components/schemas/UpdateOrganizationBody"
       responses:
         "201":
+          description: Successful operation
           content:
             application/json:
               schema:
