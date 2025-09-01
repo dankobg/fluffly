@@ -9,6 +9,38 @@ tags:
   - name: fluffly
     description: Everything about fluffly
 paths:
+  /health/alive:
+    get:
+      operationId: getHealthAlive
+      summary: Check if server is healthy
+      description: Checks if the server is healthy
+      tags:
+        - fluffly
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Healthy"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+  /health/ready:
+    get:
+      operationId: getHealthReady
+      summary: Check if server is ready
+      description: Checks if the server is ready
+      tags:
+        - fluffly
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ready"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
   /countries:
     get:
       operationId: listCountries
@@ -285,38 +317,144 @@ paths:
         default:
           $ref: "#/components/responses/UnexpectedError"
           description: errorGeneric
-  /health/alive:
+  /animals:
     get:
-      operationId: getHealthAlive
-      summary: Check if server is healthy
-      description: Checks if the server is healthy
+      operationId: listAnimals
+      summary: List animals
+      description: List animals that are available for adoption
       tags:
         - fluffly
+      parameters:
+        - $ref: "#/components/parameters/PaginationPage"
+        - $ref: "#/components/parameters/PaginationPageSize"
       responses:
         "200":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Healthy"
+                type: object
+                required:
+                  - data
+                  - meta
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Animal"
+                  meta:
+                    $ref: "#/components/schemas/PaginationMeta"
         default:
           $ref: "#/components/responses/UnexpectedError"
-  /health/ready:
-    get:
-      operationId: getHealthReady
-      summary: Check if server is ready
-      description: Checks if the server is ready
+    post:
+      operationId: createAnimal
+      summary: Create animal
+      description: Create an animal that can be adopted
       tags:
         - fluffly
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAnimalBody"
       responses:
-        "200":
+        "201":
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Ready"
+                $ref: "#/components/schemas/Animal"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
         default:
           $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+  "/animals/{id}":
+    get:
+      operationId: getAnimal
+      summary: Get animal by id
+      description: Return a specific animal by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The animal id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Animal"
+          description: identitySchema
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    patch:
+      operationId: updateAnimal
+      summary: Update animal
+      description: Update an animal that helps adopt animals
+      tags:
+        - fluffly
+      parameters:
+        - description: The animal id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAnimalBody"
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Animal"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+    delete:
+      operationId: deleteAnimal
+      summary: Delete animal by id
+      description: Delete a specific animal by id
+      tags:
+        - fluffly
+      parameters:
+        - description: The animal id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "204":
+          $ref: "#/components/responses/EmptyResponse"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/GenericError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
   /schemas:
     get:
       description: Returns a list of all identity schemas currently in use.
@@ -1813,52 +1951,6 @@ components:
       description: Number of items per page
 
   schemas:
-    UUID:
-      type: string
-      format: uuid
-    NullBool:
-      nullable: true
-      type: boolean
-    NullDuration:
-      nullable: true
-      pattern: "^[0-9]+(ns|us|ms|s|m|h)$"
-      type: string
-    NullInt:
-      nullable: true
-      type: integer
-    NullString:
-      nullable: true
-      type: string
-    NullTime:
-      format: date-time
-      nullable: true
-      type: string
-    NullUUID:
-      format: uuid4
-      nullable: true
-      type: string
-    NullInt64:
-      nullable: true
-      type: integer
-    NullJsonRawMessage:
-      description: >-
-        NullJSONRawMessage represents a json.RawMessage that works well with
-        JSON, SQL, and Swagger and is NULLable-
-      nullable: true
-      type: object
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-          description: Error code
-        message:
-          type: string
-          description: Error message
     PaginationPage:
       type: integer
       minimum: 1
@@ -1901,18 +1993,6 @@ components:
       properties:
         identity:
           $ref: "#/components/schemas/Identity"
-    Latitude:
-      type: number
-      minimum: -90
-      maximum: 90
-      multipleOf: 0.000001
-      description: Latitude
-    Longitude:
-      type: number
-      minimum: -180
-      maximum: 180
-      multipleOf: 0.000001
-      description: Longitude
     Country:
       type: object
       required:
@@ -2003,6 +2083,18 @@ components:
           minLength: 3
           maxLength: 3
           description: Country numeric iso_code
+    Latitude:
+      type: number
+      minimum: -90
+      maximum: 90
+      multipleOf: 0.000001
+      description: Latitude
+    Longitude:
+      type: number
+      minimum: -180
+      maximum: 180
+      multipleOf: 0.000001
+      description: Longitude
     Address:
       type: object
       required:
@@ -2696,6 +2788,24 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
+    CreateAnimalBody:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Animal name
+    UpdateAnimalBody:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Animal name
     Healthy:
       type: object
       required:
@@ -2710,6 +2820,52 @@ components:
       properties:
         ready:
           type: boolean
+    UUID:
+      type: string
+      format: uuid
+    NullBool:
+      nullable: true
+      type: boolean
+    NullDuration:
+      nullable: true
+      pattern: "^[0-9]+(ns|us|ms|s|m|h)$"
+      type: string
+    NullInt:
+      nullable: true
+      type: integer
+    NullString:
+      nullable: true
+      type: string
+    NullTime:
+      format: date-time
+      nullable: true
+      type: string
+    NullUUID:
+      format: uuid4
+      nullable: true
+      type: string
+    NullInt64:
+      nullable: true
+      type: integer
+    NullJsonRawMessage:
+      description: >-
+        NullJSONRawMessage represents a json.RawMessage that works well with
+        JSON, SQL, and Swagger and is NULLable-
+      nullable: true
+      type: object
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Error code
+        message:
+          type: string
+          description: Error message
     AmountInCent:
       format: int64
       type: integer
