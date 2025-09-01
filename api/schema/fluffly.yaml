@@ -1933,12 +1933,18 @@ components:
           description: Country name
         iso_alpha2:
           type: string
+          minLength: 2
+          maxLength: 2
           description: Country 2 letter iso_code
         iso_alpha3:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country 3 letter iso_code
         iso_numeric:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country numeric iso_code
         created_at:
           format: date-time
@@ -1958,15 +1964,22 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
           description: Country name
         iso_alpha2:
           type: string
+          minLength: 2
+          maxLength: 2
           description: Country 2 letter iso_code
         iso_alpha3:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country 3 letter iso_code
         iso_numeric:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country numeric iso_code
     UpdateCountryBody:
       type: object
@@ -1974,14 +1987,21 @@ components:
         name:
           type: string
           description: Country name
+          minLength: 1
         iso_alpha2:
           type: string
+          minLength: 2
+          maxLength: 2
           description: Country 2 letter iso_code
         iso_alpha3:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country 3 letter iso_code
         iso_numeric:
           type: string
+          minLength: 3
+          maxLength: 3
           description: Country numeric iso_code
     Address:
       type: object
@@ -2037,25 +2057,31 @@ components:
       required:
         - street_address
         - city
-        - country
+        - country_id
       properties:
         unit_number:
           type: string
+          minLength: 1
           description: Unit number
         street_number:
           type: string
+          minLength: 1
           description: Street number
         street_address:
           type: string
           description: Street address
+          minLength: 1
         city:
           type: string
+          minLength: 1
           description: City
         region:
           type: string
+          minLength: 1
           description: Region
         postal_code:
           type: string
+          minLength: 1
           description: Postal code
         lat:
           $ref: "#/components/schemas/Latitude"
@@ -2063,6 +2089,7 @@ components:
           $ref: "#/components/schemas/Longitude"
         note:
           type: string
+          minLength: 1
           description: Some info about address if needed
         country_id:
           format: int64
@@ -2073,24 +2100,30 @@ components:
       properties:
         unit_number:
           type: string
+          minLength: 1
           description: Unit number
           nullable: true
         street_number:
           type: string
+          minLength: 1
           description: Street number
           nullable: true
         address_line_1:
           type: string
+          minLength: 1
           description: Address line 1
         address_line_2:
           type: string
+          minLength: 1
           description: Address line 2 (more details)
           nullable: true
         city:
           type: string
+          minLength: 1
           description: City
         region:
           type: string
+          minLength: 1
           description: Region
           nullable: true
         postal_code:
@@ -2113,6 +2146,7 @@ components:
           nullable: true
         note:
           type: string
+          minLength: 1
           description: Some info about address if needed
           nullable: true
         country:
@@ -2150,9 +2184,11 @@ components:
       properties:
         phone:
           type: string
+          minLength: 1
           description: Contact phone
         email:
           type: string
+          format: email
           description: Contact E-Mail
         address:
           $ref: "#/components/schemas/CreateAddressBody"
@@ -2171,10 +2207,12 @@ components:
           nullable: true
         phone:
           type: string
+          minLength: 1
           description: Contact phone
           nullable: true
         email:
           type: string
+          format: email
           description: Contact E-Mail
           nullable: true
         address:
@@ -2260,25 +2298,31 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
           description: Organization name
         website:
           type: string
+          minLength: 1
           description: Organization website
           nullable: true
         mission_statement:
           type: string
+          minLength: 1
           description: Organization mission statement
           nullable: true
         adoption_policy:
           type: string
+          minLength: 1
           description: Organization adoption policy
           nullable: true
         adoption_url:
           type: string
+          minLength: 1
           description: Organization adoption url
           nullable: true
         distance:
           type: string
+          minLength: 1
           description: Organization distance
           nullable: true
         contact:
@@ -2294,17 +2338,7 @@ components:
         socials:
           type: array
           items:
-            type: object
-            required:
-              - platform
-              - url
-            properties:
-              platform:
-                type: string
-                description: Social platform
-              url:
-                type: string
-                description: Social platform url
+            $ref: "#/components/schemas/CreateOrganizationSocialBody"
           nullable: true
     UpdateOrganizationBody:
       type: object
@@ -2315,26 +2349,32 @@ components:
         #   description: Contact id
         name:
           type: string
+          minLength: 1
           description: Organization name
           nullable: true
         website:
           type: string
+          minLength: 1
           description: Organization website
           nullable: true
         mission_statement:
           type: string
+          minLength: 1
           description: Organization mission statement
           nullable: true
         adoption_policy:
           type: string
+          minLength: 1
           description: Organization adoption policy
           nullable: true
         adoption_url:
           type: string
+          minLength: 1
           description: Organization adoption url
           nullable: true
         distance:
           type: string
+          minLength: 1
           description: Organization distance
           nullable: true
         # @TODO: socials: ?????????????
@@ -2464,30 +2504,37 @@ components:
       properties:
         monday:
           type: string
+          minLength: 1
           description: Monday work hours
           nullable: true
         tuesday:
           type: string
+          minLength: 1
           description: Tuesday work hours
           nullable: true
         wednesday:
           type: string
+          minLength: 1
           description: Wednesday work hours
           nullable: true
         thursday:
           type: string
+          minLength: 1
           description: Thursday work hours
           nullable: true
         friday:
           type: string
+          minLength: 1
           description: Friday work hours
           nullable: true
         saturday:
           type: string
+          minLength: 1
           description: Saturday work hours
           nullable: true
         sunday:
           type: string
+          minLength: 1
           description: Sunday work hours
           nullable: true
     CreateOrganizationPhotoBody:
@@ -2495,20 +2542,38 @@ components:
       properties:
         small:
           type: string
+          minLength: 1
           description: Small photo url
           nullable: true
         medium:
           type: string
+          minLength: 1
           description: Medium photo url
           nullable: true
         large:
           type: string
+          minLength: 1
           description: Large photo url
           nullable: true
         full:
           type: string
+          minLength: 1
           description: Full photo url
           nullable: true
+    CreateOrganizationSocialBody:
+      type: object
+      required:
+        - platform
+        - url
+      properties:
+        platform:
+          type: string
+          minLength: 1
+          description: Social platform
+        url:
+          type: string
+          minLength: 1
+          description: Social platform url
     OrganizationPhoto:
       type: object
       required:

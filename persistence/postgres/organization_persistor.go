@@ -31,13 +31,20 @@ func NewPgOrganizationPersistor(ps *PgPersistor) *PgOrganizationPersistor {
 type ErrOrganizationIntegrityViolation struct{ errIntegrityViolation }
 type ErrOrganizationUniqueViolation struct{ errUniqueViolation }
 type ErrOrganizationForeignKeyViolation struct{ errForeignKeyViolation }
+type ErrOrganizationCheckViolation struct{ errCheckViolation }
 
 var (
-	ErrOrganizationNotFound                   = errors.New("organization not found")
-	errOrganizationIntegrity                  = ErrOrganizationIntegrityViolation{}
-	errOrganizationUniqueName                 = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "name"}}
-	errOrganizationContactForeignKeyUserID    = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.user_id"}}
-	errOrganizationContactForeignKeyAddressID = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.address_id"}}
+	ErrOrganizationNotFound                         = errors.New("organization not found")
+	errOrganizationIntegrity                        = ErrOrganizationIntegrityViolation{}
+	errOrganizationUniqueName                       = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "name"}}
+	errOrganizationContactForeignKeyOrganizationID  = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.organization_id"}}
+	errOrganizationContactForeignKeyAddressID       = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.address_id"}}
+	errOrganizationAddressForeignKeyCountryID       = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "address.country_id"}}
+	errOrganizationWorkHourUniqueOrganizationID     = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "work_hour.organization_id"}}
+	errOrganizationWorkHourForeignKeyOrganizationID = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "work_hour.organization_id"}}
+	errOrganizationWorkHourCheckDayProvided         = ErrOrganizationCheckViolation{errCheckViolation: errCheckViolation{Name: "work_hour.day_provided"}}
+	errOrganizationPhotoForeignKeyOrganizationID    = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "photo.organization_id"}}
+	errOrganizationSocialForeignKeyOrganizationID   = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "social.organization_id"}}
 )
 
 func convertOrganizationPgError(pgErr *pgconn.PgError) error {
@@ -45,10 +52,22 @@ func convertOrganizationPgError(pgErr *pgconn.PgError) error {
 		switch pgErr.ConstraintName {
 		case "uq_organization_name":
 			return errOrganizationUniqueName
-		case "fk_organization_contact_user_id":
-			return errOrganizationContactForeignKeyUserID
+		case "fk_address_country_id":
+			return errOrganizationAddressForeignKeyCountryID
+		case "fk_organization_contact_organization_id":
+			return errOrganizationContactForeignKeyOrganizationID
 		case "fk_organization_contact_address_id":
 			return errOrganizationContactForeignKeyAddressID
+		case "uq_organization_work_hour_organization_id":
+			return errOrganizationWorkHourUniqueOrganizationID
+		case "fk_organization_work_hour_organization_id":
+			return errOrganizationWorkHourForeignKeyOrganizationID
+		case "ck_organization_work_hour_provided":
+			return errOrganizationWorkHourCheckDayProvided
+		case "fk_organization_photo_organization_id":
+			return errOrganizationPhotoForeignKeyOrganizationID
+		case "fk_organization_social_organization_id":
+			return errOrganizationSocialForeignKeyOrganizationID
 		}
 
 		return errOrganizationIntegrity

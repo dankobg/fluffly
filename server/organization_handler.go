@@ -28,11 +28,11 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 
 	organizationCreateSetter.Contact = persistence.OrganizationContactSetter{
 		Phone: nullable.NewNullableWithValue(request.Body.Contact.Phone),
-		Email: nullable.NewNullableWithValue(request.Body.Contact.Email),
+		Email: nullable.NewNullableWithValue(string(request.Body.Contact.Email)),
 	}
 
 	organizationCreateSetter.Address = persistence.AddressSetter{
-		CountryID:     nullable.NewNullableWithValue(*request.Body.Contact.Address.CountryID),
+		CountryID:     nullable.NewNullableWithValue(request.Body.Contact.Address.CountryID),
 		UnitNumber:    nullable.NewNullableWithValue(*request.Body.Contact.Address.UnitNumber),
 		StreetNumber:  nullable.NewNullableWithValue(*request.Body.Contact.Address.StreetNumber),
 		StreetAddress: nullable.NewNullableWithValue(request.Body.Contact.Address.StreetAddress),

@@ -108,7 +108,7 @@ create table "organization_contact" (
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
   constraint "pk_organization_contact_id" primary key ("id"),
-  constraint "fk_organization_contact_user_id" foreign key ("organization_id") references "organization" ("id") on delete cascade,
+  constraint "fk_organization_contact_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade,
   constraint "fk_organization_contact_address_id" foreign key ("address_id") references "address" ("id") on delete cascade
 );
 
