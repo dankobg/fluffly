@@ -158,6 +158,16 @@ create table "organization_photo" (
   constraint "fk_organization_photo_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
 
+create table "organization_video" (
+  "id" bigint not null generated always as identity,
+  "organization_id" bigint,
+  "url" text not null,
+  "created_at" timestamptz not null default current_timestamp,
+  "updated_at" timestamptz not null default current_timestamp,
+  constraint "pk_organization_video_id" primary key ("id"),
+  constraint "fk_organization_photo_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
+);
+
 create table "animal" (
   "id" bigint not null generated always as identity,
   "user_id" uuid,
@@ -181,6 +191,8 @@ create table "animal" (
   constraint "pk_animal_id" primary key ("id"),
   constraint "fk_animal_user_id" foreign key ("user_id") references "user" ("id") on delete set null,
   constraint "fk_animal_organization_id" foreign key ("organization_id") references "organization" ("id") on delete set null,
+  constraint "ck_animal_age_valid" check ("age" in ('baby', 'young', 'adult', 'senior')),
+  constraint "ck_animal_size_valid" check ("size" in ('small', 'medium', 'large')),
   constraint "ck_animal_user_or_organization_provided" check (
     ("user_id" is not null and "organization_id" is null) or
     ("user_id" is null and "organization_id" is not null)

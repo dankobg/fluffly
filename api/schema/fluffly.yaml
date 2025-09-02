@@ -1989,10 +1989,13 @@ components:
     User:
       type: object
       required:
-        - identity
+        - name
       properties:
-        identity:
-          $ref: "#/components/schemas/Identity"
+        name:
+          type: string
+          description: User name
+        # identity:
+        #   $ref: "#/components/schemas/Identity"
     Country:
       type: object
       required:
@@ -2547,6 +2550,10 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/OrganizationPhoto"
+        videos:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationVideo"
         created_at:
           format: date-time
           type: string
@@ -2662,6 +2669,15 @@ components:
           format: uri
           description: Full photo url
           nullable: true
+    CreateOrganizationVideoBody:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Video url
     CreateOrganizationSocialBody:
       type: object
       required:
@@ -2716,21 +2732,155 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
+    OrganizationVideo:
+      type: object
+      required:
+        - id
+        - organization_id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Organization photo id
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+        url:
+          type: string
+          format: uri
+          description: Video url
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateAnimalPhotoBody:
+      type: object
+      properties:
+        small:
+          type: string
+          format: uri
+          description: Small photo url
+          nullable: true
+        medium:
+          type: string
+          format: uri
+          description: Medium photo url
+          nullable: true
+        large:
+          type: string
+          format: uri
+          description: Large photo url
+          nullable: true
+        full:
+          type: string
+          format: uri
+          description: Full photo url
+          nullable: true
+    CreateAnimalVideoBody:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Video url
+    AnimalPhoto:
+      type: object
+      required:
+        - id
+        - animal_id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal photo id
+        animal_id:
+          format: int64
+          type: integer
+          description: Animal id
+        small:
+          type: string
+          format: uri
+          description: Small photo url
+        medium:
+          type: string
+          format: uri
+          description: Medium photo url
+        large:
+          type: string
+          format: uri
+          description: Large photo url
+        full:
+          type: string
+          format: uri
+          description: Full photo url
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    AnimalVideo:
+      type: object
+      required:
+        - id
+        - animal_id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal photo id
+        animal_id:
+          format: int64
+          type: integer
+          description: Animal id
+        url:
+          type: string
+          format: uri
+          description: Video url
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
     Animal:
       type: object
       required:
         - id
-        - contact_id
-        - type_id
-        - breed_id
-        - species_id
+        - type
+        - species
+        - breeds
         - name
         - age
+        - size
+        - hemaphrodite
+        - image_url
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64
           type: integer
           description: Animal id
+        user:
+          $ref: "#/components/schemas/User"
         organization:
           $ref: "#/components/schemas/Organization"
         type:
@@ -2761,12 +2911,22 @@ components:
             - young
             - adult
             - senior
+        size:
+          type: string
+          description: Animal size
+          enum:
+            - small
+            - medium
+            - large
         image_url:
           type: string
           description: Animal image url
         description:
           type: string
           description: Animal description
+        attributes:
+          type: object
+          description: Animal attributes
         status:
           type: string
           description: Animal adoption status
@@ -2795,21 +2955,141 @@ components:
     CreateAnimalBody:
       type: object
       required:
+        - animal_type_id
+        - animal_species_id
         - name
+        - age
+        - size
+        - image_url
       properties:
+        user_id:
+          format: int64
+          type: integer
+          description: User id
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+        animal_type_id:
+          format: int64
+          type: integer
+          description: Animal type id
+        animal_species_id:
+          format: int64
+          type: integer
+          description: Animal species id
+        breed_ids:
+          type: array
+          items:
+            schema:
+              format: int64
+              type: integer
+              description: Breed id
         name:
           type: string
-          minLength: 1
           description: Animal name
+        gender:
+          type: string
+          enum:
+            - m
+            - f
+          description: Animal gender
+        hemaphrodite:
+          type: boolean
+          description: Animal is hemaphrodite
+        age:
+          type: string
+          description: Animal age
+          enum:
+            - baby
+            - young
+            - adult
+            - senior
+        size:
+          type: string
+          description: Animal size
+          enum:
+            - small
+            - medium
+            - large
+        image_url:
+          type: string
+          description: Animal image url
+        description:
+          type: string
+          description: Animal description
+        attributes:
+          type: object
+          description: Animal attributes
     UpdateAnimalBody:
       type: object
-      required:
-        - name
       properties:
+        user_id:
+          format: int64
+          type: integer
+          description: User id
+          nullable: true
+        organization_id:
+          format: int64
+          type: integer
+          description: Organization id
+          nullable: true
+        animal_type_id:
+          format: int64
+          type: integer
+          description: Animal type id
+        animal_species_id:
+          format: int64
+          type: integer
+          description: Animal species id
+        breed_ids:
+          type: array
+          items:
+            schema:
+              format: int64
+              type: integer
+              description: Breed id
+          nullable: true
         name:
           type: string
-          minLength: 1
           description: Animal name
+        gender:
+          type: string
+          enum:
+            - m
+            - f
+          description: Animal gender
+          nullable: true
+        hemaphrodite:
+          type: boolean
+          description: Animal is hemaphrodite
+          nullable: true
+        age:
+          type: string
+          description: Animal age
+          enum:
+            - baby
+            - young
+            - adult
+            - senior
+        size:
+          type: string
+          description: Animal size
+          enum:
+            - small
+            - medium
+            - large
+        image_url:
+          type: string
+          description: Animal image url
+        description:
+          type: string
+          description: Animal description
+          nullable: true
+        attributes:
+          type: object
+          description: Animal attributes
+          nullable: true
     Healthy:
       type: object
       required:

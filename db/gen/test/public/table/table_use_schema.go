@@ -26,6 +26,7 @@ func UseSchema(schema string) {
 	OrganizationContact = OrganizationContact.FromSchema(schema)
 	OrganizationPhoto = OrganizationPhoto.FromSchema(schema)
 	OrganizationSocial = OrganizationSocial.FromSchema(schema)
+	OrganizationVideo = OrganizationVideo.FromSchema(schema)
 	OrganizationWorkHour = OrganizationWorkHour.FromSchema(schema)
 	Tag = Tag.FromSchema(schema)
 	User = User.FromSchema(schema)
