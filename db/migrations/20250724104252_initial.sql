@@ -163,7 +163,6 @@ create table "animal" (
   "user_id" uuid,
   "organization_id" bigint,
   "type_id" bigint not null,
-  "breed_id" bigint not null,
   "species_id" bigint not null,
   "name" varchar(255) not null,
   "gender" gender,

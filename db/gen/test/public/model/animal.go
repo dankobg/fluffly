@@ -17,7 +17,6 @@ type Animal struct {
 	UserID          *uuid.UUID
 	OrganizationID  *int64
 	TypeID          int64
-	BreedID         int64
 	SpeciesID       int64
 	Name            string
 	Gender          *Gender

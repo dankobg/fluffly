@@ -2314,6 +2314,8 @@ components:
       required:
         - id
         - name
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64
@@ -2336,6 +2338,9 @@ components:
         - id
         - animal_type_id
         - name
+        - primary
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64
@@ -2348,6 +2353,9 @@ components:
         name:
           type: string
           description: Breed name
+        primary:
+          type: boolean
+          description: Whether breed is primary
         created_at:
           format: date-time
           type: string
@@ -2362,6 +2370,8 @@ components:
         - id
         - animal_type_id
         - name
+        - created_at
+        - updated_at
       properties:
         id:
           format: int64
@@ -2721,22 +2731,16 @@ components:
           format: int64
           type: integer
           description: Animal id
-        contact_id:
-          format: int64
-          type: integer
-          description: Contact id
-        type_id:
-          format: int64
-          type: integer
-          description: Animal type id
-        breed_id:
-          format: int64
-          type: integer
-          description: Breed id
-        species_id:
-          format: int64
-          type: integer
-          description: Animal species id
+        organization:
+          $ref: "#/components/schemas/Organization"
+        type:
+          $ref: "#/components/schemas/AnimalType"
+        species:
+          $ref: "#/components/schemas/AnimalSpecies"
+        breeds:
+          type: array
+          items:
+            $ref: "#/components/schemas/Breed"
         name:
           type: string
           description: Animal name
