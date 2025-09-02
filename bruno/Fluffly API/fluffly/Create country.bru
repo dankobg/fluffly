@@ -1,13 +1,13 @@
 meta {
   name: Create country
   type: http
-  seq: 2
+  seq: 7
 }
 
 post {
   url: {{baseUrl}}/countries
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {

@@ -1,13 +1,13 @@
 meta {
   name: Create a Recovery Code
   type: http
-  seq: 25
+  seq: 30
 }
 
 post {
   url: {{baseUrl}}/recovery/code
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {

@@ -1,11 +1,11 @@
 meta {
   name: Check if server is ready
   type: http
-  seq: 9
+  seq: 14
 }
 
 get {
   url: {{baseUrl}}/health/ready
   body: none
-  auth: none
+  auth: inherit
 }

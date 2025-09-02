@@ -1,13 +1,13 @@
 meta {
   name: Get all Identity Schemas
   type: http
-  seq: 27
+  seq: 32
 }
 
 get {
   url: {{baseUrl}}/schemas
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {

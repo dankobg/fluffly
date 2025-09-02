@@ -1,13 +1,13 @@
 meta {
   name: Update an Identity
   type: http
-  seq: 16
+  seq: 21
 }
 
 put {
   url: {{baseUrl}}/identities/:id
   body: json
-  auth: none
+  auth: inherit
 }
 
 params:path {

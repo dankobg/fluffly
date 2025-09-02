@@ -1,13 +1,13 @@
 meta {
   name: Create organization
   type: http
-  seq: 21
+  seq: 26
 }
 
 post {
   url: {{baseUrl}}/organizations
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {
@@ -68,5 +68,4 @@ body:json {
       "sunday": "Closed"
     }
   }
-  
 }

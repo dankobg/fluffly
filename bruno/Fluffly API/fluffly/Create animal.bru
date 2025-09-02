@@ -1,0 +1,29 @@
+meta {
+  name: Create animal
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/animals
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "age": "young",
+    "animal_species_id": 0,
+    "animal_type_id": 0,
+    "attributes": {},
+    "breed_ids": [],
+    "description": "",
+    "gender": "",
+    "hemaphrodite": false,
+    "image_url": "",
+    "name": "",
+    "organization_id": 0,
+    "size": "",
+    "user_id": 0
+  }
+}

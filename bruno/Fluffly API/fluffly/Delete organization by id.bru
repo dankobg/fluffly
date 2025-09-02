@@ -1,13 +1,13 @@
 meta {
   name: Delete organization by id
   type: http
-  seq: 22
+  seq: 27
 }
 
 delete {
   url: {{baseUrl}}/organizations/:id
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:path {

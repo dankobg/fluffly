@@ -1,13 +1,13 @@
 meta {
   name: Get country by id
   type: http
-  seq: 4
+  seq: 9
 }
 
 get {
   url: {{baseUrl}}/countries/:id
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:path {

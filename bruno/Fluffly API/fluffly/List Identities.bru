@@ -1,13 +1,13 @@
 meta {
   name: List Identities
   type: http
-  seq: 10
+  seq: 15
 }
 
 get {
   url: {{baseUrl}}/identities
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {

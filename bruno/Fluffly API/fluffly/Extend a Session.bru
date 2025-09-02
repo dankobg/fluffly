@@ -1,13 +1,13 @@
 meta {
   name: Extend a Session
   type: http
-  seq: 32
+  seq: 37
 }
 
 patch {
   url: {{baseUrl}}/sessions/:id/extend
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:path {

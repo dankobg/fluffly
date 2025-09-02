@@ -1,13 +1,13 @@
 meta {
   name: List organizations
   type: http
-  seq: 20
+  seq: 25
 }
 
 get {
   url: {{baseUrl}}/organizations
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {

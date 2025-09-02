@@ -1,13 +1,13 @@
 meta {
   name: List All Sessions
   type: http
-  seq: 29
+  seq: 34
 }
 
 get {
   url: {{baseUrl}}/sessions
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {

@@ -165,7 +165,7 @@ create table "organization_video" (
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
   constraint "pk_organization_video_id" primary key ("id"),
-  constraint "fk_organization_photo_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
+  constraint "fk_organization_video_organization_id" foreign key ("organization_id") references "organization" ("id") on delete cascade
 );
 
 create table "animal" (
@@ -311,6 +311,7 @@ drop table if exists "organization" cascade;
 drop table if exists "organization_social" cascade;
 drop table if exists "organization_work_hour" cascade;
 drop table if exists "organization_photo" cascade;
+drop table if exists "organization_video" cascade;
 drop table if exists "animal" cascade;
 drop table if exists "animal_breed" cascade;
 drop table if exists "user_animal_like" cascade;

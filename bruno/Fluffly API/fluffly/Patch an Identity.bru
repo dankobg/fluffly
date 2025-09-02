@@ -1,13 +1,13 @@
 meta {
   name: Patch an Identity
   type: http
-  seq: 15
+  seq: 20
 }
 
 patch {
   url: {{baseUrl}}/identities/:id
   body: json
-  auth: none
+  auth: inherit
 }
 
 params:path {

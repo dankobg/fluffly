@@ -1,13 +1,13 @@
 meta {
   name: List an Identity's Sessions
   type: http
-  seq: 19
+  seq: 24
 }
 
 get {
   url: {{baseUrl}}/identities/:id/sessions
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {

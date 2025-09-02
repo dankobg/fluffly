@@ -1,13 +1,13 @@
 meta {
   name: Update organization
   type: http
-  seq: 24
+  seq: 29
 }
 
 patch {
   url: {{baseUrl}}/organizations/:id
   body: json
-  auth: none
+  auth: inherit
 }
 
 params:path {

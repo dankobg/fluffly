@@ -1,15 +1,15 @@
 meta {
-  name: Delete an Identity
+  name: Delete animal by id
   type: http
-  seq: 18
+  seq: 3
 }
 
 delete {
-  url: {{baseUrl}}/identities/:id
+  url: {{baseUrl}}/animals/:id
   body: none
   auth: inherit
 }
 
 params:path {
-  id: 
+  id: 1
 }

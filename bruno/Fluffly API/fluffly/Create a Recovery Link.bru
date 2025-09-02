@@ -1,13 +1,13 @@
 meta {
   name: Create a Recovery Link
   type: http
-  seq: 26
+  seq: 31
 }
 
 post {
   url: {{baseUrl}}/recovery/link
   body: json
-  auth: none
+  auth: inherit
 }
 
 params:query {

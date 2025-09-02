@@ -1,13 +1,13 @@
 meta {
   name: Create multiple identities
   type: http
-  seq: 11
+  seq: 16
 }
 
 patch {
   url: {{baseUrl}}/identities
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {

@@ -1,13 +1,13 @@
 meta {
   name: List Messages
   type: http
-  seq: 6
+  seq: 11
 }
 
 get {
   url: {{baseUrl}}/courier/messages
   body: none
-  auth: none
+  auth: inherit
 }
 
 params:query {
