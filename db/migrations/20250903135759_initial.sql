@@ -63,17 +63,6 @@ create table "animal_type" (
   constraint "pk_animal_type_id" primary key ("id")
 );
 
-create table "breed" (
-  "id" bigint not null generated always as identity,
-  "animal_type_id" bigint not null,
-  "name" varchar(255) not null,
-  "created_at" timestamptz not null default current_timestamp,
-  "updated_at" timestamptz not null default current_timestamp,
-  constraint "pk_breed_id" primary key ("id"),
-  constraint "uq_breed_animal_type_id" unique ("animal_type_id", "name"),
-  constraint "fk_breed_animal_type_id" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
-);
-
 create table "animal_species" (
   "id" bigint not null generated always as identity,
   "animal_type_id" bigint not null,
@@ -83,6 +72,17 @@ create table "animal_species" (
   constraint "pk_animal_species_id" primary key ("id"),
   constraint "uq_animal_species_animal_type_id" unique ("animal_type_id", "name"),
   constraint "fk_animal_species_animal_type_id" foreign key ("animal_type_id") references "animal_type" ("id") on delete cascade
+);
+
+create table "breed" (
+  "id" bigint not null generated always as identity,
+  "animal_species_id" bigint not null,
+  "name" varchar(255) not null,
+  "created_at" timestamptz not null default current_timestamp,
+  "updated_at" timestamptz not null default current_timestamp,
+  constraint "pk_breed_id" primary key ("id"),
+  constraint "uq_breed_animal_species_id" unique ("animal_species_id", "name"),
+  constraint "fk_breed_animal_species_id" foreign key ("animal_species_id") references "animal_species" ("id") on delete cascade
 );
 
 create table "organization" (

@@ -6,7 +6,8 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values ('Cat')
+  values 
+    ('Cat')
 ) as sp("name")
 where at."name" = 'Cat';
 
@@ -16,8 +17,8 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values
-    ('Dog')
+  values 
+  ('Dog')
 ) as sp("name")
 where at."name" = 'Dog';
 
@@ -27,7 +28,8 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values ('Rabbit')
+  values 
+  ('Rabbit')
 ) as sp("name")
 where at."name" = 'Rabbit';
 
@@ -37,7 +39,12 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values ('Horse')
+  values
+    ('Donkey'),
+    ('Horse'),
+    ('Mule'),
+    ('Pony'),
+    ('Miniature Horse')
 ) as sp("name")
 where at."name" = 'Horse';
 
@@ -47,7 +54,25 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values ('Bird')
+  values
+    ('Button-Quail'),
+    ('Chicken'),
+    ('Dove'),
+    ('Duck'),
+    ('Emu'),
+    ('Finch'),
+    ('Goose'),
+    ('Guinea Fowl'),
+    ('Ostritch'),
+    ('Parakeet'),
+    ('Parrot'),
+    ('Peacock / Peafowl'),
+    ('Pheasant'),
+    ('Quail'),
+    ('Rhea'),
+    ('Swan'),
+    ('Toucan'),
+    ('Turkey')
 ) as sp("name")
 where at."name" = 'Bird';
 
@@ -57,7 +82,14 @@ insert into "animal_species" ("animal_type_id", "name")
 select at."id", sp."name"
 from "animal_type" at
 cross join (
-  values ('Barnyard')
+  values 
+    ('Alpaca'),
+    ('Cow'),
+    ('Goat'),
+    ('Llama'),
+    ('Pig'),
+    ('Pot Bellied'),
+    ('Sheep')
 ) as sp("name")
 where at."name" = 'Barnyard';
 
@@ -68,15 +100,18 @@ select at."id", sp."name"
 from "animal_type" at
 cross join (
   values
-  ('Guinea Pig'),
-  ('Chinchilla'),
-  ('Rat'),
-  ('Mouse'),
-  ('Ferret'),
-  ('Hamster'),
-  ('Hedgehog'),
-  ('Gerbil'),
-  ('Degu')
+    ('Guinea Pig'),
+    ('Chinchilla'),
+    ('Rat'),
+    ('Mouse'),
+    ('Ferret'),
+    ('Hamster'),
+    ('Hedgehog'),
+    ('Gerbil'),
+    ('Degu'),
+    ('Prairie Dog'),
+    ('Skunk'),
+    ('Sugar Glider')
 ) as sp("name")
 where at."name" = 'Small & Furry';
 
@@ -87,11 +122,15 @@ select at."id", sp."name"
 from "animal_type" at
 cross join (
   values
-    ('Reptile'),
+    ('Amphibian'),
+    ('Fish'),
     ('Other Animal'),
+    ('Reptile'),
+    ('Salamander / Newt'),
     ('Snake'),
+    ('Toad'),
     ('Tortoise'),
-    ('Turtl')
+    ('Turtle')
 ) as sp("name")
 where at."name" = 'Scales, Fins & Other';
 -- +goose StatementEnd
