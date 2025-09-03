@@ -4,8 +4,8 @@
     "traits": {
       "email": "test@test.com",
       "username": "test",
-      "first_name": "Test first",
-      "last_name": "Test last"
+      "first_name": "Test First",
+      "last_name": "Test Last"
     },
     "verifiable_addresses": [
       {
@@ -18,7 +18,7 @@
     "credentials": {
       "password": {
         "config": {
-          "hashed_password": "$2a$12$4tph7DLHJCkcj7mggYK/vuZXCkTTMywyj76G2IltYyDDqoGBal2fO"
+          "hashed_password": "$2a$12$JUM0J36mTue44awh0/m7c.Q9A0VUNIBWO.9dajoPGbK3EJx2tL3Wa"
         }
       }
     }
@@ -26,14 +26,14 @@
   {
     "schema_id": "customer",
     "traits": {
-      "email": "fluffly@dev.com",
-      "username": "dev",
-      "first_name": "Dev first",
-      "last_name": "Dev last"
+      "email": "customer@test.com",
+      "username": "customer",
+      "first_name": "Customer First",
+      "last_name": "Customer Last"
     },
     "verifiable_addresses": [
       {
-        "value": "fluffy@dev.com",
+        "value": "customer@test.com",
         "verified": true,
         "via": "email",
         "status": "completed"
@@ -42,7 +42,55 @@
     "credentials": {
       "password": {
         "config": {
-          "hashed_password": "$2a$12$aYqPuHSbrGvnlMNRHwgGG.2mavzT.Y/s5Jb7IkmGTjsIGN.epgcWa"
+          "hashed_password": "$2a$12$bLa6LBIXpfSKJNGJ4gPbIOhsDevJ1QtDOj84dz4CB6dH.JYNFSeDS"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "bob@test.com",
+      "username": "bob",
+      "first_name": "Bob",
+      "last_name": "Bobson"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "bob@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$9G4zyQnBqWPy8RRaDtPIe.lF7P/U0OqFLyDNBmNPev4tZCNNGWHEe"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "ana@test.com",
+      "username": "ana",
+      "first_name": "Ana",
+      "last_name": "Smith"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "ana@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$CbkUiY.pBn9r7gjRjFZ9LOUTTb7hAhJ5sq32kcqGzZBkE.qf5Nphq"
         }
       }
     }

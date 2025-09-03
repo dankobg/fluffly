@@ -2,14 +2,14 @@
   {
     "schema_id": "employee",
     "traits": {
-      "email": "fluffly.app@gmail.com",
+      "email": "fluffly@test.com",
       "username": "fluffly",
-      "first_name": "fluffly",
-      "last_name": "Admin"
+      "first_name": "Fluffly",
+      "last_name": "Flufflyson"
     },
     "verifiable_addresses": [
       {
-        "value": "fluffly.app@gmail.com",
+        "value": "fluffly@test.com",
         "verified": true,
         "via": "email",
         "status": "completed"
@@ -18,7 +18,7 @@
     "credentials": {
       "password": {
         "config": {
-          "hashed_password": "$2a$12$xmzfX9ECg7zwmrg4FRpdIOavLYYJ.g/ZgGQFs3R8AzErs0rG9TmzK"
+          "hashed_password": "$2a$12$NbpitY0LXWbUhUwW0BNbf.E.atZRu7LZGpz2lnXv0OSpczG/RPVtq"
         }
       }
     }
@@ -26,14 +26,14 @@
   {
     "schema_id": "employee",
     "traits": {
-      "email": "dankopetrovic.bgd@gmail.com",
-      "username": "danko",
-      "first_name": "Danko",
-      "last_name": "Petrovic"
+      "email": "dev@test.com",
+      "username": "dev",
+      "first_name": "Dev First",
+      "last_name": "Dev Last"
     },
     "verifiable_addresses": [
       {
-        "value": "dankopetrovic.bgd@gmail.com",
+        "value": "dev@test.com",
         "verified": true,
         "via": "email",
         "status": "completed"
@@ -42,7 +42,55 @@
     "credentials": {
       "password": {
         "config": {
-          "hashed_password": "$2a$12$4tph7DLHJCkcj7mggYK/vuZXCkTTMywyj76G2IltYyDDqoGBal2fO"
+          "hashed_password": "$2a$12$sUN//VQ4fQbh1B0hZ3l4jOP8kjGgpG6LADPeCZFs8n2eWyWTFkFzi"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "employee",
+    "traits": {
+      "email": "admin@test.com",
+      "username": "admin",
+      "first_name": "Admin First",
+      "last_name": "Admin Last"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "admin@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$M43ExJLvtcSk8IczwhwrgO0dd9mHEQFltd2Zo0N4XDaOLZf3.uLbK"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "employee",
+    "traits": {
+      "email": "danko@test.com",
+      "username": "danko",
+      "first_name": "Danko",
+      "last_name": "Petrovic"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "danko@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$ypS.wY268zkFRt2yPzs90ejQYwD3h8zmfnqSl9cKeVVrC3X5rUO7W"
         }
       }
     }
