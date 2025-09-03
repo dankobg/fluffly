@@ -2860,6 +2860,73 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
+    Microchip:
+      type: object
+      required:
+        - id
+        - number
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Microchip id
+        number:
+          format: string
+          description: Microchip id
+        brand:
+          format: string
+          description: Microchip brand
+        description:
+          format: string
+          description: Microchip description
+        location:
+          format: string
+          description: Microchip location
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
+    CreateMicrochipBody:
+      type: object
+      required:
+        - number
+      properties:
+        number:
+          format: string
+          description: Microchip id
+        brand:
+          format: string
+          description: Microchip brand
+        description:
+          format: string
+          description: Microchip description
+        location:
+          format: string
+          description: Microchip location
+    UpdateMicrochipBody:
+      type: object
+      properties:
+        number:
+          format: string
+          description: Microchip id
+        brand:
+          format: string
+          description: Microchip brand
+          nullable: true
+        description:
+          format: string
+          description: Microchip description
+          nullable: true
+        location:
+          format: string
+          description: Microchip location
+          nullable: true
     Animal:
       type: object
       required:
@@ -2981,10 +3048,9 @@ components:
         breed_ids:
           type: array
           items:
-            schema:
-              format: int64
-              type: integer
-              description: Breed id
+            format: int64
+            type: integer
+            description: Breed id
         name:
           type: string
           description: Animal name
@@ -3021,6 +3087,21 @@ components:
         attributes:
           type: object
           description: Animal attributes
+        tags:
+          type: array
+          items:
+            type: string
+          description: Animal tags
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateAnimalPhotoBody"
+        videos:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateAnimalVideoBody"
+        microchip:
+          $ref: "#/components/schemas/CreateMicrochipBody"
     UpdateAnimalBody:
       type: object
       properties:

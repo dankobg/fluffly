@@ -13,17 +13,57 @@ post {
 body:json {
   {
     "age": "young",
-    "animal_species_id": 0,
-    "animal_type_id": 0,
-    "attributes": {},
-    "breed_ids": [],
-    "description": "",
-    "gender": "",
+    "animal_species_id": 1,
+    "animal_type_id": 1,
+    "attributes": {
+      "good_with_cats": true,
+      "good_with_dogs": true,
+      "good_with_children": true,
+      "declawed": false,
+      "spayed_neutered": true,
+      "special_needs": false,
+      "house_trained": true,
+      "shots_taken": 2
+    },
+    "breed_ids": [
+      27
+    ],
+    "description": "My crazy cat",
+    "gender": "m",
     "hemaphrodite": false,
-    "image_url": "",
-    "name": "",
-    "organization_id": 0,
-    "size": "",
-    "user_id": 0
+    "image_url": "https://crazy_cat.jpg",
+    "name": "micko",
+    "organization_id": 1,
+    "size": "small",
+    "photos": [
+      {
+        "full": "https://micko1-full.jpg",
+        "large": "https://micko1-large.jpg",
+        "medium": "https://micko1-medium.jpg",
+        "small": "https://micko1-small.jpg"
+      },
+      {
+        "full": "https://micko2-full.jpg",
+        "large": "https://micko2-large.jpg",
+        "medium": "https://micko2-medium.jpg",
+        "small": "https://micko2-small.jpg"
+      }
+    ],
+    "videos": [
+      {
+        "url": "https://micko1-video.mp4"
+      }
+    ],
+    "tags": [
+      "funny",
+      "stupid",
+      "crazy"
+    ],
+    "microchip": {
+      "number": "asd4t6",
+      "description": "my chip",
+      "brand": "catchip",
+      "location": "right ear"
+    }
   }
 }
