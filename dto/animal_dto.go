@@ -48,7 +48,7 @@ func AnimalWithJoinDataToResponse(data persistence.AnimalWithJoinData) api.Anima
 	}
 	resp.Breeds = make([]api.Breed, len(data.Breeds))
 	for i, breed := range data.Breeds {
-		resp.Breeds[i] = AnimalBreedToResp(breed)
+		resp.Breeds[i] = AnimalBreedWithJounDataToResp(breed)
 	}
 	resp.Tags = make([]api.AnimalTag, len(data.Tags))
 	for i, tag := range data.Tags {

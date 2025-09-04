@@ -2,15 +2,15 @@ package dto
 
 import (
 	api "github.com/dankobg/fluffly/api/gen"
-	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	"github.com/dankobg/fluffly/persistence"
 )
 
-func AnimalBreedToResp(data model.Breed) api.Breed {
+func AnimalBreedWithJounDataToResp(data persistence.AnimalBreedWithJoinData) api.Breed {
 	resp := api.Breed{
 		ID:           data.ID,
 		AnimalTypeID: data.AnimalSpeciesID,
 		Name:         data.Name,
-		Primary:      false,
+		Primary:      data.Primary,
 		CreatedAt:    data.CreatedAt,
 		UpdatedAt:    data.UpdatedAt,
 	}

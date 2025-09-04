@@ -9,6 +9,11 @@ import (
 	"github.com/oapi-codegen/nullable"
 )
 
+type AnimalBreedWithJoinData struct {
+	model.Breed
+	Primary bool
+}
+
 type AnimalBreedSetter struct {
 	AnimalID  nullable.Nullable[int64]     `json:"animal_id"`
 	BreedID   nullable.Nullable[int64]     `json:"breed_id"`

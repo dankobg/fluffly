@@ -21,10 +21,10 @@ type AnimalWithJoinData struct {
 	Type         model.AnimalType
 	Species      model.AnimalSpecies
 	Microchip    model.Microchip
-	Breeds       []model.Breed       `json_column:"breeds"`
-	Tags         []model.Tag         `json_column:"tags"`
-	Photos       []model.AnimalPhoto `json_column:"photos"`
-	Videos       []model.AnimalVideo `json_column:"videos"`
+	Breeds       []AnimalBreedWithJoinData `json_column:"breeds"`
+	Tags         []model.Tag               `json_column:"tags"`
+	Photos       []model.AnimalPhoto       `json_column:"photos"`
+	Videos       []model.AnimalVideo       `json_column:"videos"`
 	Organization struct {
 		model.Organization
 		WorkHour model.OrganizationWorkHour
