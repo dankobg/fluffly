@@ -136,13 +136,11 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 		t.Address.AllColumns,
 		t.Country.AllColumns,
 		t.OrganizationWorkHour.AllColumns,
-		p.SELECT_JSON_ARR(
-			t.OrganizationPhoto.AllColumns).
+		p.SELECT_JSON_ARR(t.OrganizationPhoto.AllColumns).
 			FROM(t.OrganizationPhoto).
 			WHERE(t.OrganizationPhoto.OrganizationID.EQ(t.Organization.ID)).
 			AS("photos"),
-		p.SELECT_JSON_ARR(
-			t.OrganizationSocial.AllColumns).
+		p.SELECT_JSON_ARR(t.OrganizationSocial.AllColumns).
 			FROM(t.OrganizationSocial).
 			WHERE(t.OrganizationSocial.OrganizationID.EQ(t.Organization.ID)).
 			AS("socials"),
@@ -206,9 +204,9 @@ func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in pe
 
 		if in.WorkHour.IsSpecified() && !in.WorkHour.IsNull() {
 			var insertedWorkHour model.OrganizationWorkHour
-			inWorkHour := in.WorkHour.MustGet()
-			inWorkHour.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
-			workHourCols, workHour := inWorkHour.ToModel()
+			workHourInput := in.WorkHour.MustGet()
+			workHourInput.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+			workHourCols, workHour := workHourInput.ToModel()
 			q4 := t.OrganizationWorkHour.INSERT(workHourCols).
 				MODEL(workHour).
 				RETURNING(t.OrganizationWorkHour.AllColumns)

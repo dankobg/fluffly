@@ -222,7 +222,7 @@ create table user_animal_like (
 create table "tag" (
   "id" bigint not null generated always as identity,
   "animal_id" bigint,
-  "name" varchar(255),
+  "name" varchar(255) not null,
   "created_at" timestamptz not null default current_timestamp,
   "updated_at" timestamptz not null default current_timestamp,
   constraint "pk_tag_id" primary key ("id"),

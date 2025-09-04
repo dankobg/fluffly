@@ -2513,6 +2513,7 @@ components:
         - contact
         - socials
         - photos
+        - videos
         - created_at
         - updated_at
       properties:
@@ -2792,6 +2793,30 @@ components:
           type: string
           format: uri
           description: Video url
+    AnimalTag:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          format: int64
+          type: integer
+          description: Animal photo id
+        name:
+          type: string
+          format: uri
+          description: Tag name
+        created_at:
+          format: date-time
+          type: string
+          description: Created at timestamp
+        updated_at:
+          format: date-time
+          type: string
+          description: Updated at timestamp
     AnimalPhoto:
       type: object
       required:
@@ -2898,16 +2923,16 @@ components:
         - number
       properties:
         number:
-          format: string
+          type: string
           description: Microchip id
         brand:
-          format: string
+          type: string
           description: Microchip brand
         description:
-          format: string
+          type: string
           description: Microchip description
         location:
-          format: string
+          type: string
           description: Microchip location
     UpdateMicrochipBody:
       type: object
@@ -2937,8 +2962,11 @@ components:
         - name
         - age
         - size
-        - hemaphrodite
+        - hermaphrodite
         - image_url
+        - tags
+        - photos
+        - videos
         - created_at
         - updated_at
       properties:
@@ -2967,9 +2995,9 @@ components:
             - m
             - f
           description: Animal gender
-        hemaphrodite:
+        hermaphrodite:
           type: boolean
-          description: Animal is hemaphrodite
+          description: Animal is hermaphrodite
         age:
           type: string
           description: Animal age
@@ -3011,6 +3039,18 @@ components:
           format: date-time
           type: string
           description: Adopted at timestamp
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimalTag"
+        photos:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimalPhoto"
+        videos:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnimalVideo"
         created_at:
           format: date-time
           type: string
@@ -3030,8 +3070,8 @@ components:
         - image_url
       properties:
         user_id:
-          format: int64
-          type: integer
+          format: uuid
+          type: string
           description: User id
         organization_id:
           format: int64
@@ -3045,12 +3085,20 @@ components:
           format: int64
           type: integer
           description: Animal species id
-        breed_ids:
+        breeds:
           type: array
           items:
-            format: int64
-            type: integer
-            description: Breed id
+            type: object
+            required:
+              - breed_id
+            properties:
+              breed_id:
+                format: int64
+                type: integer
+                description: Breed id
+              primary:
+                type: boolean
+                description: Breed is primary
         name:
           type: string
           description: Animal name
@@ -3060,9 +3108,9 @@ components:
             - m
             - f
           description: Animal gender
-        hemaphrodite:
+        hermaphrodite:
           type: boolean
-          description: Animal is hemaphrodite
+          description: Animal is hermaphrodite
         age:
           type: string
           description: Animal age
@@ -3106,8 +3154,8 @@ components:
       type: object
       properties:
         user_id:
-          format: int64
-          type: integer
+          format: uuid
+          type: string
           description: User id
           nullable: true
         organization_id:
@@ -3141,9 +3189,9 @@ components:
             - f
           description: Animal gender
           nullable: true
-        hemaphrodite:
+        hermaphrodite:
           type: boolean
-          description: Animal is hemaphrodite
+          description: Animal is hermaphrodite
           nullable: true
         age:
           type: string

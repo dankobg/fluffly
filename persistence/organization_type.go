@@ -17,16 +17,17 @@ type OrganizationFilters struct {
 
 type OrganizationWithJoinData struct {
 	model.Organization
-	Contact struct {
+	WorkHour model.OrganizationWorkHour
+	Contact  struct {
 		model.OrganizationContact
 		Address struct {
 			model.Address
 			Country model.Country
 		}
 	}
-	WorkHour model.OrganizationWorkHour
-	Photos   []model.OrganizationPhoto  `json_column:"photos"`
-	Socials  []model.OrganizationSocial `json_column:"socials"`
+	Photos  []model.OrganizationPhoto  `json_column:"photos"`
+	Videos  []model.OrganizationVideo  `json_column:"videos"`
+	Socials []model.OrganizationSocial `json_column:"socials"`
 }
 
 type OrganizationCreateSetter struct {
@@ -35,6 +36,7 @@ type OrganizationCreateSetter struct {
 	Address      AddressSetter
 	WorkHour     nullable.Nullable[OrganizationWorkHourSetter]
 	Photos       nullable.Nullable[[]OrganizationPhotoSetter]
+	Videos       nullable.Nullable[[]OrganizationVideoSetter]
 	Socials      nullable.Nullable[[]OrganizationSocialSetter]
 }
 

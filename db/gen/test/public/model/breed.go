@@ -12,9 +12,9 @@ import (
 )
 
 type Breed struct {
-	ID           int64 `sql:"primary_key"`
-	AnimalTypeID int64
-	Name         string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID              int64 `sql:"primary_key"`
+	AnimalSpeciesID int64
+	Name            string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

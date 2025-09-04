@@ -29,6 +29,9 @@ func OrganizationWithJoinDataToResponse(data persistence.OrganizationWithJoinDat
 	for i, photo := range data.Photos {
 		resp.Photos[i] = OrganizationPhotoToResp(photo)
 	}
+	for i, video := range data.Videos {
+		resp.Videos[i] = OrganizationVideoToResp(video)
+	}
 	resp.Socials = make([]api.OrganizationSocial, len(data.Socials))
 	for i, social := range data.Socials {
 		resp.Socials[i] = OrganizationSocialToResp(social)

@@ -61,12 +61,16 @@ func (ps *PgPersistor) User() persistence.UserPersistor {
 	return NewPgUserPersistor(ps)
 }
 
+func (ps *PgPersistor) Country() persistence.CountryPersistor {
+	return NewPgCountryPersistor(ps)
+}
+
 func (ps *PgPersistor) Organization() persistence.OrganizationPersistor {
 	return NewPgOrganizationPersistor(ps)
 }
 
-func (ps *PgPersistor) Country() persistence.CountryPersistor {
-	return NewPgCountryPersistor(ps)
+func (ps *PgPersistor) Animal() persistence.AnimalPersistor {
+	return NewPgAnimalPersistor(ps)
 }
 
 func (ps *PgPersistor) WithTx(ctx context.Context, fn func(tx *sql.Tx) error) (err error) {

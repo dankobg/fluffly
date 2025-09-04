@@ -17,11 +17,11 @@ type breedTable struct {
 	postgres.Table
 
 	// Columns
-	ID           postgres.ColumnInteger
-	AnimalTypeID postgres.ColumnInteger
-	Name         postgres.ColumnString
-	CreatedAt    postgres.ColumnTimestampz
-	UpdatedAt    postgres.ColumnTimestampz
+	ID              postgres.ColumnInteger
+	AnimalSpeciesID postgres.ColumnInteger
+	Name            postgres.ColumnString
+	CreatedAt       postgres.ColumnTimestampz
+	UpdatedAt       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -63,25 +63,25 @@ func newBreedTable(schemaName, tableName, alias string) *BreedTable {
 
 func newBreedTableImpl(schemaName, tableName, alias string) breedTable {
 	var (
-		IDColumn           = postgres.IntegerColumn("id")
-		AnimalTypeIDColumn = postgres.IntegerColumn("animal_type_id")
-		NameColumn         = postgres.StringColumn("name")
-		CreatedAtColumn    = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn    = postgres.TimestampzColumn("updated_at")
-		allColumns         = postgres.ColumnList{IDColumn, AnimalTypeIDColumn, NameColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns     = postgres.ColumnList{AnimalTypeIDColumn, NameColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns     = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
+		IDColumn              = postgres.IntegerColumn("id")
+		AnimalSpeciesIDColumn = postgres.IntegerColumn("animal_species_id")
+		NameColumn            = postgres.StringColumn("name")
+		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
+		allColumns            = postgres.ColumnList{IDColumn, AnimalSpeciesIDColumn, NameColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{AnimalSpeciesIDColumn, NameColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns        = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return breedTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:           IDColumn,
-		AnimalTypeID: AnimalTypeIDColumn,
-		Name:         NameColumn,
-		CreatedAt:    CreatedAtColumn,
-		UpdatedAt:    UpdatedAtColumn,
+		ID:              IDColumn,
+		AnimalSpeciesID: AnimalSpeciesIDColumn,
+		Name:            NameColumn,
+		CreatedAt:       CreatedAtColumn,
+		UpdatedAt:       UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

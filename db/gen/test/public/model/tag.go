@@ -14,7 +14,7 @@ import (
 type Tag struct {
 	ID        int64 `sql:"primary_key"`
 	AnimalID  *int64
-	Name      *string
+	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
