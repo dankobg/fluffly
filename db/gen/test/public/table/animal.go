@@ -30,7 +30,7 @@ type animalTable struct {
 	ImageURL        postgres.ColumnString
 	Description     postgres.ColumnString
 	Distance        postgres.ColumnString
-	Attributes      postgres.ColumnString
+	Properties      postgres.ColumnString
 	Status          postgres.ColumnString
 	StatusChangedAt postgres.ColumnTimestampz
 	AdoptedAt       postgres.ColumnTimestampz
@@ -90,14 +90,14 @@ func newAnimalTableImpl(schemaName, tableName, alias string) animalTable {
 		ImageURLColumn        = postgres.StringColumn("image_url")
 		DescriptionColumn     = postgres.StringColumn("description")
 		DistanceColumn        = postgres.StringColumn("distance")
-		AttributesColumn      = postgres.StringColumn("attributes")
+		PropertiesColumn      = postgres.StringColumn("properties")
 		StatusColumn          = postgres.StringColumn("status")
 		StatusChangedAtColumn = postgres.TimestampzColumn("status_changed_at")
 		AdoptedAtColumn       = postgres.TimestampzColumn("adopted_at")
 		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
-		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, AttributesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns        = postgres.ColumnList{UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, AttributesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns        = postgres.ColumnList{HermaphroditeColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
@@ -118,7 +118,7 @@ func newAnimalTableImpl(schemaName, tableName, alias string) animalTable {
 		ImageURL:        ImageURLColumn,
 		Description:     DescriptionColumn,
 		Distance:        DistanceColumn,
-		Attributes:      AttributesColumn,
+		Properties:      PropertiesColumn,
 		Status:          StatusColumn,
 		StatusChangedAt: StatusChangedAtColumn,
 		AdoptedAt:       AdoptedAtColumn,

@@ -9,6 +9,7 @@ import (
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
@@ -75,7 +76,7 @@ func convertOrganizationPgError(pgErr *pgconn.PgError) error {
 	return pgErr
 }
 
-func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filters persistence.OrganizationFilters) (persistence.PagedResult[persistence.OrganizationWithJoinData], error) {
+func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filters dbtype.OrganizationFilters) (dbtype.PagedResult[dbtype.OrganizationWithJoinData], error) {
 	q := p.SELECT(
 		t.Organization.AllColumns,
 		t.OrganizationContact.AllColumns,
@@ -111,14 +112,14 @@ func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filter
 	q = getLimitOffset(q, filters.Pagination)
 
 	var dest []struct {
-		persistence.OrganizationWithJoinData
+		dbtype.OrganizationWithJoinData
 		TotalCount int64 `db:"total_count"`
 	}
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
-		return persistence.PagedResult[persistence.OrganizationWithJoinData]{}, err
+		return dbtype.PagedResult[dbtype.OrganizationWithJoinData]{}, err
 	}
-	result := persistence.PagedResult[persistence.OrganizationWithJoinData]{
-		Data: make([]persistence.OrganizationWithJoinData, len(dest)),
+	result := dbtype.PagedResult[dbtype.OrganizationWithJoinData]{
+		Data: make([]dbtype.OrganizationWithJoinData, len(dest)),
 	}
 	for i, row := range dest {
 		result.Data[i] = row.OrganizationWithJoinData
@@ -129,7 +130,7 @@ func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filter
 	return result, nil
 }
 
-func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, organizationID int64) (persistence.OrganizationWithJoinData, error) {
+func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, organizationID int64) (dbtype.OrganizationWithJoinData, error) {
 	q := p.SELECT(
 		t.Organization.AllColumns,
 		t.OrganizationContact.AllColumns,
@@ -160,7 +161,7 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 			t.Country.ID,
 			t.OrganizationWorkHour.ID,
 		)
-	var dest persistence.OrganizationWithJoinData
+	var dest dbtype.OrganizationWithJoinData
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return dest, ErrOrganizationNotFound
@@ -170,7 +171,7 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 	return dest, nil
 }
 
-func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in persistence.OrganizationCreateSetter) (model.Organization, error) {
+func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in dbtype.OrganizationCreateSetter) (model.Organization, error) {
 	var insertedOrganization model.Organization
 
 	txErr := po.WithTx(ctx, func(tx *sql.Tx) error {
@@ -273,7 +274,7 @@ func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in pe
 	return insertedOrganization, nil
 }
 
-func (po *PgOrganizationPersistor) UpdateOrganization(ctx context.Context, organizationID int64, in persistence.OrganizationSetter) (model.Organization, error) {
+func (po *PgOrganizationPersistor) UpdateOrganization(ctx context.Context, organizationID int64, in dbtype.OrganizationSetter) (model.Organization, error) {
 	cols, m := in.ToModel(true)
 	q := t.Organization.UPDATE(cols).
 		MODEL(m).

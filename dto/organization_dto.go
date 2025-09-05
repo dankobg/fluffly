@@ -3,7 +3,7 @@ package dto
 import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 )
 
 func OrganizationToResponse(data model.Organization) api.Organization {
@@ -20,7 +20,7 @@ func OrganizationToResponse(data model.Organization) api.Organization {
 	}
 }
 
-func OrganizationWithJoinDataToResponse(data persistence.OrganizationWithJoinData) api.Organization {
+func OrganizationWithJoinDataToResponse(data dbtype.OrganizationWithJoinData) api.Organization {
 	resp := OrganizationToResponse(data.Organization)
 	resp.Contact = ContactToResponse(data.Contact.OrganizationContact, data.Contact.Address.Address, data.Contact.Address.Country)
 	workHour := WorkHourToResponse(data.WorkHour)

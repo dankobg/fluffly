@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/google/uuid"
 	"github.com/oapi-codegen/nullable"
 	orykratos "github.com/ory/client-go"
@@ -40,7 +40,7 @@ func (a *ApiHandler) registrationAfterPassword(w http.ResponseWriter, r *http.Re
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if _, err := a.persistor.User().CreateUser(r.Context(), persistence.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
+	if _, err := a.persistor.User().CreateUser(r.Context(), dbtype.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
 		a.Log.Error("failed to create new user", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to create user", http.StatusBadRequest)
 		return
@@ -80,7 +80,7 @@ func (a *ApiHandler) registrationAfterOidc(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	if _, err := a.persistor.User().CreateUser(r.Context(), persistence.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
+	if _, err := a.persistor.User().CreateUser(r.Context(), dbtype.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
 		a.Log.Error("failed to create new user", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to create user", http.StatusBadRequest)
 		return

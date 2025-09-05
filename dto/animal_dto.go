@@ -3,7 +3,7 @@ package dto
 import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 )
 
 func AnimalToResponse(data model.Animal) api.Animal {
@@ -24,14 +24,14 @@ func AnimalToResponse(data model.Animal) api.Animal {
 		Size:            api.AnimalSize(data.Size),
 		Status:          (*api.AnimalStatus)(data.Status),
 		StatusChangedAt: data.StatusChangedAt,
-		Attributes:      &map[string]interface{}{},
+		Properties:      &map[string]interface{}{},
 		AdoptedAt:       data.AdoptedAt,
 		CreatedAt:       data.CreatedAt,
 		UpdatedAt:       data.UpdatedAt,
 	}
 }
 
-func AnimalWithJoinDataToResponse(data persistence.AnimalWithJoinData) api.Animal {
+func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData) api.Animal {
 	resp := AnimalToResponse(data.Animal)
 	resp.Type = api.AnimalType{
 		ID:        data.Type.ID,
@@ -63,7 +63,7 @@ func AnimalWithJoinDataToResponse(data persistence.AnimalWithJoinData) api.Anima
 		resp.Videos[i] = AnimalVideoToResp(video)
 	}
 
-	organizationWithJoinData := OrganizationWithJoinDataToResponse(persistence.OrganizationWithJoinData{
+	organizationWithJoinData := OrganizationWithJoinDataToResponse(dbtype.OrganizationWithJoinData{
 		Organization: data.Organization.Organization,
 		WorkHour:     data.Organization.WorkHour,
 		Contact:      data.Organization.Contact,

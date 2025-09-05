@@ -1,4 +1,4 @@
-package persistence
+package dbtype
 
 import (
 	"time"
@@ -61,7 +61,7 @@ type AnimalSetter struct {
 	ImageURL        nullable.Nullable[string]         `json:"image_url"`
 	Description     nullable.Nullable[string]         `json:"description"`
 	Distance        nullable.Nullable[string]         `json:"distance"`
-	Attributes      nullable.Nullable[map[string]any] `json:"attributes"`
+	Properties      nullable.Nullable[map[string]any] `json:"properties"`
 	Status          nullable.Nullable[string]         `json:"status"`
 	StatusChangedAt nullable.Nullable[time.Time]      `json:"status_changed_at"`
 	AdoptedAt       nullable.Nullable[time.Time]      `json:"adopted_at"`
@@ -162,12 +162,12 @@ func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
 			m.Distance = nil
 		}
 	}
-	// if s.Attributes.IsSpecified() {
-	// 	cols = append(cols, t.Animal.Attributes)
-	// 	if !s.Attributes.IsNull() {
-	// 		m.Attributes = ptr.Of(s.Attributes.MustGet())
+	// if s.Properties.IsSpecified() {
+	// 	cols = append(cols, t.Animal.Properties)
+	// 	if !s.Properties.IsNull() {
+	// 		m.Properties = ptr.Of(s.Properties.MustGet())
 	// 	} else {
-	// 		m.Attributes = nil
+	// 		m.Properties = nil
 	// 	}
 	// }
 	if s.Status.IsSpecified() {

@@ -3019,9 +3019,9 @@ components:
         description:
           type: string
           description: Animal description
-        attributes:
+        properties:
           type: object
-          description: Animal attributes
+          description: Animal properties
         status:
           type: string
           description: Animal adoption status
@@ -3132,9 +3132,9 @@ components:
         description:
           type: string
           description: Animal description
-        attributes:
+        properties:
           type: object
-          description: Animal attributes
+          description: Animal properties
         tags:
           type: array
           items:
@@ -3215,9 +3215,9 @@ components:
           type: string
           description: Animal description
           nullable: true
-        attributes:
+        properties:
           type: object
-          description: Animal attributes
+          description: Animal properties
           nullable: true
     Healthy:
       type: object

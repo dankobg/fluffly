@@ -9,16 +9,16 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	"github.com/dankobg/fluffly/dto"
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
 
 func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalRequestObject) (api.CreateAnimalResponseObject, error) {
-	var animalCreateSetter persistence.AnimalCreateSetter
+	var animalCreateSetter dbtype.AnimalCreateSetter
 
-	animalCreateSetter.Animal = persistence.AnimalSetter{
+	animalCreateSetter.Animal = dbtype.AnimalSetter{
 		TypeID:    nullable.NewNullableWithValue(request.Body.AnimalTypeID),
 		SpeciesID: nullable.NewNullableWithValue(request.Body.AnimalSpeciesID),
 		Name:      nullable.NewNullableWithValue(request.Body.Name),
@@ -45,14 +45,14 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	if request.Body.Description != nil {
 		animalCreateSetter.Animal.Description = nullable.NewNullableWithValue(*request.Body.Description)
 	}
-	if request.Body.Attributes != nil {
-		animalCreateSetter.Animal.Attributes = nullable.NewNullableWithValue(*request.Body.Attributes)
+	if request.Body.Properties != nil {
+		animalCreateSetter.Animal.Properties = nullable.NewNullableWithValue(*request.Body.Properties)
 	}
 
 	if request.Body.Breeds != nil {
-		animalBreedSetters := make([]persistence.AnimalBreedSetter, 0)
+		animalBreedSetters := make([]dbtype.AnimalBreedSetter, 0)
 		for _, breed := range *request.Body.Breeds {
-			animalBreedSetter := persistence.AnimalBreedSetter{
+			animalBreedSetter := dbtype.AnimalBreedSetter{
 				BreedID: nullable.NewNullableWithValue(breed.BreedID),
 			}
 			if breed.Primary != nil {
@@ -64,7 +64,7 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	}
 
 	if request.Body.Microchip != nil {
-		microchipSetter := persistence.MicrochipSetter{
+		microchipSetter := dbtype.MicrochipSetter{
 			Number: nullable.NewNullableWithValue(request.Body.Microchip.Number),
 		}
 		if request.Body.Microchip.Brand != nil {
@@ -80,9 +80,9 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	}
 
 	if request.Body.Tags != nil {
-		animalTagSetters := make([]persistence.AnimalTagSetter, 0)
+		animalTagSetters := make([]dbtype.AnimalTagSetter, 0)
 		for _, tag := range *request.Body.Tags {
-			tagSetter := persistence.AnimalTagSetter{}
+			tagSetter := dbtype.AnimalTagSetter{}
 			if tag != "" {
 				tagSetter.Name = nullable.NewNullableWithValue(tag)
 			}
@@ -92,9 +92,9 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	}
 
 	if request.Body.Photos != nil {
-		animalPhotoSetters := make([]persistence.AnimalPhotoSetter, 0)
+		animalPhotoSetters := make([]dbtype.AnimalPhotoSetter, 0)
 		for _, photo := range *request.Body.Photos {
-			photoSetter := persistence.AnimalPhotoSetter{}
+			photoSetter := dbtype.AnimalPhotoSetter{}
 			if photo.Small.IsSpecified() {
 				photoSetter.Small = photo.Small
 			}
@@ -113,9 +113,9 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	}
 
 	if request.Body.Videos != nil {
-		animalVideoSetters := make([]persistence.AnimalVideoSetter, 0)
+		animalVideoSetters := make([]dbtype.AnimalVideoSetter, 0)
 		for _, video := range *request.Body.Videos {
-			videoSetter := persistence.AnimalVideoSetter{}
+			videoSetter := dbtype.AnimalVideoSetter{}
 			if video.URL != "" {
 				videoSetter.URL = nullable.NewNullableWithValue(video.URL)
 			}
@@ -144,12 +144,12 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 }
 
 func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalRequestObject) (api.UpdateAnimalResponseObject, error) {
-	animalSetter := persistence.AnimalSetter{
+	animalSetter := dbtype.AnimalSetter{
 		UserID:         request.Body.UserID,
 		OrganizationID: request.Body.OrganizationID,
 		Hermaphrodite:  request.Body.Hermaphrodite,
 		Description:    request.Body.Description,
-		Attributes:     request.Body.Attributes,
+		Properties:     request.Body.Properties,
 		// TypeID:          request.Body.AnimalTypeID,
 		// SpeciesID:       request.Body.AnimalSpeciesID,
 		// Name:            request.Body.Name,
@@ -192,7 +192,7 @@ func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalR
 }
 
 func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsRequestObject) (api.ListAnimalsResponseObject, error) {
-	var filters persistence.AnimalFilters
+	var filters dbtype.AnimalFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	animals, err := a.persistor.Animal().ListAnimals(ctx, filters)
 	if err != nil {

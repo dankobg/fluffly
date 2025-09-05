@@ -8,6 +8,7 @@ import (
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
@@ -55,7 +56,7 @@ func convertCountryPgError(pgErr *pgconn.PgError) error {
 	return pgErr
 }
 
-func (pc *PgCountryPersistor) ListCountries(ctx context.Context, filters persistence.CountryFilters) (persistence.PagedResult[model.Country], error) {
+func (pc *PgCountryPersistor) ListCountries(ctx context.Context, filters dbtype.CountryFilters) (dbtype.PagedResult[model.Country], error) {
 	q := p.SELECT(
 		t.Country.AllColumns,
 		getSelectTotalCount(filters.Pagination),
@@ -68,10 +69,10 @@ func (pc *PgCountryPersistor) ListCountries(ctx context.Context, filters persist
 		TotalCount int64 `db:"total_count"`
 	}
 	if err := q.QueryContext(ctx, pc.db, &dest); err != nil {
-		return persistence.PagedResult[model.Country]{}, fmt.Errorf("could not query countries")
+		return dbtype.PagedResult[model.Country]{}, fmt.Errorf("could not query countries")
 	}
 
-	result := persistence.PagedResult[model.Country]{
+	result := dbtype.PagedResult[model.Country]{
 		Data: make([]model.Country, len(dest)),
 	}
 	for i, row := range dest {
@@ -106,7 +107,7 @@ func (pc *PgCountryPersistor) DeleteCountryByID(ctx context.Context, countryID i
 	return countryID, nil
 }
 
-func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in persistence.CountrySetter) (model.Country, error) {
+func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in dbtype.CountrySetter) (model.Country, error) {
 	cols, m := in.ToModel()
 	q := t.Country.INSERT(cols).
 		MODEL(m).
@@ -123,7 +124,7 @@ func (pc *PgCountryPersistor) CreateCountry(ctx context.Context, in persistence.
 	return dest, nil
 }
 
-func (pc *PgCountryPersistor) UpdateCountry(ctx context.Context, countryID int64, in persistence.CountrySetter) (model.Country, error) {
+func (pc *PgCountryPersistor) UpdateCountry(ctx context.Context, countryID int64, in dbtype.CountrySetter) (model.Country, error) {
 	cols, m := in.ToModel(true)
 	q := t.Country.UPDATE(cols).
 		MODEL(m).

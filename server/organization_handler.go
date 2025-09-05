@@ -8,16 +8,16 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
 
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
-	var organizationCreateSetter persistence.OrganizationCreateSetter
+	var organizationCreateSetter dbtype.OrganizationCreateSetter
 
-	organizationCreateSetter.Organization = persistence.OrganizationSetter{
+	organizationCreateSetter.Organization = dbtype.OrganizationSetter{
 		Name:             nullable.NewNullableWithValue(request.Body.Name),
 		Website:          request.Body.Website,
 		MissionStatement: request.Body.MissionStatement,
@@ -26,12 +26,12 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 		Distance:         request.Body.Distance,
 	}
 
-	organizationCreateSetter.Contact = persistence.OrganizationContactSetter{
+	organizationCreateSetter.Contact = dbtype.OrganizationContactSetter{
 		Phone: nullable.NewNullableWithValue(request.Body.Contact.Phone),
 		Email: nullable.NewNullableWithValue(string(request.Body.Contact.Email)),
 	}
 
-	organizationCreateSetter.Address = persistence.AddressSetter{
+	organizationCreateSetter.Address = dbtype.AddressSetter{
 		CountryID:     nullable.NewNullableWithValue(request.Body.Contact.Address.CountryID),
 		UnitNumber:    nullable.NewNullableWithValue(*request.Body.Contact.Address.UnitNumber),
 		StreetNumber:  nullable.NewNullableWithValue(*request.Body.Contact.Address.StreetNumber),
@@ -45,7 +45,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	}
 
 	if request.Body.WorkHour != nil {
-		organizationCreateSetter.WorkHour = nullable.NewNullableWithValue(persistence.OrganizationWorkHourSetter{
+		organizationCreateSetter.WorkHour = nullable.NewNullableWithValue(dbtype.OrganizationWorkHourSetter{
 			Monday:    request.Body.WorkHour.Monday,
 			Tuesday:   request.Body.WorkHour.Tuesday,
 			Wednesday: request.Body.WorkHour.Wednesday,
@@ -57,9 +57,9 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	}
 
 	if request.Body.Photos.IsSpecified() && !request.Body.Photos.IsNull() {
-		organizationPhotoSetters := make([]persistence.OrganizationPhotoSetter, 0)
+		organizationPhotoSetters := make([]dbtype.OrganizationPhotoSetter, 0)
 		for _, photo := range request.Body.Photos.MustGet() {
-			photoSetter := persistence.OrganizationPhotoSetter{}
+			photoSetter := dbtype.OrganizationPhotoSetter{}
 			if photo.Small.IsSpecified() {
 				photoSetter.Small = photo.Small
 			}
@@ -78,10 +78,10 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	}
 
 	if request.Body.Socials.IsSpecified() && !request.Body.Socials.IsNull() {
-		organizationSocialsSetters := make([]persistence.OrganizationSocialSetter, 0)
+		organizationSocialsSetters := make([]dbtype.OrganizationSocialSetter, 0)
 		if request.Body.Socials.IsSpecified() {
 			for _, social := range request.Body.Socials.MustGet() {
-				organizationSocialsSetters = append(organizationSocialsSetters, persistence.OrganizationSocialSetter{
+				organizationSocialsSetters = append(organizationSocialsSetters, dbtype.OrganizationSocialSetter{
 					Platform: nullable.NewNullableWithValue(social.Platform),
 					URL:      nullable.NewNullableWithValue(social.URL),
 				})
@@ -110,7 +110,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 }
 
 func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateOrganizationRequestObject) (api.UpdateOrganizationResponseObject, error) {
-	organizationSetter := persistence.OrganizationSetter{
+	organizationSetter := dbtype.OrganizationSetter{
 		Name:             request.Body.Name,
 		Website:          request.Body.Website,
 		MissionStatement: request.Body.MissionStatement,
@@ -160,7 +160,7 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 }
 
 func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrganizationsRequestObject) (api.ListOrganizationsResponseObject, error) {
-	var filters persistence.OrganizationFilters
+	var filters dbtype.OrganizationFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	organizations, err := a.persistor.Organization().ListOrganizations(ctx, filters)
 	if err != nil {

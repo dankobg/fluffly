@@ -9,6 +9,7 @@ import (
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/jackc/pgerrcode"
@@ -63,7 +64,7 @@ func convertAnimalPgError(pgErr *pgconn.PgError) error {
 	return pgErr
 }
 
-func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters persistence.AnimalFilters) (persistence.PagedResult[persistence.AnimalWithJoinData], error) {
+func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters dbtype.AnimalFilters) (dbtype.PagedResult[dbtype.AnimalWithJoinData], error) {
 	q := p.SELECT(
 		t.Animal.AllColumns,
 		t.AnimalType.AllColumns,
@@ -120,14 +121,14 @@ func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters persistenc
 	q = getLimitOffset(q, filters.Pagination)
 
 	var dest []struct {
-		persistence.AnimalWithJoinData
+		dbtype.AnimalWithJoinData
 		TotalCount int64 `db:"total_count"`
 	}
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
-		return persistence.PagedResult[persistence.AnimalWithJoinData]{}, err
+		return dbtype.PagedResult[dbtype.AnimalWithJoinData]{}, err
 	}
-	result := persistence.PagedResult[persistence.AnimalWithJoinData]{
-		Data: make([]persistence.AnimalWithJoinData, len(dest)),
+	result := dbtype.PagedResult[dbtype.AnimalWithJoinData]{
+		Data: make([]dbtype.AnimalWithJoinData, len(dest)),
 	}
 	for i, row := range dest {
 		result.Data[i] = row.AnimalWithJoinData
@@ -138,7 +139,7 @@ func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters persistenc
 	return result, nil
 }
 
-func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) (persistence.AnimalWithJoinData, error) {
+func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) (dbtype.AnimalWithJoinData, error) {
 	q := p.SELECT(
 		t.Animal.AllColumns,
 		t.AnimalType.AllColumns,
@@ -192,7 +193,7 @@ func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) 
 			t.Country.ID,
 			t.OrganizationWorkHour.ID,
 		)
-	var dest persistence.AnimalWithJoinData
+	var dest dbtype.AnimalWithJoinData
 	if err := q.QueryContext(ctx, po.db, &dest); err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
 			return dest, ErrAnimalNotFound
@@ -202,7 +203,7 @@ func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) 
 	return dest, nil
 }
 
-func (po *PgAnimalPersistor) CreateAnimal(ctx context.Context, in persistence.AnimalCreateSetter) (model.Animal, error) {
+func (po *PgAnimalPersistor) CreateAnimal(ctx context.Context, in dbtype.AnimalCreateSetter) (model.Animal, error) {
 	var insertedAnimal model.Animal
 
 	txErr := po.WithTx(ctx, func(tx *sql.Tx) error {
@@ -331,7 +332,7 @@ func (po *PgAnimalPersistor) CreateAnimal(ctx context.Context, in persistence.An
 	return insertedAnimal, nil
 }
 
-func (po *PgAnimalPersistor) UpdateAnimal(ctx context.Context, animalID int64, in persistence.AnimalSetter) (model.Animal, error) {
+func (po *PgAnimalPersistor) UpdateAnimal(ctx context.Context, animalID int64, in dbtype.AnimalSetter) (model.Animal, error) {
 	cols, m := in.ToModel(true)
 	q := t.Animal.UPDATE(cols).
 		MODEL(m).

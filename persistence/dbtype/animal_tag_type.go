@@ -1,4 +1,4 @@
-package persistence
+package dbtype
 
 import (
 	"time"
@@ -10,46 +10,46 @@ import (
 	"github.com/oapi-codegen/nullable"
 )
 
-type AnimalVideoSetter struct {
+type AnimalTagSetter struct {
 	AnimalID  nullable.Nullable[int64]     `json:"animalid"`
-	URL       nullable.Nullable[string]    `json:"url"`
+	Name      nullable.Nullable[string]    `json:"name"`
 	CreatedAt nullable.Nullable[time.Time] `json:"created_at"`
 	UpdatedAt nullable.Nullable[time.Time] `json:"updated_at"`
 }
 
-func (s AnimalVideoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.AnimalVideo) {
+func (s AnimalTagSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Tag) {
 	var cols p.ColumnList
-	var m model.AnimalVideo
+	var m model.Tag
 
 	if len(isPatch) > 0 {
 		if isPatch[0] {
-			cols = append(cols, t.AnimalVideo.UpdatedAt)
+			cols = append(cols, t.Tag.UpdatedAt)
 			m.UpdatedAt = time.Now()
 		}
 	}
 
 	if s.AnimalID.IsSpecified() {
-		cols = append(cols, t.AnimalVideo.AnimalID)
+		cols = append(cols, t.Tag.AnimalID)
 		if !s.AnimalID.IsNull() {
 			m.AnimalID = ptr.Of(s.AnimalID.MustGet())
 		} else {
 			m.AnimalID = nil
 		}
 	}
-	if s.URL.IsSpecified() {
-		cols = append(cols, t.AnimalVideo.URL)
-		if !s.URL.IsNull() {
-			m.URL = s.URL.MustGet()
+	if s.Name.IsSpecified() {
+		cols = append(cols, t.Tag.Name)
+		if !s.Name.IsNull() {
+			m.Name = s.Name.MustGet()
 		}
 	}
 	if s.CreatedAt.IsSpecified() {
-		cols = append(cols, t.AnimalVideo.CreatedAt)
+		cols = append(cols, t.Tag.CreatedAt)
 		if !s.CreatedAt.IsNull() {
 			m.CreatedAt = s.CreatedAt.MustGet()
 		}
 	}
 	if s.UpdatedAt.IsSpecified() {
-		cols = append(cols, t.AnimalVideo.UpdatedAt)
+		cols = append(cols, t.Tag.UpdatedAt)
 		if !s.UpdatedAt.IsNull() {
 			m.UpdatedAt = s.UpdatedAt.MustGet()
 		}

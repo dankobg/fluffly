@@ -182,7 +182,7 @@ create table "animal" (
   "image_url" text not null,
   "description" text,
   "distance" varchar,
-  "attributes" jsonb,
+  "properties" jsonb,
   "status" varchar(30),
   "status_changed_at" timestamptz,
   "adopted_at" timestamptz,

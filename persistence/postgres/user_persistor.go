@@ -7,6 +7,7 @@ import (
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
 	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
 )
@@ -52,7 +53,7 @@ func (pu *PgUserPersistor) DeleteUserByID(ctx context.Context, userID uuid.UUID)
 	return userID, nil
 }
 
-func (pu *PgUserPersistor) CreateUser(ctx context.Context, in persistence.UserSetter) (model.User, error) {
+func (pu *PgUserPersistor) CreateUser(ctx context.Context, in dbtype.UserSetter) (model.User, error) {
 	cols, m := in.ToModel()
 	q := t.User.INSERT(cols).
 		MODEL(m).
@@ -65,7 +66,7 @@ func (pu *PgUserPersistor) CreateUser(ctx context.Context, in persistence.UserSe
 	return dest, nil
 }
 
-func (pu *PgUserPersistor) UpdateUser(ctx context.Context, userID uuid.UUID, in persistence.UserSetter) (model.User, error) {
+func (pu *PgUserPersistor) UpdateUser(ctx context.Context, userID uuid.UUID, in dbtype.UserSetter) (model.User, error) {
 	cols, m := in.ToModel(true)
 
 	q := t.User.UPDATE(cols).

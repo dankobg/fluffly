@@ -8,14 +8,14 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
-	"github.com/dankobg/fluffly/persistence"
+	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
 )
 
 func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountryRequestObject) (api.CreateCountryResponseObject, error) {
-	countrySetter := persistence.CountrySetter{
+	countrySetter := dbtype.CountrySetter{
 		Name:       nullable.NewNullableWithValue(request.Body.Name),
 		IsoAlpha2:  nullable.NewNullableWithValue(request.Body.IsoAlpha2),
 		IsoAlpha3:  nullable.NewNullableWithValue(request.Body.IsoAlpha3),
@@ -41,7 +41,7 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 }
 
 func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountryRequestObject) (api.UpdateCountryResponseObject, error) {
-	countrySetter := persistence.CountrySetter{}
+	countrySetter := dbtype.CountrySetter{}
 	if request.Body.Name != nil {
 		countrySetter.Name = nullable.NewNullableWithValue(*request.Body.Name)
 	}
@@ -83,7 +83,7 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 }
 
 func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountriesRequestObject) (api.ListCountriesResponseObject, error) {
-	var filters persistence.CountryFilters
+	var filters dbtype.CountryFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	countries, err := a.persistor.Country().ListCountries(ctx, filters)
 	if err != nil {

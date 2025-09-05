@@ -26,7 +26,7 @@ type Animal struct {
 	ImageURL        string
 	Description     *string
 	Distance        *string
-	Attributes      *string
+	Properties      *string
 	Status          *string
 	StatusChangedAt *time.Time
 	AdoptedAt       *time.Time
