@@ -3022,6 +3022,10 @@ components:
         properties:
           type: object
           description: Animal properties
+          x-go-type: dbcustom.JsonType
+          x-go-type-import:
+            path: github.com/dankobg/fluffly/persistence/dbcustom
+            name: dbcustom
         status:
           type: string
           description: Animal adoption status
@@ -3135,6 +3139,10 @@ components:
         properties:
           type: object
           description: Animal properties
+          x-go-type: dbcustom.JsonType
+          x-go-type-import:
+            path: github.com/dankobg/fluffly/persistence/dbcustom
+            name: dbcustom
         tags:
           type: array
           items:
@@ -3218,6 +3226,10 @@ components:
         properties:
           type: object
           description: Animal properties
+          x-go-type: dbcustom.JsonType
+          x-go-type-import:
+            path: github.com/dankobg/fluffly/persistence/dbcustom
+            name: dbcustom
           nullable: true
     Healthy:
       type: object

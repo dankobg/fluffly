@@ -6,6 +6,7 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	t "github.com/dankobg/fluffly/db/gen/test/public/table"
+	"github.com/dankobg/fluffly/persistence/dbcustom"
 	"github.com/dankobg/fluffly/ptr"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
@@ -49,24 +50,24 @@ type AnimalCreateSetter struct {
 }
 
 type AnimalSetter struct {
-	UserID          nullable.Nullable[uuid.UUID]      `json:"user_id"`
-	OrganizationID  nullable.Nullable[int64]          `json:"organization_id"`
-	TypeID          nullable.Nullable[int64]          `json:"type_id"`
-	SpeciesID       nullable.Nullable[int64]          `json:"species_id"`
-	Name            nullable.Nullable[string]         `json:"name"`
-	Gender          nullable.Nullable[model.Gender]   `json:"gender"`
-	Hermaphrodite   nullable.Nullable[bool]           `json:"hermaphrodite"`
-	Age             nullable.Nullable[string]         `json:"age"`
-	Size            nullable.Nullable[string]         `json:"size"`
-	ImageURL        nullable.Nullable[string]         `json:"image_url"`
-	Description     nullable.Nullable[string]         `json:"description"`
-	Distance        nullable.Nullable[string]         `json:"distance"`
-	Properties      nullable.Nullable[map[string]any] `json:"properties"`
-	Status          nullable.Nullable[string]         `json:"status"`
-	StatusChangedAt nullable.Nullable[time.Time]      `json:"status_changed_at"`
-	AdoptedAt       nullable.Nullable[time.Time]      `json:"adopted_at"`
-	CreatedAt       nullable.Nullable[time.Time]      `json:"created_at"`
-	UpdatedAt       nullable.Nullable[time.Time]      `json:"updated_at"`
+	UserID          nullable.Nullable[uuid.UUID]         `json:"user_id"`
+	OrganizationID  nullable.Nullable[int64]             `json:"organization_id"`
+	TypeID          nullable.Nullable[int64]             `json:"type_id"`
+	SpeciesID       nullable.Nullable[int64]             `json:"species_id"`
+	Name            nullable.Nullable[string]            `json:"name"`
+	Gender          nullable.Nullable[model.Gender]      `json:"gender"`
+	Hermaphrodite   nullable.Nullable[bool]              `json:"hermaphrodite"`
+	Age             nullable.Nullable[string]            `json:"age"`
+	Size            nullable.Nullable[string]            `json:"size"`
+	ImageURL        nullable.Nullable[string]            `json:"image_url"`
+	Description     nullable.Nullable[string]            `json:"description"`
+	Distance        nullable.Nullable[string]            `json:"distance"`
+	Properties      nullable.Nullable[dbcustom.JsonType] `json:"properties"`
+	Status          nullable.Nullable[string]            `json:"status"`
+	StatusChangedAt nullable.Nullable[time.Time]         `json:"status_changed_at"`
+	AdoptedAt       nullable.Nullable[time.Time]         `json:"adopted_at"`
+	CreatedAt       nullable.Nullable[time.Time]         `json:"created_at"`
+	UpdatedAt       nullable.Nullable[time.Time]         `json:"updated_at"`
 }
 
 func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
@@ -162,14 +163,12 @@ func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
 			m.Distance = nil
 		}
 	}
-	// if s.Properties.IsSpecified() {
-	// 	cols = append(cols, t.Animal.Properties)
-	// 	if !s.Properties.IsNull() {
-	// 		m.Properties = ptr.Of(s.Properties.MustGet())
-	// 	} else {
-	// 		m.Properties = nil
-	// 	}
-	// }
+	if s.Properties.IsSpecified() {
+		cols = append(cols, t.Animal.Properties)
+		if !s.Properties.IsNull() {
+			m.Properties = s.Properties.MustGet()
+		}
+	}
 	if s.Status.IsSpecified() {
 		cols = append(cols, t.Animal.Status)
 		if !s.Status.IsNull() {

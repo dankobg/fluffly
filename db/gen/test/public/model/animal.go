@@ -8,6 +8,7 @@
 package model
 
 import (
+	"github.com/dankobg/fluffly/persistence/dbcustom"
 	"github.com/google/uuid"
 	"time"
 )
@@ -26,7 +27,7 @@ type Animal struct {
 	ImageURL        string
 	Description     *string
 	Distance        *string
-	Properties      *string
+	Properties      dbcustom.JsonType
 	Status          *string
 	StatusChangedAt *time.Time
 	AdoptedAt       *time.Time

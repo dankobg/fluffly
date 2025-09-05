@@ -3,6 +3,7 @@ package dto
 import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	"github.com/dankobg/fluffly/persistence/dbcustom"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 )
 
@@ -24,7 +25,7 @@ func AnimalToResponse(data model.Animal) api.Animal {
 		Size:            api.AnimalSize(data.Size),
 		Status:          (*api.AnimalStatus)(data.Status),
 		StatusChangedAt: data.StatusChangedAt,
-		Properties:      &map[string]interface{}{},
+		Properties:      &dbcustom.JsonType{},
 		AdoptedAt:       data.AdoptedAt,
 		CreatedAt:       data.CreatedAt,
 		UpdatedAt:       data.UpdatedAt,

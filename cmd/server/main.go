@@ -1,3 +1,4 @@
+//go:generate go run ../../db/generator/generator.go
 package main
 
 import (

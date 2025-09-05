@@ -149,7 +149,7 @@ func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalR
 		OrganizationID: request.Body.OrganizationID,
 		Hermaphrodite:  request.Body.Hermaphrodite,
 		Description:    request.Body.Description,
-		Properties:     request.Body.Properties,
+		// Properties:     request.Body.Properties,
 		// TypeID:          request.Body.AnimalTypeID,
 		// SpeciesID:       request.Body.AnimalSpeciesID,
 		// Name:            request.Body.Name,
