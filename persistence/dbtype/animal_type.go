@@ -37,7 +37,8 @@ type AnimalWithJoinData struct {
 			}
 		}
 	}
-	User model.User
+	User  model.User
+	Likes int64
 }
 
 type AnimalCreateSetter struct {

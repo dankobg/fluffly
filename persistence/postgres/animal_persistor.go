@@ -98,6 +98,7 @@ func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters dbtype.Ani
 			FROM(t.AnimalVideo).
 			WHERE(t.AnimalVideo.AnimalID.EQ(t.Animal.ID)).
 			AS("videos"),
+		p.COUNT(t.UserAnimalLike.AnimalID).AS("AnimalWithJoinData.likes"),
 		getSelectTotalCount(filters.Pagination),
 	).
 		FROM(
@@ -109,7 +110,8 @@ func (po *PgAnimalPersistor) ListAnimals(ctx context.Context, filters dbtype.Ani
 				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
 				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
 				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
-				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)),
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
+				LEFT_JOIN(t.UserAnimalLike, t.UserAnimalLike.AnimalID.EQ(t.Animal.ID)),
 		).
 		GROUP_BY(
 			t.Animal.ID,
@@ -173,6 +175,7 @@ func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) 
 			FROM(t.AnimalVideo).
 			WHERE(t.AnimalVideo.AnimalID.EQ(t.Animal.ID)).
 			AS("videos"),
+		p.COUNT(t.UserAnimalLike.AnimalID).AS("AnimalWithJoinData.likes"),
 	).
 		FROM(
 			t.Animal.
@@ -183,7 +186,8 @@ func (po *PgAnimalPersistor) GetAnimalByID(ctx context.Context, animalID int64) 
 				LEFT_JOIN(t.OrganizationContact, t.Organization.ID.EQ(t.OrganizationContact.OrganizationID)).
 				LEFT_JOIN(t.Address, t.Address.ID.EQ(t.OrganizationContact.AddressID)).
 				LEFT_JOIN(t.Country, t.Country.ID.EQ(t.Address.CountryID)).
-				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)),
+				LEFT_JOIN(t.OrganizationWorkHour, t.Organization.ID.EQ(t.OrganizationWorkHour.OrganizationID)).
+				LEFT_JOIN(t.UserAnimalLike, t.UserAnimalLike.AnimalID.EQ(t.Animal.ID)),
 		).
 		WHERE(t.Animal.ID.EQ(p.Int64(animalID))).
 		GROUP_BY(

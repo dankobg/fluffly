@@ -57,6 +57,7 @@ func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData) api.Animal {
 	for i, video := range data.Videos {
 		resp.Videos[i] = AnimalVideoToResp(video)
 	}
+	resp.Likes = data.Likes
 
 	organizationWithJoinData := OrganizationWithJoinDataToResponse(dbtype.OrganizationWithJoinData{
 		Organization: data.Organization.Organization,
