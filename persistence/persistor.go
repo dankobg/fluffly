@@ -38,6 +38,8 @@ type AnimalPersistor interface {
 	CreateAnimal(ctx context.Context, in dbtype.AnimalCreateSetter) (model.Animal, error)
 	UpdateAnimal(ctx context.Context, animalID int64, in dbtype.AnimalSetter) (model.Animal, error)
 	DeleteAnimalByID(ctx context.Context, animalID int64) (int64, error)
+	LikeAnimal(ctx context.Context, userID uuid.UUID, animalID int64) error
+	UnlikeAnimal(ctx context.Context, userID uuid.UUID, animalID int64) error
 }
 
 type Persistor interface {

@@ -12,6 +12,7 @@ import (
 	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
+	"github.com/google/uuid"
 	"github.com/oapi-codegen/nullable"
 )
 
@@ -219,4 +220,33 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 	}
 	resp := api.GetAnimal200JSONResponse(dto.AnimalWithJoinDataToResponse(animalWithJoinData))
 	return resp, nil
+}
+
+func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalRequestObject) (api.LikeAnimalResponseObject, error) {
+	// @TODO: remove hardcoded value
+	userID := uuid.MustParse("6e482ec1-64c4-4f34-93ba-392f4e473444")
+	if err := a.persistor.Animal().LikeAnimal(ctx, userID, request.ID); err != nil {
+		msg := "failed to like an animal"
+		var e1 postgres.ErrAnimalUniqueViolation
+		if errors.As(err, &e1) {
+			msg += ", duplicate " + e1.Name
+			return api.LikeAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		var e2 postgres.IntegrityViolationError
+		if errors.As(err, &e2) {
+			msg += ", animal integrity error"
+			return api.LikeAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+		}
+		return nil, fmt.Errorf("failed to like an animal")
+	}
+	return api.EmptyResponseResponse{}, nil
+}
+
+func (a *ApiHandler) UnlikeAnimal(ctx context.Context, request api.UnlikeAnimalRequestObject) (api.UnlikeAnimalResponseObject, error) {
+	// @TODO: remove hardcoded value
+	userID := uuid.MustParse("6e482ec1-64c4-4f34-93ba-392f4e473444")
+	if err := a.persistor.Animal().UnlikeAnimal(ctx, userID, request.ID); err != nil {
+		return nil, fmt.Errorf("failed to unlike an animal: %w", err)
+	}
+	return api.EmptyResponseResponse{}, nil
 }

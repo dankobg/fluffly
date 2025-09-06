@@ -12,6 +12,7 @@ import (
 	"github.com/dankobg/fluffly/persistence/dbtype"
 	p "github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/oapi-codegen/nullable"
@@ -42,7 +43,8 @@ var (
 	errAnimalForeignKeyOrganizationID   = ErrAnimalForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "organization_id"}}
 	errAnimalCheckAgeValid              = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "age valid"}}
 	errAnimalCheckSizeValid             = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "size valid"}}
-	errAnimalCheckUserIdOrOrgIDProvided = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "user_id_or_organization_id provided"}}
+	errAnimalCheckUserIdOrOrgIDProvided = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "user_id or organization_id not provided"}}
+	errAnimalLikeUnique                 = ErrAnimalUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "like"}}
 )
 
 func convertAnimalPgError(pgErr *pgconn.PgError) error {
@@ -58,6 +60,8 @@ func convertAnimalPgError(pgErr *pgconn.PgError) error {
 			return errAnimalCheckSizeValid
 		case "ck_animal_user_or_organization_provided":
 			return errAnimalCheckUserIdOrOrgIDProvided
+		case "pk_user_animal_like_user_id_animal_id":
+			return errAnimalLikeUnique
 		}
 		return errAnimalIntegrity
 	}
@@ -356,4 +360,27 @@ func (po *PgAnimalPersistor) DeleteAnimalByID(ctx context.Context, animalID int6
 		return 0, fmt.Errorf("failed to delete an animal: %w", err)
 	}
 	return animalID, nil
+}
+
+func (po *PgAnimalPersistor) LikeAnimal(ctx context.Context, userID uuid.UUID, animalID int64) error {
+	q := t.UserAnimalLike.INSERT(t.UserAnimalLike.UserID, t.UserAnimalLike.AnimalID).
+		VALUES(p.UUID(userID), p.Int64(animalID))
+	if _, err := q.ExecContext(ctx, po.db); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			return convertAnimalPgError(pgErr)
+		}
+		return fmt.Errorf("failed to insert animal like: %w", err)
+	}
+	return nil
+}
+
+func (po *PgAnimalPersistor) UnlikeAnimal(ctx context.Context, userID uuid.UUID, animalID int64) error {
+	q := t.UserAnimalLike.DELETE().
+		WHERE(t.UserAnimalLike.UserID.EQ(p.UUID(userID)).
+			AND(t.UserAnimalLike.AnimalID.EQ(p.Int64(animalID))))
+	if _, err := q.ExecContext(ctx, po.db); err != nil {
+		return fmt.Errorf("failed to delete animal like: %w", err)
+	}
+	return nil
 }

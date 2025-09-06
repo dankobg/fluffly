@@ -1,0 +1,15 @@
+meta {
+  name: Like animal
+  type: http
+  seq: 38
+}
+
+post {
+  url: {{baseUrl}}/animals/:id/like
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}

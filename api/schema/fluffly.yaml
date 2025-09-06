@@ -455,6 +455,56 @@ paths:
         default:
           $ref: "#/components/responses/UnexpectedError"
           description: errorGeneric
+  "/animals/{id}/like":
+    post:
+      operationId: likeAnimal
+      summary: Like animal
+      description: Give a like for an animal that you find cool
+      tags:
+        - fluffly
+      parameters:
+        - description: The animal id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "201":
+          $ref: "#/components/responses/EmptyResponse"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
+  "/animals/{id}/unlike":
+    post:
+      operationId: unlikeAnimal
+      summary: Unlike animal
+      description: Unlike an animal that you liked before
+      tags:
+        - fluffly
+      parameters:
+        - description: The animal id
+          in: path
+          name: id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "201":
+          $ref: "#/components/responses/EmptyResponse"
+        "400":
+          $ref: "#/components/responses/GenericError"
+        "401":
+          $ref: "#/components/responses/NotFoundError"
+        default:
+          $ref: "#/components/responses/UnexpectedError"
+          description: errorGeneric
   /schemas:
     get:
       description: Returns a list of all identity schemas currently in use.

@@ -56,7 +56,7 @@ gen-openapi:
 gen:
 	go generate ./...
 	just gen-openapi
-	just gen-sql
+	# just gen-sql
 
 # Run go vet
 vet:
