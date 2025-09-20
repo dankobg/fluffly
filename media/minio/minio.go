@@ -11,7 +11,6 @@ import (
 
 	"github.com/dankobg/fluffly/config"
 	"github.com/dankobg/fluffly/media"
-	"github.com/dankobg/fluffly/media/ctype"
 	minio "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -78,7 +77,7 @@ func (mu *MinioUploader) ensureBucket(ctx context.Context) error {
 }
 
 func (mu *MinioUploader) Upload(ctx context.Context, filename string, r io.Reader, size int64) (string, error) {
-	contentType, rdr, err := ctype.DetectContentType(r)
+	contentType, rdr, err := media.DetectContentType(r)
 	if err != nil {
 		contentType = "application/octet-stream"
 	}
