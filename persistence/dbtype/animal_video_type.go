@@ -11,10 +11,11 @@ import (
 )
 
 type AnimalVideoSetter struct {
-	AnimalID  nullable.Nullable[int64]     `json:"animalid"`
-	URL       nullable.Nullable[string]    `json:"url"`
-	CreatedAt nullable.Nullable[time.Time] `json:"created_at"`
-	UpdatedAt nullable.Nullable[time.Time] `json:"updated_at"`
+	AnimalID   nullable.Nullable[int64]     `json:"animalid"`
+	ObjectKind nullable.Nullable[string]    `json:"object_kind"`
+	ObjectRef  nullable.Nullable[string]    `json:"object_ref"`
+	CreatedAt  nullable.Nullable[time.Time] `json:"created_at"`
+	UpdatedAt  nullable.Nullable[time.Time] `json:"updated_at"`
 }
 
 func (s AnimalVideoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.AnimalVideo) {
@@ -36,10 +37,16 @@ func (s AnimalVideoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.AnimalV
 			m.AnimalID = nil
 		}
 	}
-	if s.URL.IsSpecified() {
-		cols = append(cols, t.AnimalVideo.URL)
-		if !s.URL.IsNull() {
-			m.URL = s.URL.MustGet()
+	if s.ObjectKind.IsSpecified() {
+		cols = append(cols, t.AnimalVideo.ObjectKind)
+		if !s.ObjectKind.IsNull() {
+			m.ObjectKind = s.ObjectKind.MustGet()
+		}
+	}
+	if s.ObjectRef.IsSpecified() {
+		cols = append(cols, t.AnimalVideo.ObjectRef)
+		if !s.ObjectRef.IsNull() {
+			m.ObjectRef = s.ObjectRef.MustGet()
 		}
 	}
 	if s.CreatedAt.IsSpecified() {

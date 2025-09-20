@@ -12,7 +12,7 @@ import (
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
-func (a *ApiHandler) SetupRoutes() http.Handler {
+func (a *ApiHandler) SetupRoutes(uploadDir string) http.Handler {
 	mux := http.NewServeMux()
 
 	// debug routes
@@ -32,6 +32,7 @@ func (a *ApiHandler) SetupRoutes() http.Handler {
 
 	// static files
 	mux.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.FS(data.MustPublicFS()))))
+	mux.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir))))
 
 	cors, err := NewCORS(a.Cfg.Cors)
 	if err != nil {

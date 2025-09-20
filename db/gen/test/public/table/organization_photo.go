@@ -17,14 +17,15 @@ type organizationPhotoTable struct {
 	postgres.Table
 
 	// Columns
-	ID             postgres.ColumnInteger
-	OrganizationID postgres.ColumnInteger
-	Small          postgres.ColumnString
-	Medium         postgres.ColumnString
-	Large          postgres.ColumnString
-	Full           postgres.ColumnString
-	CreatedAt      postgres.ColumnTimestampz
-	UpdatedAt      postgres.ColumnTimestampz
+	ID              postgres.ColumnInteger
+	OrganizationID  postgres.ColumnInteger
+	ObjectKind      postgres.ColumnString
+	ObjectRefSmall  postgres.ColumnString
+	ObjectRefMedium postgres.ColumnString
+	ObjectRefLarge  postgres.ColumnString
+	ObjectRefFull   postgres.ColumnString
+	CreatedAt       postgres.ColumnTimestampz
+	UpdatedAt       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -66,31 +67,33 @@ func newOrganizationPhotoTable(schemaName, tableName, alias string) *Organizatio
 
 func newOrganizationPhotoTableImpl(schemaName, tableName, alias string) organizationPhotoTable {
 	var (
-		IDColumn             = postgres.IntegerColumn("id")
-		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
-		SmallColumn          = postgres.StringColumn("small")
-		MediumColumn         = postgres.StringColumn("medium")
-		LargeColumn          = postgres.StringColumn("large")
-		FullColumn           = postgres.StringColumn("full")
-		CreatedAtColumn      = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn      = postgres.TimestampzColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, OrganizationIDColumn, SmallColumn, MediumColumn, LargeColumn, FullColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{OrganizationIDColumn, SmallColumn, MediumColumn, LargeColumn, FullColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns       = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
+		IDColumn              = postgres.IntegerColumn("id")
+		OrganizationIDColumn  = postgres.IntegerColumn("organization_id")
+		ObjectKindColumn      = postgres.StringColumn("object_kind")
+		ObjectRefSmallColumn  = postgres.StringColumn("object_ref_small")
+		ObjectRefMediumColumn = postgres.StringColumn("object_ref_medium")
+		ObjectRefLargeColumn  = postgres.StringColumn("object_ref_large")
+		ObjectRefFullColumn   = postgres.StringColumn("object_ref_full")
+		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
+		allColumns            = postgres.ColumnList{IDColumn, OrganizationIDColumn, ObjectKindColumn, ObjectRefSmallColumn, ObjectRefMediumColumn, ObjectRefLargeColumn, ObjectRefFullColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{OrganizationIDColumn, ObjectKindColumn, ObjectRefSmallColumn, ObjectRefMediumColumn, ObjectRefLargeColumn, ObjectRefFullColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns        = postgres.ColumnList{ObjectKindColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return organizationPhotoTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:             IDColumn,
-		OrganizationID: OrganizationIDColumn,
-		Small:          SmallColumn,
-		Medium:         MediumColumn,
-		Large:          LargeColumn,
-		Full:           FullColumn,
-		CreatedAt:      CreatedAtColumn,
-		UpdatedAt:      UpdatedAtColumn,
+		ID:              IDColumn,
+		OrganizationID:  OrganizationIDColumn,
+		ObjectKind:      ObjectKindColumn,
+		ObjectRefSmall:  ObjectRefSmallColumn,
+		ObjectRefMedium: ObjectRefMediumColumn,
+		ObjectRefLarge:  ObjectRefLargeColumn,
+		ObjectRefFull:   ObjectRefFullColumn,
+		CreatedAt:       CreatedAtColumn,
+		UpdatedAt:       UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

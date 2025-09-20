@@ -3,6 +3,7 @@ package dto
 import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	"github.com/dankobg/fluffly/media"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 )
 
@@ -14,7 +15,10 @@ func AnimalToResponse(data model.Animal) api.Animal {
 		Distance:        data.Distance,
 		Gender:          (*api.AnimalGender)(data.Gender),
 		Hermaphrodite:   data.Hermaphrodite,
-		ImageURL:        data.ImageURL,
+		ImageSmallURL:   data.ImageObjectRefSmall,  // @TODO: resolve
+		ImageMediumURL:  data.ImageObjectRefMedium, // @TODO: resolve
+		ImageLargeURL:   data.ImageObjectRefLarge,  // @TODO: resolve
+		ImageFullURL:    data.ImageObjectRefFull,   // @TODO: resolve
 		Name:            data.Name,
 		Size:            api.AnimalSize(data.Size),
 		Status:          (*api.AnimalStatus)(data.Status),
@@ -26,7 +30,7 @@ func AnimalToResponse(data model.Animal) api.Animal {
 	}
 }
 
-func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData) api.Animal {
+func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData, upl media.Uploader) api.Animal {
 	resp := AnimalToResponse(data.Animal)
 	resp.Type = api.AnimalType{
 		ID:        data.Type.ID,
@@ -51,11 +55,11 @@ func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData) api.Animal {
 	}
 	resp.Photos = make([]api.AnimalPhoto, len(data.Photos))
 	for i, photo := range data.Photos {
-		resp.Photos[i] = AnimalPhotoToResp(photo)
+		resp.Photos[i] = AnimalPhotoToResp(photo, upl)
 	}
 	resp.Videos = make([]api.AnimalVideo, len(data.Videos))
 	for i, video := range data.Videos {
-		resp.Videos[i] = AnimalVideoToResp(video)
+		resp.Videos[i] = AnimalVideoToResp(video, upl)
 	}
 	resp.Likes = data.Likes
 
@@ -63,7 +67,7 @@ func AnimalWithJoinDataToResponse(data dbtype.AnimalWithJoinData) api.Animal {
 		Organization: data.Organization.Organization,
 		WorkHour:     data.Organization.WorkHour,
 		Contact:      data.Organization.Contact,
-	})
+	}, upl)
 	resp.Organization = &organizationWithJoinData
 
 	return resp

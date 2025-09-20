@@ -14,7 +14,8 @@ import (
 type OrganizationVideo struct {
 	ID             int64 `sql:"primary_key"`
 	OrganizationID *int64
-	URL            string
+	ObjectKind     string
+	ObjectRef      string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }

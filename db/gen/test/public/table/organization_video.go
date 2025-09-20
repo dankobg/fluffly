@@ -19,7 +19,8 @@ type organizationVideoTable struct {
 	// Columns
 	ID             postgres.ColumnInteger
 	OrganizationID postgres.ColumnInteger
-	URL            postgres.ColumnString
+	ObjectKind     postgres.ColumnString
+	ObjectRef      postgres.ColumnString
 	CreatedAt      postgres.ColumnTimestampz
 	UpdatedAt      postgres.ColumnTimestampz
 
@@ -65,12 +66,13 @@ func newOrganizationVideoTableImpl(schemaName, tableName, alias string) organiza
 	var (
 		IDColumn             = postgres.IntegerColumn("id")
 		OrganizationIDColumn = postgres.IntegerColumn("organization_id")
-		URLColumn            = postgres.StringColumn("url")
+		ObjectKindColumn     = postgres.StringColumn("object_kind")
+		ObjectRefColumn      = postgres.StringColumn("object_ref")
 		CreatedAtColumn      = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn      = postgres.TimestampzColumn("updated_at")
-		allColumns           = postgres.ColumnList{IDColumn, OrganizationIDColumn, URLColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns       = postgres.ColumnList{OrganizationIDColumn, URLColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns       = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
+		allColumns           = postgres.ColumnList{IDColumn, OrganizationIDColumn, ObjectKindColumn, ObjectRefColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns       = postgres.ColumnList{OrganizationIDColumn, ObjectKindColumn, ObjectRefColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns       = postgres.ColumnList{ObjectKindColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return organizationVideoTable{
@@ -79,7 +81,8 @@ func newOrganizationVideoTableImpl(schemaName, tableName, alias string) organiza
 		//Columns
 		ID:             IDColumn,
 		OrganizationID: OrganizationIDColumn,
-		URL:            URLColumn,
+		ObjectKind:     ObjectKindColumn,
+		ObjectRef:      ObjectRefColumn,
 		CreatedAt:      CreatedAtColumn,
 		UpdatedAt:      UpdatedAtColumn,
 

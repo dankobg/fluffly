@@ -11,13 +11,14 @@ import (
 )
 
 type OrganizationPhotoSetter struct {
-	OrganizationID nullable.Nullable[int64]     `json:"organizationid"`
-	Small          nullable.Nullable[string]    `json:"small"`
-	Medium         nullable.Nullable[string]    `json:"medium"`
-	Large          nullable.Nullable[string]    `json:"large"`
-	Full           nullable.Nullable[string]    `json:"full"`
-	CreatedAt      nullable.Nullable[time.Time] `json:"created_at"`
-	UpdatedAt      nullable.Nullable[time.Time] `json:"updated_at"`
+	OrganizationID  nullable.Nullable[int64]     `json:"organizationid"`
+	ObjectKind      nullable.Nullable[string]    `json:"object_kind"`
+	ObjectRefSmall  nullable.Nullable[string]    `json:"object_ref_small"`
+	ObjectRefMedium nullable.Nullable[string]    `json:"object_ref_medium"`
+	ObjectRefLarge  nullable.Nullable[string]    `json:"object_ref_large"`
+	ObjectRefFull   nullable.Nullable[string]    `json:"object_ref_full"`
+	CreatedAt       nullable.Nullable[time.Time] `json:"created_at"`
+	UpdatedAt       nullable.Nullable[time.Time] `json:"updated_at"`
 }
 
 func (s OrganizationPhotoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.OrganizationPhoto) {
@@ -39,36 +40,36 @@ func (s OrganizationPhotoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.O
 			m.OrganizationID = nil
 		}
 	}
-	if s.Small.IsSpecified() {
-		cols = append(cols, t.OrganizationPhoto.Small)
-		if !s.Small.IsNull() {
-			m.Small = ptr.Of(s.Small.MustGet())
+	if s.ObjectRefSmall.IsSpecified() {
+		cols = append(cols, t.OrganizationPhoto.ObjectRefSmall)
+		if !s.ObjectRefSmall.IsNull() {
+			m.ObjectRefSmall = ptr.Of(s.ObjectRefSmall.MustGet())
 		} else {
-			m.Small = nil
+			m.ObjectRefSmall = nil
 		}
 	}
-	if s.Medium.IsSpecified() {
-		cols = append(cols, t.OrganizationPhoto.Medium)
-		if !s.Medium.IsNull() {
-			m.Medium = ptr.Of(s.Medium.MustGet())
+	if s.ObjectRefMedium.IsSpecified() {
+		cols = append(cols, t.OrganizationPhoto.ObjectRefMedium)
+		if !s.ObjectRefMedium.IsNull() {
+			m.ObjectRefMedium = ptr.Of(s.ObjectRefMedium.MustGet())
 		} else {
-			m.Medium = nil
+			m.ObjectRefMedium = nil
 		}
 	}
-	if s.Large.IsSpecified() {
-		cols = append(cols, t.OrganizationPhoto.Large)
-		if !s.Large.IsNull() {
-			m.Large = ptr.Of(s.Large.MustGet())
+	if s.ObjectRefLarge.IsSpecified() {
+		cols = append(cols, t.OrganizationPhoto.ObjectRefLarge)
+		if !s.ObjectRefLarge.IsNull() {
+			m.ObjectRefLarge = ptr.Of(s.ObjectRefLarge.MustGet())
 		} else {
-			m.Large = nil
+			m.ObjectRefLarge = nil
 		}
 	}
-	if s.Full.IsSpecified() {
-		cols = append(cols, t.OrganizationPhoto.Full)
-		if !s.Full.IsNull() {
-			m.Full = ptr.Of(s.Full.MustGet())
+	if s.ObjectRefFull.IsSpecified() {
+		cols = append(cols, t.OrganizationPhoto.ObjectRefFull)
+		if !s.ObjectRefFull.IsNull() {
+			m.ObjectRefFull = ptr.Of(s.ObjectRefFull.MustGet())
 		} else {
-			m.Full = nil
+			m.ObjectRefFull = nil
 		}
 	}
 	if s.CreatedAt.IsSpecified() {

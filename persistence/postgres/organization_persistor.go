@@ -89,6 +89,11 @@ func (po *PgOrganizationPersistor) ListOrganizations(ctx context.Context, filter
 			WHERE(t.OrganizationPhoto.OrganizationID.EQ(t.Organization.ID)).
 			AS("photos"),
 		p.SELECT_JSON_ARR(
+			t.OrganizationVideo.AllColumns).
+			FROM(t.OrganizationVideo).
+			WHERE(t.OrganizationVideo.OrganizationID.EQ(t.Organization.ID)).
+			AS("videos"),
+		p.SELECT_JSON_ARR(
 			t.OrganizationSocial.AllColumns).
 			FROM(t.OrganizationSocial).
 			WHERE(t.OrganizationSocial.OrganizationID.EQ(t.Organization.ID)).
@@ -141,6 +146,11 @@ func (po *PgOrganizationPersistor) GetOrganizationByID(ctx context.Context, orga
 			FROM(t.OrganizationPhoto).
 			WHERE(t.OrganizationPhoto.OrganizationID.EQ(t.Organization.ID)).
 			AS("photos"),
+		p.SELECT_JSON_ARR(
+			t.OrganizationVideo.AllColumns).
+			FROM(t.OrganizationVideo).
+			WHERE(t.OrganizationVideo.OrganizationID.EQ(t.Organization.ID)).
+			AS("videos"),
 		p.SELECT_JSON_ARR(t.OrganizationSocial.AllColumns).
 			FROM(t.OrganizationSocial).
 			WHERE(t.OrganizationSocial.OrganizationID.EQ(t.Organization.ID)).
@@ -235,6 +245,29 @@ func (po *PgOrganizationPersistor) CreateOrganization(ctx context.Context, in db
 					RETURNING(t.OrganizationPhoto.AllColumns)
 				if err := q5.QueryContext(ctx, tx, &insertedPhotos); err != nil {
 					return fmt.Errorf("failed to insert organization photos: %w", err)
+				}
+			}
+		}
+
+		if in.Videos.IsSpecified() && !in.Videos.IsNull() {
+			videosInput := in.Videos.MustGet()
+			if len(videosInput) > 0 {
+				var insertedVideos []model.OrganizationVideo
+				videos := make([]model.OrganizationVideo, len(videosInput))
+				var videoCols p.ColumnList
+				for i, video := range videosInput {
+					video.OrganizationID = nullable.NewNullableWithValue(insertedOrganization.ID)
+					cols, m := video.ToModel()
+					if i == 0 {
+						videoCols = cols
+					}
+					videos[i] = m
+				}
+				q5 := t.OrganizationVideo.INSERT(videoCols).
+					MODELS(videos).
+					RETURNING(t.OrganizationVideo.AllColumns)
+				if err := q5.QueryContext(ctx, tx, &insertedVideos); err != nil {
+					return fmt.Errorf("failed to insert organization videos: %w", err)
 				}
 			}
 		}

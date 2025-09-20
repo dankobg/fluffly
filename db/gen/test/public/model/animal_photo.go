@@ -12,12 +12,13 @@ import (
 )
 
 type AnimalPhoto struct {
-	ID        int64 `sql:"primary_key"`
-	AnimalID  *int64
-	Small     *string
-	Medium    *string
-	Large     *string
-	Full      *string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID              int64 `sql:"primary_key"`
+	AnimalID        *int64
+	ObjectKind      string
+	ObjectRefSmall  *string
+	ObjectRefMedium *string
+	ObjectRefLarge  *string
+	ObjectRefFull   *string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }

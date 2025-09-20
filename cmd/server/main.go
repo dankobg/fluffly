@@ -19,6 +19,9 @@ import (
 	"github.com/dankobg/fluffly/httpserver"
 	"github.com/dankobg/fluffly/logging"
 	"github.com/dankobg/fluffly/mailer"
+	"github.com/dankobg/fluffly/media"
+	"github.com/dankobg/fluffly/media/local"
+	"github.com/dankobg/fluffly/media/minio"
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/server"
 )
@@ -74,12 +77,28 @@ func (s *ServeCommand) Run() error {
 	}
 	pg := postgres.New(db)
 
-	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg)
+	var upl media.Uploader
+	switch cfg.FileStorage {
+	case local.StorageKind:
+		upl, err = local.NewLocalUploader(cfg.BaseURL+"/uploads", cfg.UploadDir)
+		if err != nil {
+			fmt.Println("failed to init local uploader: %w", err)
+		}
+	case minio.StorageKind:
+		upl, err = minio.NewMinioUploader(cfg.Minio)
+		if err != nil {
+			fmt.Println("failed to init minio uploader: %w", err)
+		}
+	default:
+		panic("unknown file storage: " + cfg.FileStorage)
+	}
+
+	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg, upl)
 
 	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	defer stop()
 
-	h := apiHandler.SetupRoutes()
+	h := apiHandler.SetupRoutes(cfg.UploadDir)
 
 	srv := httpserver.New(
 		httpserver.WithHostPort("", cfg.Port),

@@ -3,6 +3,8 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/dankobg/fluffly/config"
 	"github.com/google/uuid"
@@ -46,8 +48,27 @@ func RequestID(next http.Handler) http.Handler {
 }
 
 func BodyLimit(limit int64) func(http.Handler) http.Handler {
+	type fileRoute struct {
+		path   string
+		method string
+	}
+	fileRoutes := []fileRoute{
+		{path: "/api/v1/organizations", method: http.MethodPost},
+		{path: "/api/v1/animals", method: http.MethodPost},
+	}
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
+				if limit == 0 {
+					limit = 10 << 20
+				}
+				if slices.ContainsFunc(fileRoutes, func(fr fileRoute) bool {
+					return r.Method == fr.method && r.URL.Path == fr.path
+				}) {
+					limit = 100 << 20
+				}
+			}
 			r.Body = http.MaxBytesReader(w, r.Body, limit)
 			next.ServeHTTP(w, r)
 		})

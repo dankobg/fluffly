@@ -17,14 +17,15 @@ type animalPhotoTable struct {
 	postgres.Table
 
 	// Columns
-	ID        postgres.ColumnInteger
-	AnimalID  postgres.ColumnInteger
-	Small     postgres.ColumnString
-	Medium    postgres.ColumnString
-	Large     postgres.ColumnString
-	Full      postgres.ColumnString
-	CreatedAt postgres.ColumnTimestampz
-	UpdatedAt postgres.ColumnTimestampz
+	ID              postgres.ColumnInteger
+	AnimalID        postgres.ColumnInteger
+	ObjectKind      postgres.ColumnString
+	ObjectRefSmall  postgres.ColumnString
+	ObjectRefMedium postgres.ColumnString
+	ObjectRefLarge  postgres.ColumnString
+	ObjectRefFull   postgres.ColumnString
+	CreatedAt       postgres.ColumnTimestampz
+	UpdatedAt       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -66,31 +67,33 @@ func newAnimalPhotoTable(schemaName, tableName, alias string) *AnimalPhotoTable 
 
 func newAnimalPhotoTableImpl(schemaName, tableName, alias string) animalPhotoTable {
 	var (
-		IDColumn        = postgres.IntegerColumn("id")
-		AnimalIDColumn  = postgres.IntegerColumn("animal_id")
-		SmallColumn     = postgres.StringColumn("small")
-		MediumColumn    = postgres.StringColumn("medium")
-		LargeColumn     = postgres.StringColumn("large")
-		FullColumn      = postgres.StringColumn("full")
-		CreatedAtColumn = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn = postgres.TimestampzColumn("updated_at")
-		allColumns      = postgres.ColumnList{IDColumn, AnimalIDColumn, SmallColumn, MediumColumn, LargeColumn, FullColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = postgres.ColumnList{AnimalIDColumn, SmallColumn, MediumColumn, LargeColumn, FullColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns  = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
+		IDColumn              = postgres.IntegerColumn("id")
+		AnimalIDColumn        = postgres.IntegerColumn("animal_id")
+		ObjectKindColumn      = postgres.StringColumn("object_kind")
+		ObjectRefSmallColumn  = postgres.StringColumn("object_ref_small")
+		ObjectRefMediumColumn = postgres.StringColumn("object_ref_medium")
+		ObjectRefLargeColumn  = postgres.StringColumn("object_ref_large")
+		ObjectRefFullColumn   = postgres.StringColumn("object_ref_full")
+		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
+		allColumns            = postgres.ColumnList{IDColumn, AnimalIDColumn, ObjectKindColumn, ObjectRefSmallColumn, ObjectRefMediumColumn, ObjectRefLargeColumn, ObjectRefFullColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{AnimalIDColumn, ObjectKindColumn, ObjectRefSmallColumn, ObjectRefMediumColumn, ObjectRefLargeColumn, ObjectRefFullColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns        = postgres.ColumnList{ObjectKindColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return animalPhotoTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:        IDColumn,
-		AnimalID:  AnimalIDColumn,
-		Small:     SmallColumn,
-		Medium:    MediumColumn,
-		Large:     LargeColumn,
-		Full:      FullColumn,
-		CreatedAt: CreatedAtColumn,
-		UpdatedAt: UpdatedAtColumn,
+		ID:              IDColumn,
+		AnimalID:        AnimalIDColumn,
+		ObjectKind:      ObjectKindColumn,
+		ObjectRefSmall:  ObjectRefSmallColumn,
+		ObjectRefMedium: ObjectRefMediumColumn,
+		ObjectRefLarge:  ObjectRefLargeColumn,
+		ObjectRefFull:   ObjectRefFullColumn,
+		CreatedAt:       CreatedAtColumn,
+		UpdatedAt:       UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

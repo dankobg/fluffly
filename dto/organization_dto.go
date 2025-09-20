@@ -3,6 +3,7 @@ package dto
 import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
+	"github.com/dankobg/fluffly/media"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 )
 
@@ -20,17 +21,18 @@ func OrganizationToResponse(data model.Organization) api.Organization {
 	}
 }
 
-func OrganizationWithJoinDataToResponse(data dbtype.OrganizationWithJoinData) api.Organization {
+func OrganizationWithJoinDataToResponse(data dbtype.OrganizationWithJoinData, upl media.Uploader) api.Organization {
 	resp := OrganizationToResponse(data.Organization)
 	resp.Contact = ContactToResponse(data.Contact.OrganizationContact, data.Contact.Address.Address, data.Contact.Address.Country)
 	workHour := WorkHourToResponse(data.WorkHour)
 	resp.WorkHour = &workHour
 	resp.Photos = make([]api.OrganizationPhoto, len(data.Photos))
 	for i, photo := range data.Photos {
-		resp.Photos[i] = OrganizationPhotoToResp(photo)
+		resp.Photos[i] = OrganizationPhotoToResp(photo, upl)
 	}
+	resp.Videos = make([]api.OrganizationVideo, len(data.Videos))
 	for i, video := range data.Videos {
-		resp.Videos[i] = OrganizationVideoToResp(video)
+		resp.Videos[i] = OrganizationVideoToResp(video, upl)
 	}
 	resp.Socials = make([]api.OrganizationSocial, len(data.Socials))
 	for i, social := range data.Socials {

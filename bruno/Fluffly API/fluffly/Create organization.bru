@@ -6,7 +6,7 @@ meta {
 
 post {
   url: {{baseUrl}}/organizations
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
@@ -17,7 +17,7 @@ body:json {
     "contact": {
       "address": {
         "city": "Belgrade",
-        "country_id": 198, 
+        "country_id": 198,
         "lat": 44.817612,
         "lng": 20.456946,
         "note": "Next to the city park entrance",
@@ -40,7 +40,7 @@ body:json {
         "medium": "https://cdn.pawshelter.org/photos/shelter_front_medium.jpg",
         "small": "https://cdn.pawshelter.org/photos/shelter_front_small.jpg"
       },
-       {
+      {
         "full": "https://cdn.pawshelter.org/photos/shelter_front_full2.jpg",
         "large": "https://cdn.pawshelter.org/photos/shelter_front_large2.jpg",
         "medium": "https://cdn.pawshelter.org/photos/shelter_front_medium2.jpg",
@@ -68,4 +68,52 @@ body:json {
       "sunday": "Closed"
     }
   }
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "adoption_policy": "We require all adopters to complete a home visit and provide veterinary references. All animals must be kept indoors and spayed/neutered.",
+      "adoption_url": "https://www.pawshelter.org/adopt",
+      "contact": {
+        "address": {
+          "city": "Belgrade",
+          "country_id": 198,
+          "lat": 44.817612,
+          "lng": 20.456946,
+          "note": "Next to the city park entrance",
+          "postal_code": "11000",
+          "region": "Central Serbia",
+          "street_address": "Knez Mihailova",
+          "street_number": "12",
+          "unit_number": "3B"
+        },
+        "email": "contact@pawshelter.org",
+        "phone": "+381 11 123 4567"
+      },
+      "distance": "5.2 km",
+      "mission_statement": "Our mission is to rescue, rehabilitate, and rehome stray dogs and cats, while promoting responsible pet ownership.",
+      "name": "Paw Shelter Belgrade",
+      "socials": [
+        {
+          "platform": "Facebook",
+          "url": "https://facebook.com/pawshelterbg"
+        },
+        {
+          "platform": "Instagram",
+          "url": "https://instagram.com/pawshelterbg"
+        }
+      ],
+      "website": "https://www.pawshelter.org",
+      "work_hour": {
+        "monday": "09:00-17:00",
+        "tuesday": "09:00-17:00",
+        "wednesday": "09:00-17:00",
+        "thursday": "09:00-17:00",
+        "friday": "09:00-17:00",
+        "saturday": "10:00-14:00",
+        "sunday": "Closed"
+      }
+    }
+  '''
 }

@@ -29,6 +29,8 @@ type Fluffly struct {
 	Port            int    `koanf:"port"`
 	BaseURL         string `koanf:"base_url"`
 	WebsiteURL      string `koanf:"website_url"`
+	FileStorage     string `koanf:"file_storage"`
+	UploadDir       string `koanf:"upload_dir"`
 	OpenapiSpecURL  string `koanf:"openapi_spec_url"`
 	KratosPublicURL string `koanf:"kratos_public_url"`
 	KratosAdminURL  string `koanf:"kratos_admin_url"`
@@ -72,6 +74,18 @@ type DatabaseConfig struct {
 	RetriesDelay time.Duration `koanf:"retries_delay"`
 }
 
+// MinioConfig contains minio settings
+type MinioConfig struct {
+	RootUser      string `koanf:"root_user"`
+	RootPassword  string `koanf:"root_password"`
+	Host          string `koanf:"host"`
+	ApiPort       int    `koanf:"api_port"`
+	ConsolePort   int    `koanf:"console_port"`
+	DefaultBucket string `koanf:"default_bucket"`
+	Token         string `koanf:"token"`
+	UseSSL        bool   `koanf:"use_ssl"`
+}
+
 // RedisConfig contains Redis db settings
 type RedisConfig struct {
 	Host     string `koanf:"host"`
@@ -111,6 +125,7 @@ type Config struct {
 	Redis    RedisConfig    `koanf:"redis"`
 	Email    EmailConfig    `koanf:"email"`
 	Logger   LoggerConfig   `koanf:"logger"`
+	Minio    MinioConfig    `koanf:"minio"`
 }
 
 // loadEnv loads env files by convention: https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use

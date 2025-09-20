@@ -89,9 +89,19 @@ services:
       pg:
         condition: service_healthy
   # ----------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    restart: on-failure
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - intranet
+  # ----------------------------------------------------------------------------
 
 volumes:
   pg-data:
+  minio-data:
   # redis-data:
 
 networks:

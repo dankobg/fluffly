@@ -17,25 +17,29 @@ type animalTable struct {
 	postgres.Table
 
 	// Columns
-	ID              postgres.ColumnInteger
-	UserID          postgres.ColumnString
-	OrganizationID  postgres.ColumnInteger
-	TypeID          postgres.ColumnInteger
-	SpeciesID       postgres.ColumnInteger
-	Name            postgres.ColumnString
-	Gender          postgres.ColumnString
-	Hermaphrodite   postgres.ColumnBool
-	Age             postgres.ColumnString
-	Size            postgres.ColumnString
-	ImageURL        postgres.ColumnString
-	Description     postgres.ColumnString
-	Distance        postgres.ColumnString
-	Properties      postgres.ColumnString
-	Status          postgres.ColumnString
-	StatusChangedAt postgres.ColumnTimestampz
-	AdoptedAt       postgres.ColumnTimestampz
-	CreatedAt       postgres.ColumnTimestampz
-	UpdatedAt       postgres.ColumnTimestampz
+	ID                   postgres.ColumnInteger
+	UserID               postgres.ColumnString
+	OrganizationID       postgres.ColumnInteger
+	TypeID               postgres.ColumnInteger
+	SpeciesID            postgres.ColumnInteger
+	Name                 postgres.ColumnString
+	Gender               postgres.ColumnString
+	Hermaphrodite        postgres.ColumnBool
+	Age                  postgres.ColumnString
+	Size                 postgres.ColumnString
+	ImageObjectKind      postgres.ColumnString
+	ImageObjectRefSmall  postgres.ColumnString
+	ImageObjectRefMedium postgres.ColumnString
+	ImageObjectRefLarge  postgres.ColumnString
+	ImageObjectRefFull   postgres.ColumnString
+	Description          postgres.ColumnString
+	Distance             postgres.ColumnString
+	Properties           postgres.ColumnString
+	Status               postgres.ColumnString
+	StatusChangedAt      postgres.ColumnTimestampz
+	AdoptedAt            postgres.ColumnTimestampz
+	CreatedAt            postgres.ColumnTimestampz
+	UpdatedAt            postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -77,53 +81,61 @@ func newAnimalTable(schemaName, tableName, alias string) *AnimalTable {
 
 func newAnimalTableImpl(schemaName, tableName, alias string) animalTable {
 	var (
-		IDColumn              = postgres.IntegerColumn("id")
-		UserIDColumn          = postgres.StringColumn("user_id")
-		OrganizationIDColumn  = postgres.IntegerColumn("organization_id")
-		TypeIDColumn          = postgres.IntegerColumn("type_id")
-		SpeciesIDColumn       = postgres.IntegerColumn("species_id")
-		NameColumn            = postgres.StringColumn("name")
-		GenderColumn          = postgres.StringColumn("gender")
-		HermaphroditeColumn   = postgres.BoolColumn("hermaphrodite")
-		AgeColumn             = postgres.StringColumn("age")
-		SizeColumn            = postgres.StringColumn("size")
-		ImageURLColumn        = postgres.StringColumn("image_url")
-		DescriptionColumn     = postgres.StringColumn("description")
-		DistanceColumn        = postgres.StringColumn("distance")
-		PropertiesColumn      = postgres.StringColumn("properties")
-		StatusColumn          = postgres.StringColumn("status")
-		StatusChangedAtColumn = postgres.TimestampzColumn("status_changed_at")
-		AdoptedAtColumn       = postgres.TimestampzColumn("adopted_at")
-		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
-		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns        = postgres.ColumnList{UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageURLColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns        = postgres.ColumnList{HermaphroditeColumn, CreatedAtColumn, UpdatedAtColumn}
+		IDColumn                   = postgres.IntegerColumn("id")
+		UserIDColumn               = postgres.StringColumn("user_id")
+		OrganizationIDColumn       = postgres.IntegerColumn("organization_id")
+		TypeIDColumn               = postgres.IntegerColumn("type_id")
+		SpeciesIDColumn            = postgres.IntegerColumn("species_id")
+		NameColumn                 = postgres.StringColumn("name")
+		GenderColumn               = postgres.StringColumn("gender")
+		HermaphroditeColumn        = postgres.BoolColumn("hermaphrodite")
+		AgeColumn                  = postgres.StringColumn("age")
+		SizeColumn                 = postgres.StringColumn("size")
+		ImageObjectKindColumn      = postgres.StringColumn("image_object_kind")
+		ImageObjectRefSmallColumn  = postgres.StringColumn("image_object_ref_small")
+		ImageObjectRefMediumColumn = postgres.StringColumn("image_object_ref_medium")
+		ImageObjectRefLargeColumn  = postgres.StringColumn("image_object_ref_large")
+		ImageObjectRefFullColumn   = postgres.StringColumn("image_object_ref_full")
+		DescriptionColumn          = postgres.StringColumn("description")
+		DistanceColumn             = postgres.StringColumn("distance")
+		PropertiesColumn           = postgres.StringColumn("properties")
+		StatusColumn               = postgres.StringColumn("status")
+		StatusChangedAtColumn      = postgres.TimestampzColumn("status_changed_at")
+		AdoptedAtColumn            = postgres.TimestampzColumn("adopted_at")
+		CreatedAtColumn            = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn            = postgres.TimestampzColumn("updated_at")
+		allColumns                 = postgres.ColumnList{IDColumn, UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageObjectKindColumn, ImageObjectRefSmallColumn, ImageObjectRefMediumColumn, ImageObjectRefLargeColumn, ImageObjectRefFullColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns             = postgres.ColumnList{UserIDColumn, OrganizationIDColumn, TypeIDColumn, SpeciesIDColumn, NameColumn, GenderColumn, HermaphroditeColumn, AgeColumn, SizeColumn, ImageObjectKindColumn, ImageObjectRefSmallColumn, ImageObjectRefMediumColumn, ImageObjectRefLargeColumn, ImageObjectRefFullColumn, DescriptionColumn, DistanceColumn, PropertiesColumn, StatusColumn, StatusChangedAtColumn, AdoptedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns             = postgres.ColumnList{HermaphroditeColumn, ImageObjectKindColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return animalTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:              IDColumn,
-		UserID:          UserIDColumn,
-		OrganizationID:  OrganizationIDColumn,
-		TypeID:          TypeIDColumn,
-		SpeciesID:       SpeciesIDColumn,
-		Name:            NameColumn,
-		Gender:          GenderColumn,
-		Hermaphrodite:   HermaphroditeColumn,
-		Age:             AgeColumn,
-		Size:            SizeColumn,
-		ImageURL:        ImageURLColumn,
-		Description:     DescriptionColumn,
-		Distance:        DistanceColumn,
-		Properties:      PropertiesColumn,
-		Status:          StatusColumn,
-		StatusChangedAt: StatusChangedAtColumn,
-		AdoptedAt:       AdoptedAtColumn,
-		CreatedAt:       CreatedAtColumn,
-		UpdatedAt:       UpdatedAtColumn,
+		ID:                   IDColumn,
+		UserID:               UserIDColumn,
+		OrganizationID:       OrganizationIDColumn,
+		TypeID:               TypeIDColumn,
+		SpeciesID:            SpeciesIDColumn,
+		Name:                 NameColumn,
+		Gender:               GenderColumn,
+		Hermaphrodite:        HermaphroditeColumn,
+		Age:                  AgeColumn,
+		Size:                 SizeColumn,
+		ImageObjectKind:      ImageObjectKindColumn,
+		ImageObjectRefSmall:  ImageObjectRefSmallColumn,
+		ImageObjectRefMedium: ImageObjectRefMediumColumn,
+		ImageObjectRefLarge:  ImageObjectRefLargeColumn,
+		ImageObjectRefFull:   ImageObjectRefFullColumn,
+		Description:          DescriptionColumn,
+		Distance:             DistanceColumn,
+		Properties:           PropertiesColumn,
+		Status:               StatusColumn,
+		StatusChangedAt:      StatusChangedAtColumn,
+		AdoptedAt:            AdoptedAtColumn,
+		CreatedAt:            CreatedAtColumn,
+		UpdatedAt:            UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

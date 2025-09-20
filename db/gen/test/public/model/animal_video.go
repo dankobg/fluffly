@@ -12,9 +12,10 @@ import (
 )
 
 type AnimalVideo struct {
-	ID        int64 `sql:"primary_key"`
-	AnimalID  *int64
-	URL       string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         int64 `sql:"primary_key"`
+	AnimalID   *int64
+	ObjectKind string
+	ObjectRef  string
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }

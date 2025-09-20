@@ -8,6 +8,7 @@ import (
 	"github.com/dankobg/fluffly/auth/kratos"
 	"github.com/dankobg/fluffly/config"
 	"github.com/dankobg/fluffly/mailer"
+	"github.com/dankobg/fluffly/media"
 	"github.com/dankobg/fluffly/persistence"
 	"github.com/redis/go-redis/v9"
 )
@@ -23,9 +24,10 @@ type ApiHandler struct {
 	persistor  persistence.Persistor
 	Mailer     mailer.Mailer
 	openapiTpl *template.Template
+	uploader   media.Uploader
 }
 
-func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor) *ApiHandler {
+func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor, upl media.Uploader) *ApiHandler {
 	return &ApiHandler{
 		Cfg:       cfg,
 		Log:       log,
@@ -33,6 +35,7 @@ func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto
 		Keto:      keto,
 		persistor: p,
 		Mailer:    mailer,
+		uploader:  upl,
 	}
 }
 

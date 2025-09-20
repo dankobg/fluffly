@@ -51,24 +51,28 @@ type AnimalCreateSetter struct {
 }
 
 type AnimalSetter struct {
-	UserID          nullable.Nullable[uuid.UUID]         `json:"user_id"`
-	OrganizationID  nullable.Nullable[int64]             `json:"organization_id"`
-	TypeID          nullable.Nullable[int64]             `json:"type_id"`
-	SpeciesID       nullable.Nullable[int64]             `json:"species_id"`
-	Name            nullable.Nullable[string]            `json:"name"`
-	Gender          nullable.Nullable[model.Gender]      `json:"gender"`
-	Hermaphrodite   nullable.Nullable[bool]              `json:"hermaphrodite"`
-	Age             nullable.Nullable[string]            `json:"age"`
-	Size            nullable.Nullable[string]            `json:"size"`
-	ImageURL        nullable.Nullable[string]            `json:"image_url"`
-	Description     nullable.Nullable[string]            `json:"description"`
-	Distance        nullable.Nullable[string]            `json:"distance"`
-	Properties      nullable.Nullable[dbcustom.JsonType] `json:"properties"`
-	Status          nullable.Nullable[string]            `json:"status"`
-	StatusChangedAt nullable.Nullable[time.Time]         `json:"status_changed_at"`
-	AdoptedAt       nullable.Nullable[time.Time]         `json:"adopted_at"`
-	CreatedAt       nullable.Nullable[time.Time]         `json:"created_at"`
-	UpdatedAt       nullable.Nullable[time.Time]         `json:"updated_at"`
+	UserID               nullable.Nullable[uuid.UUID]         `json:"user_id"`
+	OrganizationID       nullable.Nullable[int64]             `json:"organization_id"`
+	TypeID               nullable.Nullable[int64]             `json:"type_id"`
+	SpeciesID            nullable.Nullable[int64]             `json:"species_id"`
+	Name                 nullable.Nullable[string]            `json:"name"`
+	Gender               nullable.Nullable[model.Gender]      `json:"gender"`
+	Hermaphrodite        nullable.Nullable[bool]              `json:"hermaphrodite"`
+	Age                  nullable.Nullable[string]            `json:"age"`
+	Size                 nullable.Nullable[string]            `json:"size"`
+	ImageObjectKind      nullable.Nullable[string]            `json:"image_object_kind"`
+	ImageObjectRefSmall  nullable.Nullable[string]            `json:"image_object_ref_small"`
+	ImageObjectRefMedium nullable.Nullable[string]            `json:"image_object_ref_medium"`
+	ImageObjectRefLarge  nullable.Nullable[string]            `json:"image_object_ref_large"`
+	ImageObjectRefFull   nullable.Nullable[string]            `json:"image_object_ref_full"`
+	Description          nullable.Nullable[string]            `json:"description"`
+	Distance             nullable.Nullable[string]            `json:"distance"`
+	Properties           nullable.Nullable[dbcustom.JsonType] `json:"properties"`
+	Status               nullable.Nullable[string]            `json:"status"`
+	StatusChangedAt      nullable.Nullable[time.Time]         `json:"status_changed_at"`
+	AdoptedAt            nullable.Nullable[time.Time]         `json:"adopted_at"`
+	CreatedAt            nullable.Nullable[time.Time]         `json:"created_at"`
+	UpdatedAt            nullable.Nullable[time.Time]         `json:"updated_at"`
 }
 
 func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
@@ -142,10 +146,28 @@ func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
 			m.Size = s.Size.MustGet()
 		}
 	}
-	if s.ImageURL.IsSpecified() {
-		cols = append(cols, t.Animal.ImageURL)
-		if !s.ImageURL.IsNull() {
-			m.ImageURL = s.ImageURL.MustGet()
+	if s.ImageObjectKind.IsSpecified() {
+		cols = append(cols, t.Animal.ImageObjectKind)
+		if !s.ImageObjectKind.IsNull() {
+			m.ImageObjectKind = s.ImageObjectKind.MustGet()
+		}
+	}
+	if s.ImageObjectRefSmall.IsSpecified() {
+		cols = append(cols, t.Animal.ImageObjectRefSmall)
+		if !s.ImageObjectRefSmall.IsNull() {
+			m.ImageObjectRefSmall = s.ImageObjectRefSmall.MustGet()
+		}
+	}
+	if s.ImageObjectRefMedium.IsSpecified() {
+		cols = append(cols, t.Animal.ImageObjectRefMedium)
+		if !s.ImageObjectRefMedium.IsNull() {
+			m.ImageObjectRefMedium = s.ImageObjectRefMedium.MustGet()
+		}
+	}
+	if s.ImageObjectRefFull.IsSpecified() {
+		cols = append(cols, t.Animal.ImageObjectRefFull)
+		if !s.ImageObjectRefFull.IsNull() {
+			m.ImageObjectRefFull = s.ImageObjectRefFull.MustGet()
 		}
 	}
 	if s.Description.IsSpecified() {

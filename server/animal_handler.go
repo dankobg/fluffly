@@ -20,12 +20,16 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	var animalCreateSetter dbtype.AnimalCreateSetter
 
 	animalCreateSetter.Animal = dbtype.AnimalSetter{
-		TypeID:    nullable.NewNullableWithValue(request.Body.AnimalTypeID),
-		SpeciesID: nullable.NewNullableWithValue(request.Body.AnimalSpeciesID),
-		Name:      nullable.NewNullableWithValue(request.Body.Name),
-		Age:       nullable.NewNullableWithValue(string(request.Body.Age)),
-		Size:      nullable.NewNullableWithValue(string(request.Body.Size)),
-		ImageURL:  nullable.NewNullableWithValue(request.Body.ImageURL),
+		TypeID:               nullable.NewNullableWithValue(request.Body.AnimalTypeID),
+		SpeciesID:            nullable.NewNullableWithValue(request.Body.AnimalSpeciesID),
+		Name:                 nullable.NewNullableWithValue(request.Body.Name),
+		Age:                  nullable.NewNullableWithValue(string(request.Body.Age)),
+		Size:                 nullable.NewNullableWithValue(string(request.Body.Size)),
+		ImageObjectKind:      nullable.NewNullableWithValue(a.uploader.Kind()),
+		ImageObjectRefSmall:  nullable.NewNullableWithValue("small"),
+		ImageObjectRefMedium: nullable.NewNullableWithValue("medium"),
+		ImageObjectRefLarge:  nullable.NewNullableWithValue("large"),
+		ImageObjectRefFull:   nullable.NewNullableWithValue("full"),
 	}
 	if request.Body.Gender != nil {
 		gender := model.Gender_M
@@ -97,16 +101,16 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 		for _, photo := range *request.Body.Photos {
 			photoSetter := dbtype.AnimalPhotoSetter{}
 			if photo.Small.IsSpecified() {
-				photoSetter.Small = photo.Small
+				photoSetter.ObjectRefSmall = photo.Small
 			}
 			if photo.Medium.IsSpecified() {
-				photoSetter.Medium = photo.Medium
+				photoSetter.ObjectRefMedium = photo.Medium
 			}
 			if photo.Large.IsSpecified() {
-				photoSetter.Large = photo.Large
+				photoSetter.ObjectRefLarge = photo.Large
 			}
 			if photo.Full.IsSpecified() {
-				photoSetter.Full = photo.Full
+				photoSetter.ObjectRefFull = photo.Full
 			}
 			animalPhotoSetters = append(animalPhotoSetters, photoSetter)
 		}
@@ -118,7 +122,7 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 		for _, video := range *request.Body.Videos {
 			videoSetter := dbtype.AnimalVideoSetter{}
 			if video.URL != "" {
-				videoSetter.URL = nullable.NewNullableWithValue(video.URL)
+				videoSetter.ObjectRef = nullable.NewNullableWithValue(video.URL)
 			}
 			animalVideoSetters = append(animalVideoSetters, videoSetter)
 		}
@@ -201,7 +205,7 @@ func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsReq
 	}
 	animalsData := make([]api.Animal, len(animals.Data))
 	for i, animalWithJoinData := range animals.Data {
-		animalsData[i] = dto.AnimalWithJoinDataToResponse(animalWithJoinData)
+		animalsData[i] = dto.AnimalWithJoinDataToResponse(animalWithJoinData, a.uploader)
 	}
 	resp := api.ListAnimals200JSONResponse{
 		Data: animalsData,
@@ -218,7 +222,7 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 		}
 		return nil, fmt.Errorf("failed to get an animal by id: %w", err)
 	}
-	resp := api.GetAnimal200JSONResponse(dto.AnimalWithJoinDataToResponse(animalWithJoinData))
+	resp := api.GetAnimal200JSONResponse(dto.AnimalWithJoinDataToResponse(animalWithJoinData, a.uploader))
 	return resp, nil
 }
 

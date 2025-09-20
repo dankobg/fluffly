@@ -14,23 +14,27 @@ import (
 )
 
 type Animal struct {
-	ID              int64 `sql:"primary_key"`
-	UserID          *uuid.UUID
-	OrganizationID  *int64
-	TypeID          int64
-	SpeciesID       int64
-	Name            string
-	Gender          *Gender
-	Hermaphrodite   bool
-	Age             string
-	Size            string
-	ImageURL        string
-	Description     *string
-	Distance        *string
-	Properties      dbcustom.JsonType
-	Status          *string
-	StatusChangedAt *time.Time
-	AdoptedAt       *time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	ID                   int64 `sql:"primary_key"`
+	UserID               *uuid.UUID
+	OrganizationID       *int64
+	TypeID               int64
+	SpeciesID            int64
+	Name                 string
+	Gender               *Gender
+	Hermaphrodite        bool
+	Age                  string
+	Size                 string
+	ImageObjectKind      string
+	ImageObjectRefSmall  string
+	ImageObjectRefMedium string
+	ImageObjectRefLarge  string
+	ImageObjectRefFull   string
+	Description          *string
+	Distance             *string
+	Properties           dbcustom.JsonType
+	Status               *string
+	StatusChangedAt      *time.Time
+	AdoptedAt            *time.Time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }

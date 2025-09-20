@@ -216,9 +216,9 @@ paths:
         - fluffly
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateOrganizationBody"
+              $ref: "#/components/schemas/CreateOrganizationMultipartBody"
       responses:
         "201":
           description: Successful operation
@@ -2490,11 +2490,41 @@ components:
           items:
             $ref: "#/components/schemas/CreateOrganizationPhotoBody"
           nullable: true
+        videos:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateOrganizationVideoBody"
+          nullable: true
         socials:
           type: array
           items:
             $ref: "#/components/schemas/CreateOrganizationSocialBody"
           nullable: true
+    CreateOrganizationDataPart:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CreateOrganizationBody"
+    CreateOrganizationFilePart:
+      type: object
+      properties:
+        photos:
+          type: array
+          items:
+            type: string
+            format: binary
+        videos:
+          type: array
+          items:
+            type: string
+            format: binary
+    CreateOrganizationMultipartBody:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/CreateOrganizationDataPart"
+        - $ref: "#/components/schemas/CreateOrganizationFilePart"
     UpdateOrganizationBody:
       type: object
       properties:
@@ -2759,19 +2789,19 @@ components:
           format: int64
           type: integer
           description: Organization id
-        small:
+        small_url:
           type: string
           format: uri
           description: Small photo url
-        medium:
+        medium_url:
           type: string
           format: uri
           description: Medium photo url
-        large:
+        large_url:
           type: string
           format: uri
           description: Large photo url
-        full:
+        full_url:
           type: string
           format: uri
           description: Full photo url
@@ -2883,19 +2913,19 @@ components:
           format: int64
           type: integer
           description: Animal id
-        small:
+        small_url:
           type: string
           format: uri
           description: Small photo url
-        medium:
+        medium_url:
           type: string
           format: uri
           description: Medium photo url
-        large:
+        large_url:
           type: string
           format: uri
           description: Large photo url
-        full:
+        full_url:
           type: string
           format: uri
           description: Full photo url
@@ -3013,7 +3043,10 @@ components:
         - age
         - size
         - hermaphrodite
-        - image_url
+        - image_small_url
+        - image_medium_url
+        - image_large_url
+        - image_full_url
         - tags
         - photos
         - videos
@@ -3064,9 +3097,18 @@ components:
             - small
             - medium
             - large
-        image_url:
+        image_small_url:
           type: string
-          description: Animal image url
+          description: Animal small image url
+        image_medium_url:
+          type: string
+          description: Animal medium image url
+        image_large_url:
+          type: string
+          description: Animal large image url
+        image_full_url:
+          type: string
+          description: Animal full image url
         description:
           type: string
           description: Animal description

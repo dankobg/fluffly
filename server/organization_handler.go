@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,72 +16,114 @@ import (
 )
 
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
+	form, err := request.Body.ReadForm(50 << 20)
+	if err != nil {
+		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+	}
+	orgData := form.Value["data"][0]
+	var input api.CreateOrganizationBody
+	if err := json.Unmarshal([]byte(orgData), &input); err != nil {
+		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+	}
+
+	photoFileHeaders := form.File["photos"]
+	videoFileHeaders := form.File["videos"]
+	var photoUploadResults []uploadResult
+	var videoUploadResults []uploadResult
+	if len(photoFileHeaders) > 0 {
+		photoResults := a.uploadOrganizationMultipartFiles(ctx, photoFileHeaders, 5)
+		photoUploadResults = append(photoUploadResults, photoResults...)
+	}
+	if len(videoFileHeaders) > 0 {
+		videoResults := a.uploadOrganizationMultipartFiles(ctx, videoFileHeaders, 5)
+		videoUploadResults = append(videoUploadResults, videoResults...)
+	}
+	var filesToDelete []string
+	for _, res := range append(photoUploadResults, videoUploadResults...) {
+		if res.Err != nil {
+			filesToDelete = append(filesToDelete, res.Name)
+		}
+	}
+	if len(filesToDelete) > 0 {
+		go func() {
+			_ = a.deleteOrganizationFiles(ctx, filesToDelete, 5)
+		}()
+		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
+	}
+
 	var organizationCreateSetter dbtype.OrganizationCreateSetter
 
 	organizationCreateSetter.Organization = dbtype.OrganizationSetter{
-		Name:             nullable.NewNullableWithValue(request.Body.Name),
-		Website:          request.Body.Website,
-		MissionStatement: request.Body.MissionStatement,
-		AdoptionPolicy:   request.Body.AdoptionPolicy,
-		AdoptionURL:      request.Body.AdoptionURL,
-		Distance:         request.Body.Distance,
+		Name:             nullable.NewNullableWithValue(input.Name),
+		Website:          input.Website,
+		MissionStatement: input.MissionStatement,
+		AdoptionPolicy:   input.AdoptionPolicy,
+		AdoptionURL:      input.AdoptionURL,
+		Distance:         input.Distance,
 	}
 
 	organizationCreateSetter.Contact = dbtype.OrganizationContactSetter{
-		Phone: nullable.NewNullableWithValue(request.Body.Contact.Phone),
-		Email: nullable.NewNullableWithValue(string(request.Body.Contact.Email)),
+		Phone: nullable.NewNullableWithValue(input.Contact.Phone),
+		Email: nullable.NewNullableWithValue(string(input.Contact.Email)),
 	}
 
 	organizationCreateSetter.Address = dbtype.AddressSetter{
-		CountryID:     nullable.NewNullableWithValue(request.Body.Contact.Address.CountryID),
-		UnitNumber:    nullable.NewNullableWithValue(*request.Body.Contact.Address.UnitNumber),
-		StreetNumber:  nullable.NewNullableWithValue(*request.Body.Contact.Address.StreetNumber),
-		StreetAddress: nullable.NewNullableWithValue(request.Body.Contact.Address.StreetAddress),
-		City:          nullable.NewNullableWithValue(request.Body.Contact.Address.City),
-		Region:        nullable.NewNullableWithValue(*request.Body.Contact.Address.Region),
-		PostalCode:    nullable.NewNullableWithValue(*request.Body.Contact.Address.PostalCode),
-		Lat:           nullable.NewNullableWithValue(float64(*request.Body.Contact.Address.Lat)),
-		Lng:           nullable.NewNullableWithValue(float64(*request.Body.Contact.Address.Lng)),
-		Note:          nullable.NewNullableWithValue(*request.Body.Contact.Address.Note),
+		CountryID:     nullable.NewNullableWithValue(input.Contact.Address.CountryID),
+		UnitNumber:    nullable.NewNullableWithValue(*input.Contact.Address.UnitNumber),
+		StreetNumber:  nullable.NewNullableWithValue(*input.Contact.Address.StreetNumber),
+		StreetAddress: nullable.NewNullableWithValue(input.Contact.Address.StreetAddress),
+		City:          nullable.NewNullableWithValue(input.Contact.Address.City),
+		Region:        nullable.NewNullableWithValue(*input.Contact.Address.Region),
+		PostalCode:    nullable.NewNullableWithValue(*input.Contact.Address.PostalCode),
+		Lat:           nullable.NewNullableWithValue(float64(*input.Contact.Address.Lat)),
+		Lng:           nullable.NewNullableWithValue(float64(*input.Contact.Address.Lng)),
+		Note:          nullable.NewNullableWithValue(*input.Contact.Address.Note),
 	}
 
-	if request.Body.WorkHour != nil {
+	if input.WorkHour != nil {
 		organizationCreateSetter.WorkHour = nullable.NewNullableWithValue(dbtype.OrganizationWorkHourSetter{
-			Monday:    request.Body.WorkHour.Monday,
-			Tuesday:   request.Body.WorkHour.Tuesday,
-			Wednesday: request.Body.WorkHour.Wednesday,
-			Thursday:  request.Body.WorkHour.Thursday,
-			Friday:    request.Body.WorkHour.Friday,
-			Saturday:  request.Body.WorkHour.Saturday,
-			Sunday:    request.Body.WorkHour.Sunday,
+			Monday:    input.WorkHour.Monday,
+			Tuesday:   input.WorkHour.Tuesday,
+			Wednesday: input.WorkHour.Wednesday,
+			Thursday:  input.WorkHour.Thursday,
+			Friday:    input.WorkHour.Friday,
+			Saturday:  input.WorkHour.Saturday,
+			Sunday:    input.WorkHour.Sunday,
 		})
 	}
 
-	if request.Body.Photos.IsSpecified() && !request.Body.Photos.IsNull() {
-		organizationPhotoSetters := make([]dbtype.OrganizationPhotoSetter, 0)
-		for _, photo := range request.Body.Photos.MustGet() {
-			photoSetter := dbtype.OrganizationPhotoSetter{}
-			if photo.Small.IsSpecified() {
-				photoSetter.Small = photo.Small
+	if len(photoUploadResults) > 0 {
+		organizationPhotoSetters := make([]dbtype.OrganizationPhotoSetter, len(photoUploadResults))
+		for i, photoRes := range photoUploadResults {
+			// @TODO: optimize image size
+			photoSetter := dbtype.OrganizationPhotoSetter{
+				ObjectKind:      nullable.NewNullableWithValue(a.uploader.Kind()),
+				ObjectRefSmall:  nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefMedium: nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefLarge:  nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefFull:   nullable.NewNullableWithValue(photoRes.Name),
 			}
-			if photo.Medium.IsSpecified() {
-				photoSetter.Medium = photo.Medium
-			}
-			if photo.Large.IsSpecified() {
-				photoSetter.Large = photo.Large
-			}
-			if photo.Full.IsSpecified() {
-				photoSetter.Full = photo.Full
-			}
-			organizationPhotoSetters = append(organizationPhotoSetters, photoSetter)
+			organizationPhotoSetters[i] = photoSetter
 		}
 		organizationCreateSetter.Photos = nullable.NewNullableWithValue(organizationPhotoSetters)
 	}
 
-	if request.Body.Socials.IsSpecified() && !request.Body.Socials.IsNull() {
+	if len(videoUploadResults) > 0 {
+		organizationVideoSetters := make([]dbtype.OrganizationVideoSetter, len(videoUploadResults))
+		for i, videoRes := range videoUploadResults {
+			videoSetter := dbtype.OrganizationVideoSetter{
+				ObjectKind: nullable.NewNullableWithValue(a.uploader.Kind()),
+				ObjectRef:  nullable.NewNullableWithValue(videoRes.Name),
+			}
+			organizationVideoSetters[i] = videoSetter
+		}
+		organizationCreateSetter.Videos = nullable.NewNullableWithValue(organizationVideoSetters)
+	}
+
+	if input.Socials.IsSpecified() && !input.Socials.IsNull() {
 		organizationSocialsSetters := make([]dbtype.OrganizationSocialSetter, 0)
-		if request.Body.Socials.IsSpecified() {
-			for _, social := range request.Body.Socials.MustGet() {
+		if input.Socials.IsSpecified() {
+			for _, social := range input.Socials.MustGet() {
 				organizationSocialsSetters = append(organizationSocialsSetters, dbtype.OrganizationSocialSetter{
 					Platform: nullable.NewNullableWithValue(social.Platform),
 					URL:      nullable.NewNullableWithValue(social.URL),
@@ -155,7 +198,7 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 		}
 		return nil, fmt.Errorf("failed to get an organization by id: %w", err)
 	}
-	resp := api.GetOrganization200JSONResponse(dto.OrganizationWithJoinDataToResponse(organizationWithJoinData))
+	resp := api.GetOrganization200JSONResponse(dto.OrganizationWithJoinDataToResponse(organizationWithJoinData, a.uploader))
 	return resp, nil
 }
 
@@ -168,7 +211,7 @@ func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrga
 	}
 	organizationsData := make([]api.Organization, len(organizations.Data))
 	for i, organizationWithJoinData := range organizations.Data {
-		organizationsData[i] = dto.OrganizationWithJoinDataToResponse(organizationWithJoinData)
+		organizationsData[i] = dto.OrganizationWithJoinDataToResponse(organizationWithJoinData, a.uploader)
 	}
 	resp := api.ListOrganizations200JSONResponse{
 		Data: organizationsData,

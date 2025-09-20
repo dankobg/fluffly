@@ -17,11 +17,12 @@ type animalVideoTable struct {
 	postgres.Table
 
 	// Columns
-	ID        postgres.ColumnInteger
-	AnimalID  postgres.ColumnInteger
-	URL       postgres.ColumnString
-	CreatedAt postgres.ColumnTimestampz
-	UpdatedAt postgres.ColumnTimestampz
+	ID         postgres.ColumnInteger
+	AnimalID   postgres.ColumnInteger
+	ObjectKind postgres.ColumnString
+	ObjectRef  postgres.ColumnString
+	CreatedAt  postgres.ColumnTimestampz
+	UpdatedAt  postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -63,25 +64,27 @@ func newAnimalVideoTable(schemaName, tableName, alias string) *AnimalVideoTable 
 
 func newAnimalVideoTableImpl(schemaName, tableName, alias string) animalVideoTable {
 	var (
-		IDColumn        = postgres.IntegerColumn("id")
-		AnimalIDColumn  = postgres.IntegerColumn("animal_id")
-		URLColumn       = postgres.StringColumn("url")
-		CreatedAtColumn = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn = postgres.TimestampzColumn("updated_at")
-		allColumns      = postgres.ColumnList{IDColumn, AnimalIDColumn, URLColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns  = postgres.ColumnList{AnimalIDColumn, URLColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns  = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn}
+		IDColumn         = postgres.IntegerColumn("id")
+		AnimalIDColumn   = postgres.IntegerColumn("animal_id")
+		ObjectKindColumn = postgres.StringColumn("object_kind")
+		ObjectRefColumn  = postgres.StringColumn("object_ref")
+		CreatedAtColumn  = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn  = postgres.TimestampzColumn("updated_at")
+		allColumns       = postgres.ColumnList{IDColumn, AnimalIDColumn, ObjectKindColumn, ObjectRefColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns   = postgres.ColumnList{AnimalIDColumn, ObjectKindColumn, ObjectRefColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns   = postgres.ColumnList{ObjectKindColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return animalVideoTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:        IDColumn,
-		AnimalID:  AnimalIDColumn,
-		URL:       URLColumn,
-		CreatedAt: CreatedAtColumn,
-		UpdatedAt: UpdatedAtColumn,
+		ID:         IDColumn,
+		AnimalID:   AnimalIDColumn,
+		ObjectKind: ObjectKindColumn,
+		ObjectRef:  ObjectRefColumn,
+		CreatedAt:  CreatedAtColumn,
+		UpdatedAt:  UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

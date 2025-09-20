@@ -12,7 +12,8 @@ import (
 
 type OrganizationVideoSetter struct {
 	OrganizationID nullable.Nullable[int64]     `json:"organizationid"`
-	URL            nullable.Nullable[string]    `json:"url"`
+	ObjectKind     nullable.Nullable[string]    `json:"object_kind"`
+	ObjectRef      nullable.Nullable[string]    `json:"object_ref"`
 	CreatedAt      nullable.Nullable[time.Time] `json:"created_at"`
 	UpdatedAt      nullable.Nullable[time.Time] `json:"updated_at"`
 }
@@ -36,10 +37,16 @@ func (s OrganizationVideoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.O
 			m.OrganizationID = nil
 		}
 	}
-	if s.URL.IsSpecified() {
-		cols = append(cols, t.OrganizationVideo.URL)
-		if !s.URL.IsNull() {
-			m.URL = s.URL.MustGet()
+	if s.ObjectKind.IsSpecified() {
+		cols = append(cols, t.OrganizationVideo.ObjectKind)
+		if !s.ObjectKind.IsNull() {
+			m.ObjectKind = s.ObjectKind.MustGet()
+		}
+	}
+	if s.ObjectRef.IsSpecified() {
+		cols = append(cols, t.OrganizationVideo.ObjectRef)
+		if !s.ObjectRef.IsNull() {
+			m.ObjectRef = s.ObjectRef.MustGet()
 		}
 	}
 	if s.CreatedAt.IsSpecified() {
