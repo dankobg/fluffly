@@ -21,7 +21,7 @@ type uploadResult struct {
 
 type uploadSource interface {
 	Name() string
-	Open() (r io.Reader, size int64, contentType string, e error)
+	Open() (r io.ReadCloser, size int64, contentType string, e error)
 }
 
 type multipartSource struct {
@@ -31,14 +31,13 @@ type multipartSource struct {
 func (m multipartSource) Name() string {
 	return m.fh.Filename
 }
-func (m multipartSource) Open() (io.Reader, int64, string, error) {
+func (m multipartSource) Open() (io.ReadCloser, int64, string, error) {
 	var f openapi_types.File
 	f.InitFromMultipart(m.fh)
 	rdr, err := f.Reader()
 	if err != nil {
 		return nil, 0, "", err
 	}
-	defer rdr.Close()
 	return rdr, f.FileSize(), "", nil
 }
 
@@ -50,12 +49,11 @@ type urlSource struct {
 func (u urlSource) Name() string {
 	return filepath.Clean(filepath.Base(strings.TrimSpace(u.url)))
 }
-func (u urlSource) Open() (io.Reader, int64, string, error) {
+func (u urlSource) Open() (io.ReadCloser, int64, string, error) {
 	resp, err := u.c.Get(u.url)
 	if err != nil {
 		return nil, 0, "", err
 	}
-	defer resp.Body.Close()
 	return resp.Body, resp.ContentLength, resp.Header.Get("Content-Type"), nil
 }
 
@@ -78,6 +76,7 @@ func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uplo
 				} else {
 					results <- uploadResult{Name: url}
 				}
+				rdr.Close()
 			}
 		})
 	}
