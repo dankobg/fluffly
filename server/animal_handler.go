@@ -99,18 +99,9 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	if request.Body.Photos != nil {
 		animalPhotoSetters := make([]dbtype.AnimalPhotoSetter, 0)
 		for _, photo := range *request.Body.Photos {
-			photoSetter := dbtype.AnimalPhotoSetter{}
-			if photo.Small.IsSpecified() {
-				photoSetter.ObjectRefSmall = photo.Small
-			}
-			if photo.Medium.IsSpecified() {
-				photoSetter.ObjectRefMedium = photo.Medium
-			}
-			if photo.Large.IsSpecified() {
-				photoSetter.ObjectRefLarge = photo.Large
-			}
-			if photo.Full.IsSpecified() {
-				photoSetter.ObjectRefFull = photo.Full
+			photoSetter := dbtype.AnimalPhotoSetter{
+				ObjectStorageKind: nullable.NewNullableWithValue("external"),
+				ObjectRefFull:     nullable.NewNullableWithValue(photo.URL), // @TODO: for others
 			}
 			animalPhotoSetters = append(animalPhotoSetters, photoSetter)
 		}

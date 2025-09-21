@@ -3,6 +3,8 @@ package server
 import (
 	"html/template"
 	"log/slog"
+	"net/http"
+	"time"
 
 	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/auth/kratos"
@@ -25,9 +27,20 @@ type ApiHandler struct {
 	Mailer     mailer.Mailer
 	openapiTpl *template.Template
 	uploader   media.Uploader
+	httpc      *http.Client
 }
 
 func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor, upl media.Uploader) *ApiHandler {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	t.MaxIdleConns = 100
+	t.IdleConnTimeout = 60 * time.Second
+	t.MaxConnsPerHost = 100
+	t.MaxIdleConnsPerHost = 100
+	httpc := &http.Client{
+		Timeout:   10 * time.Second,
+		Transport: t,
+	}
+
 	return &ApiHandler{
 		Cfg:       cfg,
 		Log:       log,
@@ -36,6 +49,7 @@ func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto
 		persistor: p,
 		Mailer:    mailer,
 		uploader:  upl,
+		httpc:     httpc,
 	}
 }
 

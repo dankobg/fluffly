@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -17,25 +19,62 @@ type uploadResult struct {
 	Err  error
 }
 
-func (a *ApiHandler) uploadOrganizationMultipartFiles(ctx context.Context, fhs []*multipart.FileHeader, workers int) []uploadResult {
-	jobs := make(chan *multipart.FileHeader)
+type uploadSource interface {
+	Name() string
+	Open() (r io.Reader, size int64, contentType string, e error)
+}
+
+type multipartSource struct {
+	fh *multipart.FileHeader
+}
+
+func (m multipartSource) Name() string {
+	return m.fh.Filename
+}
+func (m multipartSource) Open() (io.Reader, int64, string, error) {
+	var f openapi_types.File
+	f.InitFromMultipart(m.fh)
+	rdr, err := f.Reader()
+	if err != nil {
+		return nil, 0, "", err
+	}
+	defer rdr.Close()
+	return rdr, f.FileSize(), "", nil
+}
+
+type urlSource struct {
+	c   *http.Client
+	url string
+}
+
+func (u urlSource) Name() string {
+	return filepath.Clean(filepath.Base(strings.TrimSpace(u.url)))
+}
+func (u urlSource) Open() (io.Reader, int64, string, error) {
+	resp, err := u.c.Get(u.url)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	defer resp.Body.Close()
+	return resp.Body, resp.ContentLength, resp.Header.Get("Content-Type"), nil
+}
+
+func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
+	jobs := make(chan uploadSource)
 	results := make(chan uploadResult)
 	var wg sync.WaitGroup
 
 	for range workers {
 		wg.Go(func() {
-			for fh := range jobs {
-				var f openapi_types.File
-				f.InitFromMultipart(fh)
-				rdr, err := f.Reader()
+			for src := range jobs {
+				rdr, size, _, err := src.Open()
 				if err != nil {
-					results <- uploadResult{Err: fmt.Errorf("file %s: %w", fh.Filename, err)}
+					results <- uploadResult{Err: fmt.Errorf("file %s: %w", src.Name(), err)}
 					continue
 				}
-				url, err := a.uploadOrganizationFile(ctx, f.Filename(), rdr, f.FileSize())
-				rdr.Close()
+				url, err := a.uploadOrganizationFile(ctx, src.Name(), rdr, size)
 				if err != nil {
-					results <- uploadResult{Err: fmt.Errorf("upload %s: %w", f.Filename(), err)}
+					results <- uploadResult{Err: fmt.Errorf("upload %s: %w", src.Name(), err)}
 				} else {
 					results <- uploadResult{Name: url}
 				}
@@ -44,8 +83,8 @@ func (a *ApiHandler) uploadOrganizationMultipartFiles(ctx context.Context, fhs [
 	}
 
 	go func() {
-		for _, fh := range fhs {
-			jobs <- fh
+		for _, src := range sources {
+			jobs <- src
 		}
 		close(jobs)
 	}()

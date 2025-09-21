@@ -28,14 +28,32 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 
 	photoFileHeaders := form.File["photos"]
 	videoFileHeaders := form.File["videos"]
+	var photoFileSources []uploadSource
+	var videoFileSources []uploadSource
+	for _, fh := range photoFileHeaders {
+		photoFileSources = append(photoFileSources, multipartSource{fh: fh})
+	}
+	for _, fh := range videoFileHeaders {
+		videoFileSources = append(videoFileSources, multipartSource{fh: fh})
+	}
+	if input.Photos.IsSpecified() && !input.Photos.IsNull() {
+		for _, photo := range input.Photos.MustGet() {
+			photoFileSources = append(photoFileSources, urlSource{c: a.httpc, url: photo.URL})
+		}
+	}
+	if input.Videos.IsSpecified() && !input.Videos.IsNull() {
+		for _, video := range input.Videos.MustGet() {
+			videoFileSources = append(videoFileSources, urlSource{c: a.httpc, url: video.URL})
+		}
+	}
 	var photoUploadResults []uploadResult
 	var videoUploadResults []uploadResult
 	if len(photoFileHeaders) > 0 {
-		photoResults := a.uploadOrganizationMultipartFiles(ctx, photoFileHeaders, 5)
+		photoResults := a.uploadOrganizationFiles(ctx, photoFileSources, 5)
 		photoUploadResults = append(photoUploadResults, photoResults...)
 	}
 	if len(videoFileHeaders) > 0 {
-		videoResults := a.uploadOrganizationMultipartFiles(ctx, videoFileHeaders, 5)
+		videoResults := a.uploadOrganizationFiles(ctx, videoFileSources, 5)
 		videoUploadResults = append(videoUploadResults, videoResults...)
 	}
 	var filesToDelete []string
