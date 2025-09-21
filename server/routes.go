@@ -12,23 +12,25 @@ import (
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
-func (a *ApiHandler) SetupRoutes(uploadDir string) http.Handler {
+func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 	mux := http.NewServeMux()
 
-	// debug routes
-	mux.Handle("GET /debug/vars", expvar.Handler())
-	mux.HandleFunc("GET /debug/pprof/", pprof.Index)
-	mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
-	mux.Handle("GET /debug/pprof/block", pprof.Handler("block"))
-	mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
-	mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
-	mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
-	mux.Handle("GET /debug/pprof/mutex", pprof.Handler("mutex"))
-	mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("POST /debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
-	mux.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
-	mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+	if env == "development" {
+		// debug routes
+		mux.Handle("GET /debug/vars", expvar.Handler())
+		mux.HandleFunc("GET /debug/pprof/", pprof.Index)
+		mux.Handle("GET /debug/pprof/allocs", pprof.Handler("allocs"))
+		mux.Handle("GET /debug/pprof/block", pprof.Handler("block"))
+		mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
+		mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
+		mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
+		mux.Handle("GET /debug/pprof/mutex", pprof.Handler("mutex"))
+		mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("POST /debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("GET /debug/pprof/symbol", pprof.Symbol)
+		mux.Handle("GET /debug/pprof/threadcreate", pprof.Handler("threadcreate"))
+		mux.HandleFunc("GET /debug/pprof/trace", pprof.Trace)
+	}
 
 	// static files
 	mux.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.FS(data.MustPublicFS()))))

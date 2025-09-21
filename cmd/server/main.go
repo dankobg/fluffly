@@ -98,7 +98,7 @@ func (s *ServeCommand) Run() error {
 	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	defer stop()
 
-	h := apiHandler.SetupRoutes(cfg.UploadDir)
+	h := apiHandler.SetupRoutes(cfg.ENV, cfg.UploadDir)
 
 	srv := httpserver.New(
 		httpserver.WithHostPort("", cfg.Port),
