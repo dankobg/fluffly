@@ -83,7 +83,7 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	}
 	if len(filesToDelete) > 0 {
 		go func() {
-			_ = a.deleteOrganizationFiles(ctx, filesToDelete, 5)
+			_ = a.deleteUploadedFiles(ctx, filesToDelete, 5)
 		}()
 		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
 	}

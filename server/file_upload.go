@@ -14,6 +14,14 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
+	return a.uploadFileSources(ctx, sources, workers, a.uploadOrganizationFile)
+}
+
+func (a *ApiHandler) uploadAnimalFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
+	return a.uploadFileSources(ctx, sources, workers, a.uploadAnimalFile)
+}
+
 type uploadResult struct {
 	Name string
 	Err  error
@@ -57,7 +65,12 @@ func (u urlSource) Open() (io.ReadCloser, int64, string, error) {
 	return resp.Body, resp.ContentLength, resp.Header.Get("Content-Type"), nil
 }
 
-func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
+func (a *ApiHandler) uploadFileSources(
+	ctx context.Context,
+	sources []uploadSource,
+	workers int,
+	uploaderFunc func(ctx context.Context, filename string, r io.Reader, size int64) (string, error),
+) []uploadResult {
 	jobs := make(chan uploadSource)
 	results := make(chan uploadResult)
 	var wg sync.WaitGroup
@@ -70,50 +83,7 @@ func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uplo
 					results <- uploadResult{Err: fmt.Errorf("file %s: %w", src.Name(), err)}
 					continue
 				}
-				url, err := a.uploadOrganizationFile(ctx, src.Name(), rdr, size)
-				if err != nil {
-					results <- uploadResult{Err: fmt.Errorf("upload %s: %w", src.Name(), err)}
-				} else {
-					results <- uploadResult{Name: url}
-				}
-				rdr.Close()
-			}
-		})
-	}
-
-	go func() {
-		for _, src := range sources {
-			jobs <- src
-		}
-		close(jobs)
-	}()
-
-	go func() {
-		wg.Wait()
-		close(results)
-	}()
-
-	out := make([]uploadResult, 0)
-	for res := range results {
-		out = append(out, res)
-	}
-	return out
-}
-
-func (a *ApiHandler) uploadAnimalFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
-	jobs := make(chan uploadSource)
-	results := make(chan uploadResult)
-	var wg sync.WaitGroup
-
-	for range workers {
-		wg.Go(func() {
-			for src := range jobs {
-				rdr, size, _, err := src.Open()
-				if err != nil {
-					results <- uploadResult{Err: fmt.Errorf("file %s: %w", src.Name(), err)}
-					continue
-				}
-				url, err := a.uploadAnimalFile(ctx, src.Name(), rdr, size)
+				url, err := uploaderFunc(ctx, src.Name(), rdr, size)
 				if err != nil {
 					results <- uploadResult{Err: fmt.Errorf("upload %s: %w", src.Name(), err)}
 				} else {
@@ -148,7 +118,7 @@ type deleteResult struct {
 	Err  error
 }
 
-func (a *ApiHandler) deleteOrganizationFiles(ctx context.Context, filenames []string, workers int) []deleteResult {
+func (a *ApiHandler) deleteUploadedFiles(ctx context.Context, filenames []string, workers int) []deleteResult {
 	jobs := make(chan string)
 	results := make(chan deleteResult)
 	var wg sync.WaitGroup
@@ -183,10 +153,6 @@ func (a *ApiHandler) deleteOrganizationFiles(ctx context.Context, filenames []st
 		out = append(out, res)
 	}
 	return out
-}
-
-func (a *ApiHandler) deleteAnimalFiles(ctx context.Context, filenames []string, workers int) []deleteResult {
-	return a.deleteOrganizationFiles(ctx, filenames, workers)
 }
 
 func (a *ApiHandler) uploadOrganizationFile(ctx context.Context, filename string, r io.Reader, size int64) (string, error) {

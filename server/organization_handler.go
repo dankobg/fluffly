@@ -65,7 +65,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	}
 	if len(filesToDelete) > 0 {
 		go func() {
-			_ = a.deleteOrganizationFiles(ctx, filesToDelete, 5)
+			_ = a.deleteUploadedFiles(ctx, filesToDelete, 5)
 		}()
 		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
 	}
