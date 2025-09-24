@@ -11,7 +11,7 @@ import (
 )
 
 type AnimalTagSetter struct {
-	AnimalID  nullable.Nullable[int64]     `json:"animalid"`
+	AnimalID  nullable.Nullable[int64]     `json:"animal_id"`
 	Name      nullable.Nullable[string]    `json:"name"`
 	CreatedAt nullable.Nullable[time.Time] `json:"created_at"`
 	UpdatedAt nullable.Nullable[time.Time] `json:"updated_at"`

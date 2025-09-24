@@ -354,9 +354,9 @@ paths:
         - fluffly
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: "#/components/schemas/CreateAnimalBody"
+              $ref: "#/components/schemas/CreateAnimalMultipartBody"
       responses:
         "201":
           description: Successful operation
@@ -3132,6 +3132,35 @@ components:
           format: date-time
           type: string
           description: Updated at timestamp
+
+    CreateAnimalFilePart:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+        photos:
+          type: array
+          items:
+            type: string
+            format: binary
+        videos:
+          type: array
+          items:
+            type: string
+            format: binary
+    CreateAnimalDataPart:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/CreateAnimalBody"
+    CreateAnimalMultipartBody:
+      type: object
+      required:
+        - data
+      allOf:
+        - $ref: "#/components/schemas/CreateAnimalDataPart"
+        - $ref: "#/components/schemas/CreateAnimalFilePart"
     CreateAnimalBody:
       type: object
       required:
@@ -3140,16 +3169,17 @@ components:
         - name
         - age
         - size
-        - image_url
       properties:
         user_id:
           format: uuid
           type: string
           description: User id
+          nullable: true
         organization_id:
           format: int64
           type: integer
           description: Organization id
+          nullable: true
         animal_type_id:
           format: int64
           type: integer
@@ -3172,6 +3202,7 @@ components:
               primary:
                 type: boolean
                 description: Breed is primary
+          nullable: true
         name:
           type: string
           description: Animal name
@@ -3181,9 +3212,11 @@ components:
             - m
             - f
           description: Animal gender
+          nullable: true
         hermaphrodite:
           type: boolean
           description: Animal is hermaphrodite
+          nullable: true
         age:
           type: string
           description: Animal age
@@ -3202,9 +3235,11 @@ components:
         image_url:
           type: string
           description: Animal image url
+          nullable: true
         description:
           type: string
           description: Animal description
+          nullable: true
         properties:
           type: object
           description: Animal properties
@@ -3212,21 +3247,26 @@ components:
           x-go-type-import:
             path: github.com/dankobg/fluffly/persistence/dbcustom
             name: dbcustom
+          nullable: true
         tags:
           type: array
           items:
             type: string
           description: Animal tags
+          nullable: true
         photos:
           type: array
           items:
             $ref: "#/components/schemas/CreateAnimalPhotoBody"
+          nullable: true
         videos:
           type: array
           items:
             $ref: "#/components/schemas/CreateAnimalVideoBody"
+          nullable: true
         microchip:
           $ref: "#/components/schemas/CreateMicrochipBody"
+          nullable: true
     UpdateAnimalBody:
       type: object
       properties:

@@ -164,6 +164,12 @@ func (s AnimalSetter) ToModel(isPatch ...bool) (p.ColumnList, model.Animal) {
 			m.ImageObjectRefMedium = s.ImageObjectRefMedium.MustGet()
 		}
 	}
+	if s.ImageObjectRefLarge.IsSpecified() {
+		cols = append(cols, t.Animal.ImageObjectRefLarge)
+		if !s.ImageObjectRefLarge.IsNull() {
+			m.ImageObjectRefLarge = s.ImageObjectRefLarge.MustGet()
+		}
+	}
 	if s.ImageObjectRefFull.IsSpecified() {
 		cols = append(cols, t.Animal.ImageObjectRefFull)
 		if !s.ImageObjectRefFull.IsNull() {

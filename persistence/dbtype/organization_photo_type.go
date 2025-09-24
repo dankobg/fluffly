@@ -40,6 +40,12 @@ func (s OrganizationPhotoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.O
 			m.OrganizationID = nil
 		}
 	}
+	if s.ObjectKind.IsSpecified() {
+		cols = append(cols, t.OrganizationPhoto.ObjectKind)
+		if !s.ObjectKind.IsNull() {
+			m.ObjectKind = s.ObjectKind.MustGet()
+		}
+	}
 	if s.ObjectRefSmall.IsSpecified() {
 		cols = append(cols, t.OrganizationPhoto.ObjectRefSmall)
 		if !s.ObjectRefSmall.IsNull() {

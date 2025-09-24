@@ -11,14 +11,14 @@ import (
 )
 
 type AnimalPhotoSetter struct {
-	AnimalID          nullable.Nullable[int64]     `json:"animalid"`
-	ObjectStorageKind nullable.Nullable[string]    `json:"object_storage_kind"`
-	ObjectRefSmall    nullable.Nullable[string]    `json:"object_ref_small"`
-	ObjectRefMedium   nullable.Nullable[string]    `json:"object_ref_medium"`
-	ObjectRefLarge    nullable.Nullable[string]    `json:"object_ref_large"`
-	ObjectRefFull     nullable.Nullable[string]    `json:"object_ref_full"`
-	CreatedAt         nullable.Nullable[time.Time] `json:"created_at"`
-	UpdatedAt         nullable.Nullable[time.Time] `json:"updated_at"`
+	AnimalID        nullable.Nullable[int64]     `json:"animal_id"`
+	ObjectKind      nullable.Nullable[string]    `json:"object_kind"`
+	ObjectRefSmall  nullable.Nullable[string]    `json:"object_ref_small"`
+	ObjectRefMedium nullable.Nullable[string]    `json:"object_ref_medium"`
+	ObjectRefLarge  nullable.Nullable[string]    `json:"object_ref_large"`
+	ObjectRefFull   nullable.Nullable[string]    `json:"object_ref_full"`
+	CreatedAt       nullable.Nullable[time.Time] `json:"created_at"`
+	UpdatedAt       nullable.Nullable[time.Time] `json:"updated_at"`
 }
 
 func (s AnimalPhotoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.AnimalPhoto) {
@@ -41,6 +41,12 @@ func (s AnimalPhotoSetter) ToModel(isPatch ...bool) (p.ColumnList, model.AnimalP
 		}
 	}
 
+	if s.ObjectKind.IsSpecified() {
+		cols = append(cols, t.AnimalPhoto.ObjectKind)
+		if !s.ObjectKind.IsNull() {
+			m.ObjectKind = s.ObjectKind.MustGet()
+		}
+	}
 	if s.ObjectRefSmall.IsSpecified() {
 		cols = append(cols, t.AnimalPhoto.ObjectRefSmall)
 		if !s.ObjectRefSmall.IsNull() {

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -17,46 +18,106 @@ import (
 )
 
 func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalRequestObject) (api.CreateAnimalResponseObject, error) {
+	form, err := request.Body.ReadForm(50 << 20)
+	if err != nil {
+		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+	}
+	defer form.RemoveAll()
+	animalData := form.Value["data"][0]
+	var input api.CreateAnimalBody
+	if err := json.Unmarshal([]byte(animalData), &input); err != nil {
+		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+	}
+
+	mainImageFileHeaders := form.File["image"]
+	if len(mainImageFileHeaders) == 0 && (input.ImageURL.IsNull() || (!input.ImageURL.IsNull() && input.ImageURL.MustGet() == "")) {
+		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "Provide image file or image_url as main animal photo"}}, nil
+	}
+	photoFileHeaders := form.File["photos"]
+	videoFileHeaders := form.File["videos"]
+	var mainImageFileSources []uploadSource
+	var photoFileSources []uploadSource
+	var videoFileSources []uploadSource
+	for _, fh := range mainImageFileHeaders {
+		mainImageFileSources = append(mainImageFileSources, multipartSource{fh: fh})
+	}
+	for _, fh := range photoFileHeaders {
+		photoFileSources = append(photoFileSources, multipartSource{fh: fh})
+	}
+	for _, fh := range videoFileHeaders {
+		videoFileSources = append(videoFileSources, multipartSource{fh: fh})
+	}
+	if input.ImageURL.IsSpecified() && !input.ImageURL.IsNull() {
+		mainImageFileSources = append(mainImageFileSources, urlSource{c: a.httpc, url: input.ImageURL.MustGet()})
+	}
+	if input.Photos.IsSpecified() && !input.Photos.IsNull() {
+		for _, photo := range input.Photos.MustGet() {
+			photoFileSources = append(photoFileSources, urlSource{c: a.httpc, url: photo.URL})
+		}
+	}
+	if input.Videos.IsSpecified() && !input.Videos.IsNull() {
+		for _, video := range input.Videos.MustGet() {
+			videoFileSources = append(videoFileSources, urlSource{c: a.httpc, url: video.URL})
+		}
+	}
+	var mainImageUploadResults []uploadResult
+	var photoUploadResults []uploadResult
+	var videoUploadResults []uploadResult
+	if len(mainImageFileSources) > 0 {
+		mainImageResults := a.uploadAnimalFiles(ctx, mainImageFileSources, 1)
+		mainImageUploadResults = append(mainImageUploadResults, mainImageResults...)
+	}
+	if len(photoFileSources) > 0 {
+		photoResults := a.uploadAnimalFiles(ctx, photoFileSources, 5)
+		photoUploadResults = append(photoUploadResults, photoResults...)
+	}
+	if len(videoFileSources) > 0 {
+		videoResults := a.uploadAnimalFiles(ctx, videoFileSources, 5)
+		videoUploadResults = append(videoUploadResults, videoResults...)
+	}
+	var filesToDelete []string
+	for _, res := range append(mainImageUploadResults, append(photoUploadResults, videoUploadResults...)...) {
+		if res.Err != nil {
+			filesToDelete = append(filesToDelete, res.Name)
+		}
+	}
+	if len(filesToDelete) > 0 {
+		go func() {
+			_ = a.deleteOrganizationFiles(ctx, filesToDelete, 5)
+		}()
+		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
+	}
+
 	var animalCreateSetter dbtype.AnimalCreateSetter
 
 	animalCreateSetter.Animal = dbtype.AnimalSetter{
-		TypeID:               nullable.NewNullableWithValue(request.Body.AnimalTypeID),
-		SpeciesID:            nullable.NewNullableWithValue(request.Body.AnimalSpeciesID),
-		Name:                 nullable.NewNullableWithValue(request.Body.Name),
-		Age:                  nullable.NewNullableWithValue(string(request.Body.Age)),
-		Size:                 nullable.NewNullableWithValue(string(request.Body.Size)),
+		TypeID:               nullable.NewNullableWithValue(input.AnimalTypeID),
+		SpeciesID:            nullable.NewNullableWithValue(input.AnimalSpeciesID),
+		Name:                 nullable.NewNullableWithValue(input.Name),
+		Age:                  nullable.NewNullableWithValue(string(input.Age)),
+		Size:                 nullable.NewNullableWithValue(string(input.Size)),
 		ImageObjectKind:      nullable.NewNullableWithValue(a.uploader.Kind()),
-		ImageObjectRefSmall:  nullable.NewNullableWithValue("small"),
-		ImageObjectRefMedium: nullable.NewNullableWithValue("medium"),
-		ImageObjectRefLarge:  nullable.NewNullableWithValue("large"),
-		ImageObjectRefFull:   nullable.NewNullableWithValue("full"),
+		ImageObjectRefSmall:  nullable.NewNullableWithValue(mainImageUploadResults[0].Name),
+		ImageObjectRefMedium: nullable.NewNullableWithValue(mainImageUploadResults[0].Name),
+		ImageObjectRefLarge:  nullable.NewNullableWithValue(mainImageUploadResults[0].Name),
+		ImageObjectRefFull:   nullable.NewNullableWithValue(mainImageUploadResults[0].Name),
+		UserID:               input.UserID,
+		OrganizationID:       input.OrganizationID,
+		Hermaphrodite:        input.Hermaphrodite,
+		Description:          input.Description,
+		Properties:           input.Properties,
 	}
-	if request.Body.Gender != nil {
+	if input.Gender.IsSpecified() && !input.Gender.IsNull() {
 		gender := model.Gender_M
-		if string(*request.Body.Gender) == model.Gender_F.String() {
+		if string(input.Gender.MustGet()) == model.Gender_F.String() {
 			gender = model.Gender_F
 		}
 		animalCreateSetter.Animal.Gender = nullable.NewNullableWithValue(gender)
 	}
-	if request.Body.UserID != nil {
-		animalCreateSetter.Animal.UserID = nullable.NewNullableWithValue(*request.Body.UserID)
-	}
-	if request.Body.OrganizationID != nil {
-		animalCreateSetter.Animal.OrganizationID = nullable.NewNullableWithValue(*request.Body.OrganizationID)
-	}
-	if request.Body.Hermaphrodite != nil {
-		animalCreateSetter.Animal.Hermaphrodite = nullable.NewNullableWithValue(*request.Body.Hermaphrodite)
-	}
-	if request.Body.Description != nil {
-		animalCreateSetter.Animal.Description = nullable.NewNullableWithValue(*request.Body.Description)
-	}
-	if request.Body.Properties != nil {
-		animalCreateSetter.Animal.Properties = nullable.NewNullableWithValue(*request.Body.Properties)
-	}
 
-	if request.Body.Breeds != nil {
+	if input.Breeds.IsSpecified() && !input.Breeds.IsNull() {
 		animalBreedSetters := make([]dbtype.AnimalBreedSetter, 0)
-		for _, breed := range *request.Body.Breeds {
+		for _, breed := range input.Breeds.MustGet() {
 			animalBreedSetter := dbtype.AnimalBreedSetter{
 				BreedID: nullable.NewNullableWithValue(breed.BreedID),
 			}
@@ -68,54 +129,56 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 		animalCreateSetter.Breeds = nullable.NewNullableWithValue(animalBreedSetters)
 	}
 
-	if request.Body.Microchip != nil {
+	if input.Microchip != nil {
 		microchipSetter := dbtype.MicrochipSetter{
-			Number: nullable.NewNullableWithValue(request.Body.Microchip.Number),
+			Number: nullable.NewNullableWithValue(input.Microchip.Number),
 		}
-		if request.Body.Microchip.Brand != nil {
-			microchipSetter.Brand = nullable.NewNullableWithValue(*request.Body.Microchip.Brand)
+		if input.Microchip.Brand != nil {
+			microchipSetter.Brand = nullable.NewNullableWithValue(*input.Microchip.Brand)
 		}
-		if request.Body.Microchip.Description != nil {
-			microchipSetter.Description = nullable.NewNullableWithValue(*request.Body.Microchip.Description)
+		if input.Microchip.Description != nil {
+			microchipSetter.Description = nullable.NewNullableWithValue(*input.Microchip.Description)
 		}
-		if request.Body.Microchip.Location != nil {
-			microchipSetter.Location = nullable.NewNullableWithValue(*request.Body.Microchip.Location)
+		if input.Microchip.Location != nil {
+			microchipSetter.Location = nullable.NewNullableWithValue(*input.Microchip.Location)
 		}
 		animalCreateSetter.Microchip = nullable.NewNullableWithValue(microchipSetter)
 	}
 
-	if request.Body.Tags != nil {
+	if input.Tags.IsSpecified() && !input.Tags.IsNull() {
 		animalTagSetters := make([]dbtype.AnimalTagSetter, 0)
-		for _, tag := range *request.Body.Tags {
-			tagSetter := dbtype.AnimalTagSetter{}
-			if tag != "" {
-				tagSetter.Name = nullable.NewNullableWithValue(tag)
-			}
-			animalTagSetters = append(animalTagSetters, tagSetter)
+		for _, tag := range input.Tags.MustGet() {
+			animalTagSetters = append(animalTagSetters, dbtype.AnimalTagSetter{
+				Name: nullable.NewNullableWithValue(tag),
+			})
 		}
 		animalCreateSetter.Tags = nullable.NewNullableWithValue(animalTagSetters)
 	}
 
-	if request.Body.Photos != nil {
-		animalPhotoSetters := make([]dbtype.AnimalPhotoSetter, 0)
-		for _, photo := range *request.Body.Photos {
+	if len(photoUploadResults) > 0 {
+		animalPhotoSetters := make([]dbtype.AnimalPhotoSetter, len(photoUploadResults))
+		for i, photoRes := range photoUploadResults {
+			// @TODO: optimize image size
 			photoSetter := dbtype.AnimalPhotoSetter{
-				ObjectStorageKind: nullable.NewNullableWithValue("external"),
-				ObjectRefFull:     nullable.NewNullableWithValue(photo.URL), // @TODO: for others
+				ObjectKind:      nullable.NewNullableWithValue(a.uploader.Kind()),
+				ObjectRefSmall:  nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefMedium: nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefLarge:  nullable.NewNullableWithValue(photoRes.Name),
+				ObjectRefFull:   nullable.NewNullableWithValue(photoRes.Name),
 			}
-			animalPhotoSetters = append(animalPhotoSetters, photoSetter)
+			animalPhotoSetters[i] = photoSetter
 		}
 		animalCreateSetter.Photos = nullable.NewNullableWithValue(animalPhotoSetters)
 	}
 
-	if request.Body.Videos != nil {
-		animalVideoSetters := make([]dbtype.AnimalVideoSetter, 0)
-		for _, video := range *request.Body.Videos {
-			videoSetter := dbtype.AnimalVideoSetter{}
-			if video.URL != "" {
-				videoSetter.ObjectRef = nullable.NewNullableWithValue(video.URL)
+	if len(videoUploadResults) > 0 {
+		animalVideoSetters := make([]dbtype.AnimalVideoSetter, len(videoUploadResults))
+		for i, videoRes := range videoUploadResults {
+			videoSetter := dbtype.AnimalVideoSetter{
+				ObjectKind: nullable.NewNullableWithValue(a.uploader.Kind()),
+				ObjectRef:  nullable.NewNullableWithValue(videoRes.Name),
 			}
-			animalVideoSetters = append(animalVideoSetters, videoSetter)
+			animalVideoSetters[i] = videoSetter
 		}
 		animalCreateSetter.Videos = nullable.NewNullableWithValue(animalVideoSetters)
 	}

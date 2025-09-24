@@ -11,7 +11,7 @@ import (
 )
 
 type AnimalVideoSetter struct {
-	AnimalID   nullable.Nullable[int64]     `json:"animalid"`
+	AnimalID   nullable.Nullable[int64]     `json:"animal_id"`
 	ObjectKind nullable.Nullable[string]    `json:"object_kind"`
 	ObjectRef  nullable.Nullable[string]    `json:"object_ref"`
 	CreatedAt  nullable.Nullable[time.Time] `json:"created_at"`

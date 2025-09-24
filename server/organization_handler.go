@@ -20,6 +20,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	if err != nil {
 		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
+	defer form.RemoveAll()
 	orgData := form.Value["data"][0]
 	var input api.CreateOrganizationBody
 	if err := json.Unmarshal([]byte(orgData), &input); err != nil {
@@ -48,11 +49,11 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	}
 	var photoUploadResults []uploadResult
 	var videoUploadResults []uploadResult
-	if len(photoFileHeaders) > 0 {
+	if len(photoFileSources) > 0 {
 		photoResults := a.uploadOrganizationFiles(ctx, photoFileSources, 5)
 		photoUploadResults = append(photoUploadResults, photoResults...)
 	}
-	if len(videoFileHeaders) > 0 {
+	if len(videoFileSources) > 0 {
 		videoResults := a.uploadOrganizationFiles(ctx, videoFileSources, 5)
 		videoUploadResults = append(videoUploadResults, videoResults...)
 	}

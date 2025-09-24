@@ -6,70 +6,58 @@ meta {
 
 post {
   url: {{baseUrl}}/animals
-  body: json
+  body: multipartForm
   auth: inherit
 }
 
-body:json {
-  {
-    "age": "young",
-    "animal_species_id": 1,
-    "animal_type_id": 1,
-    "properties": {
-      "good_with_cats": true,
-      "good_with_dogs": true,
-      "good_with_children": true,
-      "declawed": false,
-      "spayed_neutered": true,
-      "special_needs": false,
-      "house_trained": true,
-      "shots_taken": 2
-    },
-    "breeds": [
-      {
-        "breed_id": 27,
-        "primary": true
+body:multipart-form {
+  data: '''
+    {
+      "age": "young",
+      "animal_species_id": 1,
+      "animal_type_id": 1,
+      "properties": {
+        "good_with_cats": true,
+        "good_with_dogs": true,
+        "good_with_children": true,
+        "declawed": false,
+        "spayed_neutered": true,
+        "special_needs": false,
+        "house_trained": true,
+        "shots_taken": 2
       },
-      {
-        "breed_id": 5
+      "breeds": [
+        {
+          "breed_id": 27,
+          "primary": true
+        },
+        {
+          "breed_id": 5
+        }
+      ],
+      "description": "My crazy cat",
+      "gender": "m",
+      "hemaphrodite": false,
+      "image_url": "https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg",
+      "name": "Micko",
+      "organization_id": 1,
+      "size": "small",
+      "tags": [
+        "funny",
+        "stupid",
+        "crazy"
+      ],
+      "photos": [
+        {
+          "url": "https://images.pexels.com/photos/57416/cat-sweet-kitty-animals-57416.jpeg"
+        }    
+      ],  
+      "microchip": {
+        "number": "NHG525K",
+        "description": "my chip",
+        "brand": "catchip",
+        "location": "right ear"
       }
-    ],
-    "description": "My crazy cat",
-    "gender": "m",
-    "hemaphrodite": false,
-    "image_url": "https://crazy_cat.jpg",
-    "name": "Micko",
-    "organization_id": 1,
-    "size": "small",
-    "tags": [
-      "funny",
-      "stupid",
-      "crazy"
-    ],
-    "photos": [
-      {
-        "full": "https://micko1-full.jpg",
-        "large": "https://micko1-large.jpg",
-        "medium": "https://micko1-medium.jpg",
-        "small": "https://micko1-small.jpg"
-      },
-      {
-        "full": "https://micko2-full.jpg",
-        "large": "https://micko2-large.jpg",
-        "medium": "https://micko2-medium.jpg",
-        "small": "https://micko2-small.jpg"
-      }
-    ],
-    "videos": [
-      {
-        "url": "https://micko1-video.mp4"
-      }
-    ],
-    "microchip": {
-      "number": "NHG525K",
-      "description": "my chip",
-      "brand": "catchip",
-      "location": "right ear"
     }
-  }
+  '''
 }

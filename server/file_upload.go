@@ -100,6 +100,49 @@ func (a *ApiHandler) uploadOrganizationFiles(ctx context.Context, sources []uplo
 	return out
 }
 
+func (a *ApiHandler) uploadAnimalFiles(ctx context.Context, sources []uploadSource, workers int) []uploadResult {
+	jobs := make(chan uploadSource)
+	results := make(chan uploadResult)
+	var wg sync.WaitGroup
+
+	for range workers {
+		wg.Go(func() {
+			for src := range jobs {
+				rdr, size, _, err := src.Open()
+				if err != nil {
+					results <- uploadResult{Err: fmt.Errorf("file %s: %w", src.Name(), err)}
+					continue
+				}
+				url, err := a.uploadAnimalFile(ctx, src.Name(), rdr, size)
+				if err != nil {
+					results <- uploadResult{Err: fmt.Errorf("upload %s: %w", src.Name(), err)}
+				} else {
+					results <- uploadResult{Name: url}
+				}
+				rdr.Close()
+			}
+		})
+	}
+
+	go func() {
+		for _, src := range sources {
+			jobs <- src
+		}
+		close(jobs)
+	}()
+
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	out := make([]uploadResult, 0)
+	for res := range results {
+		out = append(out, res)
+	}
+	return out
+}
+
 type deleteResult struct {
 	Name string
 	Err  error
@@ -140,6 +183,10 @@ func (a *ApiHandler) deleteOrganizationFiles(ctx context.Context, filenames []st
 		out = append(out, res)
 	}
 	return out
+}
+
+func (a *ApiHandler) deleteAnimalFiles(ctx context.Context, filenames []string, workers int) []deleteResult {
+	return a.deleteOrganizationFiles(ctx, filenames, workers)
 }
 
 func (a *ApiHandler) uploadOrganizationFile(ctx context.Context, filename string, r io.Reader, size int64) (string, error) {
