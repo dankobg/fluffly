@@ -331,12 +331,12 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
 	}
-	if request.Params.PageToken != nil {
+	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
 	identitySessions, _, err := req.Execute()
 	if err != nil {
-		return make(api.ListIdentitySessions200JSONResponse, 0), nil
+		return api.ListIdentitySessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
 	resp := make(api.ListIdentitySessions200JSONResponse, 0, len(identitySessions))
 	for _, sess := range identitySessions {
@@ -354,12 +354,12 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
 	}
-	if request.Params.PageToken != nil {
+	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
 	schemaContainers, _, err := req.Execute()
 	if err != nil {
-		return make(api.ListIdentitySchemas200JSONResponse, 0), nil
+		return api.ListIdentitySchemasdefaultJSONResponse{Body: api.Error{Code: 400, Message: err.Error()}}, nil
 	}
 	resp := make(api.ListIdentitySchemas200JSONResponse, 0, len(schemaContainers))
 	for _, sc := range schemaContainers {

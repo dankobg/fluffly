@@ -17,7 +17,7 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
 	}
-	if request.Params.PageToken != nil {
+	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
 	if request.Params.Expand != nil {
@@ -29,7 +29,7 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 	}
 	sessions, _, err := req.Execute()
 	if err != nil {
-		return make(api.ListSessions200JSONResponse, 0), nil
+		return api.ListSessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
 	resp := make(api.ListSessions200JSONResponse, 0, len(sessions))
 	for _, session := range sessions {

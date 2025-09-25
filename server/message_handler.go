@@ -14,7 +14,7 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
 	}
-	if request.Params.PageToken != nil {
+	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
 	if request.Params.Recipient != nil {
@@ -25,7 +25,7 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 	}
 	courierMessages, _, err := req.Execute()
 	if err != nil {
-		return make(api.ListCourierMessages200JSONResponse, 0), nil
+		return api.ListCourierMessages400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
 	resp := make(api.ListCourierMessages200JSONResponse, 0)
 	for _, message := range courierMessages {
