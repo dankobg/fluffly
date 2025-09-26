@@ -9,6 +9,7 @@ import (
 	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/auth/kratos"
 	"github.com/dankobg/fluffly/config"
+	"github.com/dankobg/fluffly/geocoding"
 	"github.com/dankobg/fluffly/mailer"
 	"github.com/dankobg/fluffly/media"
 	"github.com/dankobg/fluffly/persistence"
@@ -28,9 +29,10 @@ type ApiHandler struct {
 	openapiTpl *template.Template
 	uploader   media.Uploader
 	httpc      *http.Client
+	geocoder   geocoding.Geocoder
 }
 
-func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor, upl media.Uploader) *ApiHandler {
+func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto.Client, mailer mailer.Mailer, p persistence.Persistor, upl media.Uploader, g geocoding.Geocoder) *ApiHandler {
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.MaxIdleConns = 100
 	t.IdleConnTimeout = 60 * time.Second
@@ -50,6 +52,7 @@ func New(cfg *config.Config, log *slog.Logger, kratos *kratos.Client, keto *keto
 		Mailer:    mailer,
 		uploader:  upl,
 		httpc:     httpc,
+		geocoder:  g,
 	}
 }
 

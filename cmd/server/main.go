@@ -16,6 +16,7 @@ import (
 	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/auth/kratos"
 	"github.com/dankobg/fluffly/config"
+	"github.com/dankobg/fluffly/geocoding/nominatim"
 	"github.com/dankobg/fluffly/httpserver"
 	"github.com/dankobg/fluffly/logging"
 	"github.com/dankobg/fluffly/mailer"
@@ -93,7 +94,12 @@ func (s *ServeCommand) Run() error {
 		panic("unknown file storage: " + cfg.FileStorage)
 	}
 
-	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg, upl)
+	geoc, err := nominatim.NewNominatimGeocoder()
+	if err != nil {
+		return fmt.Errorf("failed to init a geocoder: %w", err)
+	}
+
+	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg, upl, geoc)
 
 	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	defer stop()
