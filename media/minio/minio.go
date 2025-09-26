@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/dankobg/fluffly/config"
@@ -24,7 +25,7 @@ type MinioUploader struct {
 }
 
 func NewMinioUploader(cfg config.MinioConfig) (*MinioUploader, error) {
-	endpoint := net.JoinHostPort(cfg.Host, fmt.Sprint(cfg.ApiPort))
+	endpoint := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.ApiPort))
 
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(cfg.RootUser, cfg.RootPassword, cfg.Token),
