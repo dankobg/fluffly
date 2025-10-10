@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"slices"
 	"strconv"
-	"time"
 
 	"github.com/dankobg/fluffly/geocoding"
 )
@@ -21,19 +20,12 @@ type NominatimGeocoder struct {
 	baseURL string
 }
 
-func NewNominatimGeocoder() (*NominatimGeocoder, error) {
-	t := http.DefaultTransport.(*http.Transport).Clone()
-	t.MaxIdleConns = 100
-	t.IdleConnTimeout = 60 * time.Second
-	t.MaxConnsPerHost = 100
-	t.MaxIdleConnsPerHost = 100
-	httpc := &http.Client{
-		Timeout:   10 * time.Second,
-		Transport: t,
+func NewNominatimGeocoder(c *http.Client) (*NominatimGeocoder, error) {
+	if c == nil {
+		c = http.DefaultClient
 	}
-
 	return &NominatimGeocoder{
-		c:       httpc,
+		c:       c,
 		baseURL: baseURL,
 	}, nil
 }

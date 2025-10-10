@@ -40,14 +40,14 @@ type mailerOpts struct {
 }
 
 type SmtpClientOption interface {
-	apply(*mailerOpts)
+	apply(mo *mailerOpts)
 }
 
 type SmtpClientOptions []SmtpClientOption
 
-func (o SmtpClientOptions) apply(s *mailerOpts) {
+func (o SmtpClientOptions) apply(mo *mailerOpts) {
 	for _, opt := range o {
-		opt.apply(s)
+		opt.apply(mo)
 	}
 }
 
@@ -259,7 +259,7 @@ func (client *SmtpClient) Send(ctx context.Context, msg *Message) error {
 		}
 	}
 	if len(attachments) > 0 {
-		m.SetAttachements(attachments)
+		m.SetAttachments(attachments)
 	}
 
 	if err := c.DialAndSendWithContext(ctx, m); err != nil {

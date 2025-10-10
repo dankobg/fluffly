@@ -94,12 +94,14 @@ func (s *ServeCommand) Run() error {
 		panic("unknown file storage: " + cfg.FileStorage)
 	}
 
-	geoc, err := nominatim.NewNominatimGeocoder()
+	httpc := httpserver.NewHttpClient()
+
+	geoc, err := nominatim.NewNominatimGeocoder(httpc)
 	if err != nil {
 		return fmt.Errorf("failed to init a geocoder: %w", err)
 	}
 
-	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg, upl, geoc)
+	apiHandler := server.New(cfg, logger, kratosClient, ketoClient, smtpClient, pg, upl, geoc, httpc)
 
 	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	defer stop()

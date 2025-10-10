@@ -29,14 +29,14 @@ type serverOpts struct {
 }
 
 type ServerOption interface {
-	apply(*serverOpts)
+	apply(so *serverOpts)
 }
 
 type ServerOptions []ServerOption
 
-func (o ServerOptions) apply(s *serverOpts) {
+func (o ServerOptions) apply(so *serverOpts) {
 	for _, opt := range o {
-		opt.apply(s)
+		opt.apply(so)
 	}
 }
 

@@ -108,11 +108,12 @@ func (a *ApiHandler) AttachSessionData(next http.Handler) http.Handler {
 		}
 
 		toSessionReq := a.Kratos.Public.FrontendAPI.ToSession(ctx).Cookie(info.session.String())
-		session, _, err := toSessionReq.Execute()
+		session, sessionResp, err := toSessionReq.Execute()
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
 		}
+		defer sessionResp.Body.Close()
 
 		if session != nil && session.Active != nil && !*session.Active {
 			next.ServeHTTP(w, r)

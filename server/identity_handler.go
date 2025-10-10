@@ -36,10 +36,11 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 	if request.Params.PreviewCredentialsIdentifierSimilar != nil {
 		req = req.PreviewCredentialsIdentifierSimilar(*request.Params.PreviewCredentialsIdentifierSimilar)
 	}
-	identities, _, err := req.Execute()
+	identities, identitiesResp, err := req.Execute()
 	if err != nil {
-		return api.ListIdentitiesdefaultJSONResponse{Body: api.Error{Code: 400, Message: err.Error()}}, nil
+		return api.ListIdentitiesdefaultJSONResponse{Body: api.Error{Code: http.StatusBadRequest, Message: err.Error()}}, nil
 	}
+	defer identitiesResp.Body.Close()
 	resp := make(api.ListIdentities200JSONResponse, 0, len(identities))
 	for _, identity := range identities {
 		res, err := dto.IdentityToResponse(identity)
@@ -60,10 +61,11 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 		}
 		req = req.IncludeCredential(includeParams)
 	}
-	identity, _, err := req.Execute()
+	identity, identityResp, err := req.Execute()
 	if err != nil {
 		return api.GetIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
 	if err != nil {
 		return nil, err
@@ -151,10 +153,11 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 			VerifiableAddresses: verifiableAddresses,
 		})
 	}
-	identity, _, err := req.Execute()
+	identity, identityResp, err := req.Execute()
 	if err != nil {
 		return nil, err
 	}
+	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
 	if err != nil {
 		return nil, err
@@ -213,10 +216,11 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 			Traits:         request.Body.Traits,
 		})
 	}
-	identity, _, err := req.Execute()
+	identity, identityResp, err := req.Execute()
 	if err != nil {
 		return api.UpdateIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
 	if err != nil {
 		return nil, err
@@ -226,10 +230,11 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 
 func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdentityRequestObject) (api.DeleteIdentityResponseObject, error) {
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentity(ctx, request.ID)
-	_, err := req.Execute()
+	deleteIdentityResp, err := req.Execute()
 	if err != nil {
 		return api.DeleteIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer deleteIdentityResp.Body.Close()
 	return api.DeleteIdentity204Response{}, nil
 }
 
@@ -247,10 +252,11 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 		}
 		req = req.JsonPatch(patches)
 	}
-	identity, _, err := req.Execute()
+	identity, identityResp, err := req.Execute()
 	if err != nil {
 		return api.PatchIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
 	if err != nil {
 		return nil, err
@@ -264,10 +270,11 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 		patch := client.PatchIdentitiesBody{}
 		req = req.PatchIdentitiesBody(patch)
 	}
-	batchPatchIdentities, _, err := req.Execute()
+	batchPatchIdentities, batchPatchIdentitiesResp, err := req.Execute()
 	if err != nil {
 		return api.BatchPatchIdentities400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusNotFound, Message: "batch patch failed"}}, nil
 	}
+	defer batchPatchIdentitiesResp.Body.Close()
 	identitiesPatches := make([]api.IdentityPatchResponse, 0)
 	for _, x := range batchPatchIdentities.Identities {
 		var defaultErr any
@@ -307,19 +314,21 @@ func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.
 	if request.Params.Identifier != nil {
 		req = req.Identifier(*request.Params.Identifier)
 	}
-	_, err := req.Execute()
+	deleteIdentityCredentialsResp, err := req.Execute()
 	if err != nil {
 		return api.DeleteIdentityCredentials404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer deleteIdentityCredentialsResp.Body.Close()
 	return api.DeleteIdentityCredentials204Response{}, nil
 }
 
 func (a *ApiHandler) DeleteIdentitySessions(ctx context.Context, request api.DeleteIdentitySessionsRequestObject) (api.DeleteIdentitySessionsResponseObject, error) {
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentitySessions(ctx, request.ID)
-	_, err := req.Execute()
+	deleteIdentitySessionsResp, err := req.Execute()
 	if err != nil {
 		return api.DeleteIdentitySessions404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
 	}
+	defer deleteIdentitySessionsResp.Body.Close()
 	return api.DeleteIdentitySessions204Response{}, nil
 }
 
@@ -334,10 +343,11 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
-	identitySessions, _, err := req.Execute()
+	identitySessions, identitySessionsResp, err := req.Execute()
 	if err != nil {
 		return api.ListIdentitySessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
+	defer identitySessionsResp.Body.Close()
 	resp := make(api.ListIdentitySessions200JSONResponse, 0, len(identitySessions))
 	for _, sess := range identitySessions {
 		res, err := dto.SessionToResponse(sess)
@@ -357,10 +367,11 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
 		req = req.PageToken(*request.Params.PageToken)
 	}
-	schemaContainers, _, err := req.Execute()
+	schemaContainers, schemaContainersResp, err := req.Execute()
 	if err != nil {
-		return api.ListIdentitySchemasdefaultJSONResponse{Body: api.Error{Code: 400, Message: err.Error()}}, nil
+		return api.ListIdentitySchemasdefaultJSONResponse{Body: api.Error{Code: http.StatusBadRequest, Message: err.Error()}}, nil
 	}
+	defer schemaContainersResp.Body.Close()
 	resp := make(api.ListIdentitySchemas200JSONResponse, 0, len(schemaContainers))
 	for _, sc := range schemaContainers {
 		res, err := dto.SchemaContainerToResponse(sc)
@@ -374,10 +385,11 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 
 func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdentitySchemaRequestObject) (api.GetIdentitySchemaResponseObject, error) {
 	req := a.Kratos.Admin.IdentityAPI.GetIdentitySchema(ctx, request.ID)
-	identitySchema, _, err := req.Execute()
+	identitySchema, identitySchemaResp, err := req.Execute()
 	if err != nil {
 		return api.GetIdentitySchema404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "schema not found"}}, nil
 	}
+	defer identitySchemaResp.Body.Close()
 	return api.GetIdentitySchema200JSONResponse(identitySchema), nil
 }
 
@@ -390,10 +402,11 @@ func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request 
 			FlowType:   request.Body.FlowType,
 		})
 	}
-	recoveryCodeForIdentity, _, err := req.Execute()
+	recoveryCodeForIdentity, recoveryCodeForIdentityResp, err := req.Execute()
 	if err != nil {
 		return api.CreateRecoveryCodeForIdentity400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: "failed to create code"}}, nil
 	}
+	defer recoveryCodeForIdentityResp.Body.Close()
 	resp, err := dto.RecoveryCodeForIdentityToResponse(*recoveryCodeForIdentity)
 	if err != nil {
 		return nil, err
@@ -409,10 +422,11 @@ func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request 
 			ExpiresIn:  request.Body.ExpiresIn,
 		})
 	}
-	recoveryLinkForIdentity, _, err := req.Execute()
+	recoveryLinkForIdentity, recoveryLinkForIdentityResp, err := req.Execute()
 	if err != nil {
 		return api.CreateRecoveryLinkForIdentity400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: "failed to create link"}}, nil
 	}
+	defer recoveryLinkForIdentityResp.Body.Close()
 	resp, err := dto.RecoveryLinkForIdentityToResponse(*recoveryLinkForIdentity)
 	if err != nil {
 		return nil, err

@@ -17,14 +17,14 @@ type loggerOpts struct {
 }
 
 type LoggerOption interface {
-	apply(*loggerOpts)
+	apply(lo *loggerOpts)
 }
 
 type LoggerOptions []LoggerOption
 
-func (o LoggerOptions) apply(s *loggerOpts) {
+func (o LoggerOptions) apply(lo *loggerOpts) {
 	for _, opt := range o {
-		opt.apply(s)
+		opt.apply(lo)
 	}
 }
 

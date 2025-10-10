@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"net"
 	"net/http"
 	"time"
 )
@@ -36,4 +37,24 @@ func New(opts ...ServerOption) *http.Server {
 	}
 
 	return srv
+}
+
+func NewHttpClient() *http.Client {
+	c := &http.Client{
+		Transport: &http.Transport{
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 60 * time.Second,
+			}).Dial,
+			ForceAttemptHTTP2:     true,
+			MaxIdleConns:          100,
+			MaxIdleConnsPerHost:   10,
+			MaxConnsPerHost:       10,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
+	return c
 }

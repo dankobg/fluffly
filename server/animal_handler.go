@@ -17,8 +17,12 @@ import (
 	"github.com/oapi-codegen/nullable"
 )
 
+const (
+	createAnimalFileMaxMemory = 50 << 20
+)
+
 func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalRequestObject) (api.CreateAnimalResponseObject, error) {
-	form, err := request.Body.ReadForm(50 << 20)
+	form, err := request.Body.ReadForm(createAnimalFileMaxMemory)
 	if err != nil {
 		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}

@@ -52,31 +52,6 @@ func (mu *MinioUploader) Kind() string {
 	return StorageKind
 }
 
-func (mu *MinioUploader) setPolicy(ctx context.Context) error {
-	policy := `{
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Effect": "Allow",
-			"Principal": {"AWS": ["*"]},
-			"Action": ["s3:GetObject"],
-			"Resource": ["arn:aws:s3:::fluffly/*"]
-		}
-	]
-}`
-	return mu.client.SetBucketPolicy(ctx, mu.bucketName, policy)
-}
-
-func (mu *MinioUploader) ensureBucket(ctx context.Context) error {
-	if err := mu.client.MakeBucket(ctx, mu.bucketName, minio.MakeBucketOptions{}); err != nil {
-		exists, errBucketExists := mu.client.BucketExists(ctx, mu.bucketName)
-		if errBucketExists != nil || !exists {
-			return fmt.Errorf("failed to ensure bucket %q: %w", mu.bucketName, err)
-		}
-	}
-	return nil
-}
-
 func (mu *MinioUploader) Upload(ctx context.Context, filename string, r io.Reader, size int64) (string, error) {
 	contentType, rdr, err := media.DetectContentType(r)
 	if err != nil {
@@ -108,4 +83,29 @@ func (mu *MinioUploader) URL(name string, kind string) (string, error) {
 		return "", fmt.Errorf("failed to resolve file url - %s: %w", name, err)
 	}
 	return url, nil
+}
+
+func (mu *MinioUploader) setPolicy(ctx context.Context) error {
+	policy := `{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Principal": {"AWS": ["*"]},
+			"Action": ["s3:GetObject"],
+			"Resource": ["arn:aws:s3:::fluffly/*"]
+		}
+	]
+}`
+	return mu.client.SetBucketPolicy(ctx, mu.bucketName, policy)
+}
+
+func (mu *MinioUploader) ensureBucket(ctx context.Context) error {
+	if err := mu.client.MakeBucket(ctx, mu.bucketName, minio.MakeBucketOptions{}); err != nil {
+		exists, errBucketExists := mu.client.BucketExists(ctx, mu.bucketName)
+		if errBucketExists != nil || !exists {
+			return fmt.Errorf("failed to ensure bucket %q: %w", mu.bucketName, err)
+		}
+	}
+	return nil
 }

@@ -27,10 +27,11 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 		}
 		req = req.Expand(expands)
 	}
-	sessions, _, err := req.Execute()
+	sessions, sessionsResp, err := req.Execute()
 	if err != nil {
 		return api.ListSessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
+	defer sessionsResp.Body.Close()
 	resp := make(api.ListSessions200JSONResponse, 0, len(sessions))
 	for _, session := range sessions {
 		res, err := dto.SessionToResponse(session)
@@ -45,10 +46,11 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 
 func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSessionRequestObject) (api.DisableSessionResponseObject, error) {
 	req := a.Kratos.Admin.IdentityAPI.DisableSession(ctx, request.ID)
-	_, err := req.Execute()
+	disableSessionResp, err := req.Execute()
 	if err != nil {
 		return api.DisableSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
 	}
+	defer disableSessionResp.Body.Close()
 	return api.DisableSession204Response{}, nil
 }
 
@@ -61,10 +63,11 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 		}
 		req = req.Expand(expands)
 	}
-	session, _, err := req.Execute()
+	session, sessionResp, err := req.Execute()
 	if err != nil {
 		return api.GetSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
 	}
+	defer sessionResp.Body.Close()
 	resp, err := dto.SessionToResponse(*session)
 	if err != nil {
 		return nil, err
@@ -74,10 +77,11 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 
 func (a *ApiHandler) ExtendSession(ctx context.Context, request api.ExtendSessionRequestObject) (api.ExtendSessionResponseObject, error) {
 	req := a.Kratos.Admin.IdentityAPI.ExtendSession(ctx, request.ID)
-	session, _, err := req.Execute()
+	session, sessionResp, err := req.Execute()
 	if err != nil {
 		return api.ExtendSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
 	}
+	defer sessionResp.Body.Close()
 	resp, err := dto.SessionToResponse(*session)
 	if err != nil {
 		return nil, err

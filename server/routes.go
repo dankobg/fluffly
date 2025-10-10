@@ -12,6 +12,10 @@ import (
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
+const (
+	defaultBodyLimit = 10 << 20
+)
+
 func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 	mux := http.NewServeMux()
 
@@ -74,7 +78,7 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 	middlewareChain := MiddlewareChain(
 		PanicRecovery,
 		RequestID,
-		BodyLimit(10<<20),
+		BodyLimit(defaultBodyLimit),
 		cors,
 		a.AttachSessionData,
 	)

@@ -58,15 +58,18 @@ func BodyLimit(limit int64) func(http.Handler) http.Handler {
 	}
 
 	return func(next http.Handler) http.Handler {
+		const normalLimit = 10 << 20
+		const fileLimit = 100 << 20
+
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
 				if limit == 0 {
-					limit = 10 << 20
+					limit = normalLimit
 				}
 				if slices.ContainsFunc(fileRoutes, func(fr fileRoute) bool {
 					return r.Method == fr.method && r.URL.Path == fr.path
 				}) {
-					limit = 100 << 20
+					limit = fileLimit
 				}
 			}
 			r.Body = http.MaxBytesReader(w, r.Body, limit)

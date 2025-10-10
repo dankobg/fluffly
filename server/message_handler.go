@@ -23,10 +23,11 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 	if request.Params.Status != nil {
 		req = req.Status(client.CourierMessageStatus(*request.Params.Status))
 	}
-	courierMessages, _, err := req.Execute()
+	courierMessages, courierMessagesResp, err := req.Execute()
 	if err != nil {
 		return api.ListCourierMessages400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
+	defer courierMessagesResp.Body.Close()
 	resp := make(api.ListCourierMessages200JSONResponse, 0)
 	for _, message := range courierMessages {
 		res, err := dto.MessageToResponse(message)
@@ -40,10 +41,11 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 
 func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCourierMessageRequestObject) (api.GetCourierMessageResponseObject, error) {
 	req := a.Kratos.Admin.CourierAPI.GetCourierMessage(ctx, request.ID)
-	courierMessage, _, err := req.Execute()
+	courierMessage, courierMessageResp, err := req.Execute()
 	if err != nil {
 		return api.GetCourierMessage404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Courier message not found"}}, nil
 	}
+	defer courierMessageResp.Body.Close()
 	resp, err := dto.MessageToResponse(*courierMessage)
 	if err != nil {
 		return nil, err

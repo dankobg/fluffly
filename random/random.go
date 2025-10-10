@@ -113,38 +113,38 @@ func Token(length int) string {
 }
 
 // AlphaInRange generates a random alphabet string in range
-func AlphaInRange(min, max int) string {
-	n := rand.IntN((max-min)+1) + min
+func AlphaInRange(minN, maxN int) string {
+	n := rand.IntN((maxN-minN)+1) + minN
 	return Alpha(n)
 }
 
 // AlphaNumericInRange generates a random alphanumeric string in range
-func AlphaNumericInRange(min, max int) string {
-	n := rand.IntN((max-min)+1) + min
+func AlphaNumericInRange(minN, maxN int) string {
+	n := rand.IntN((maxN-minN)+1) + minN
 	return AlphaNumeric(n)
 }
 
 // AlphaLowercaseInRange generates a random alphabet lowercase string in range
-func AlphaLowercaseInRange(min, max int) string {
-	n := rand.IntN((max-min)+1) + min
+func AlphaLowercaseInRange(minN, maxN int) string {
+	n := rand.IntN((maxN-minN)+1) + minN
 	return AlphaLowercase(n)
 }
 
 // AlphaUppercaseInRange generates a random alphabet uppercase string in range
-func AlphaUppercaseInRange(min, max int) string {
-	n := rand.IntN((max-min)+1) + min
+func AlphaUppercaseInRange(minN, maxN int) string {
+	n := rand.IntN((maxN-minN)+1) + minN
 	return AlphaUppercase(n)
 }
 
 // AsciiInRange generates a random ascii string in range
-func AsciiInRange(min, max int) string {
-	n := rand.IntN((max-min)+1) + min
+func AsciiInRange(minN, maxN int) string {
+	n := rand.IntN((maxN-minN)+1) + minN
 	return Ascii(n)
 }
 
 // IntInRange generates a random int in range
-func IntInRange(min, max int) int {
-	return rand.IntN((max-min)+1) + min
+func IntInRange(minN, maxN int) int {
+	return rand.IntN((maxN-minN)+1) + minN
 }
 
 // Bool generates a random bool

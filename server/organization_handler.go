@@ -15,8 +15,12 @@ import (
 	"github.com/oapi-codegen/nullable"
 )
 
+const (
+	createOrganizationFileMaxMemory = 50 << 20
+)
+
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
-	form, err := request.Body.ReadForm(50 << 20)
+	form, err := request.Body.ReadForm(createOrganizationFileMaxMemory)
 	if err != nil {
 		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
 	}
