@@ -2,6 +2,7 @@ package nominatim
 
 import (
 	"cmp"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -59,7 +60,7 @@ type nominatimResult struct {
 	Boundingbox []string `json:"boundingbox,omitempty"`
 }
 
-func (n *NominatimGeocoder) ForwardGeocode(search string) (geocoding.ForwardGeocodeResult, error) {
+func (n *NominatimGeocoder) ForwardGeocode(ctx context.Context, search string) (geocoding.ForwardGeocodeResult, error) {
 	if search == "" {
 		return geocoding.ForwardGeocodeResult{}, errors.New("search query can't be empty")
 	}
@@ -71,7 +72,7 @@ func (n *NominatimGeocoder) ForwardGeocode(search string) (geocoding.ForwardGeoc
 	q.Add("format", "jsonv2")
 	searchURL.RawQuery = q.Encode()
 
-	req, err := http.NewRequest(http.MethodGet, searchURL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, searchURL.String(), nil)
 	if err != nil {
 		return geocoding.ForwardGeocodeResult{}, fmt.Errorf("failed to create a search request: %w", err)
 	}
@@ -106,6 +107,6 @@ func (n *NominatimGeocoder) ForwardGeocode(search string) (geocoding.ForwardGeoc
 	return geocoding.ForwardGeocodeResult{Lat: lat, Lng: lng}, nil
 }
 
-func (n *NominatimGeocoder) ForwardGeocodeStructured(search geocoding.ForwardGeocodeStructuredInput) (geocoding.ForwardGeocodeResult, error) {
+func (n *NominatimGeocoder) ForwardGeocodeStructured(ctx context.Context, search geocoding.ForwardGeocodeStructuredInput) (geocoding.ForwardGeocodeResult, error) {
 	panic("not implemented")
 }

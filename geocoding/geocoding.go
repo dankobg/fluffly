@@ -1,5 +1,7 @@
 package geocoding
 
+import "context"
+
 type ForwardGeocodeResult struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
@@ -13,6 +15,6 @@ type ForwardGeocodeStructuredInput struct {
 }
 
 type Geocoder interface {
-	ForwardGeocode(search string) (ForwardGeocodeResult, error)
-	ForwardGeocodeStructured(search ForwardGeocodeStructuredInput) (ForwardGeocodeResult, error)
+	ForwardGeocode(ctx context.Context, search string) (ForwardGeocodeResult, error)
+	ForwardGeocodeStructured(ctx context.Context, search ForwardGeocodeStructuredInput) (ForwardGeocodeResult, error)
 }

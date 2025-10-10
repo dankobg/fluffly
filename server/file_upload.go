@@ -58,7 +58,12 @@ func (u urlSource) Name() string {
 	return filepath.Clean(filepath.Base(strings.TrimSpace(u.url)))
 }
 func (u urlSource) Open() (io.ReadCloser, int64, string, error) {
-	resp, err := u.c.Get(u.url)
+	req, err := http.NewRequest(http.MethodGet, u.url, nil)
+	if err != nil {
+		return nil, 0, "", fmt.Errorf("failed to create a request: %w", err)
+	}
+	u.c.Do(req)
+	resp, err := u.c.Do(req)
 	if err != nil {
 		return nil, 0, "", err
 	}
