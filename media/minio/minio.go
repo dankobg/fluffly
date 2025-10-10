@@ -40,10 +40,10 @@ func NewMinioUploader(cfg config.MinioConfig) (*MinioUploader, error) {
 		apiURL:     client.EndpointURL().String(),
 	}
 	if err := mupl.ensureBucket(context.Background()); err != nil {
-		fmt.Println("failed to ensure bucket: %w", err)
+		return nil, fmt.Errorf("failed to ensure bucket: %w", err)
 	}
 	if err := mupl.setPolicy(context.Background()); err != nil {
-		fmt.Println("failed to set policy: %w", err)
+		return nil, fmt.Errorf("failed to set policy: %w", err)
 	}
 	return mupl, nil
 }
