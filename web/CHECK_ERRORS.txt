@@ -1,0 +1,28 @@
+
+/home/danko/projects/fluffly/web/src/routes/(dash)/dashboard/sessions/sessions-data-grid/data-table-row-actions.svelte:41:14
+Error: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'. (ts)
+				params: {
+					path: { id: row.getValue('id') }
+				}
+
+/home/danko/projects/fluffly/web/src/routes/(dash)/dashboard/sessions/sessions-data-grid/data-table-row-actions.svelte:58:14
+Error: Type 'string | number' is not assignable to type 'string'.
+  Type 'number' is not assignable to type 'string'. (ts)
+				params: {
+					path: { id: row.getValue('id') }
+				}
+
+/home/danko/projects/fluffly/web/src/routes/(dash)/dashboard/sessions/[session_id]/+page.svelte:118:45
+Error: Argument of type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluffly_openapi").AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluf...' is not assignable to parameter of type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluffly_openapi").AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluf...'.
+  Type 'undefined' is not assignable to type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: SessionAuthenticationMethodMethod | undefined; organization?: string | undefined; provider?: string | undefined; }[] | undefined...'. (ts)
+				disabled={!data.session.active}
+				onclick={() => onDeactivateSessionClick(data.session)}
+			>
+
+/home/danko/projects/fluffly/web/src/routes/(dash)/dashboard/sessions/[session_id]/+page.svelte:122:80
+Error: Argument of type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluffly_openapi").AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluf...' is not assignable to parameter of type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluffly_openapi").AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: import("/home/danko/projects/fluffly/web/src/lib/gen/fluf...'.
+  Type 'undefined' is not assignable to type '{ active?: boolean | undefined; authenticated_at?: string | undefined; authentication_methods?: { aal?: AuthenticatorAssuranceLevel | undefined; completed_at?: string | undefined; method?: SessionAuthenticationMethodMethod | undefined; organization?: string | undefined; provider?: string | undefined; }[] | undefined...'. (ts)
+			</Button>
+			<Button disabled={!data.session.active} onclick={() => onExtendSessionClick(data.session)}>Extend</Button>
+		</div>
