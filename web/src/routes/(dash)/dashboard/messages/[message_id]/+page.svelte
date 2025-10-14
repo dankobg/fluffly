@@ -18,9 +18,9 @@
 		hour12: false
 	});
 
-	let StatusIcon = $derived(data.message?.status && statusIcons.get(data.message.status));
+	let StatusIcon = $derived(data.messageResult?.data?.status && statusIcons.get(data.messageResult?.data.status));
 	let statusIconClasses = $derived.by(() => {
-		switch (data.message?.status as CourierMessageStatus) {
+		switch (data.messageResult?.data?.status as CourierMessageStatus) {
 			case CourierMessageStatus.abandoned:
 				return 'text-red-400';
 			case CourierMessageStatus.processing:
@@ -34,9 +34,9 @@
 		}
 	});
 
-	let TypeIcon = $derived(data.message?.type && typeIcons.get(data.message.type));
+	let TypeIcon = $derived(data.messageResult?.data?.type && typeIcons.get(data.messageResult?.data.type));
 	let typeIconClasses = $derived.by(() => {
-		switch (data.message?.type as CourierMessageType) {
+		switch (data.messageResult?.data?.type as CourierMessageType) {
 			case CourierMessageType.email:
 				return 'text-blue-400';
 			case CourierMessageType.phone:
@@ -46,9 +46,11 @@
 		}
 	});
 
-	let TemplateTypeIcon = $derived(data.message?.template_type && templateTypeIcons.get(data.message.template_type));
+	let TemplateTypeIcon = $derived(
+		data.messageResult?.data?.template_type && templateTypeIcons.get(data.messageResult?.data.template_type)
+	);
 	let templateTypeIconClasses = $derived.by(() => {
-		switch (data.message?.template_type as CourierMessageTemplateType) {
+		switch (data.messageResult?.data?.template_type as CourierMessageTemplateType) {
 			case CourierMessageTemplateType.recovery_valid:
 			case CourierMessageTemplateType.recovery_code_valid:
 			case CourierMessageTemplateType.verification_valid:
@@ -69,59 +71,61 @@
 	});
 </script>
 
-{#if data.message}
+{#if data.messageResult?.data}
 	<h1 class="mb-6 text-2xl font-bold">Courier Message</h1>
 	<div class="grid grid-cols-1 gap-x-8 gap-y-4 text-sm sm:grid-cols-2">
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">ID</span>
-			<span class="font-medium">{data.message.id}</span>
+			<span class="font-medium">{data.messageResult?.data.id}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Recipient</span>
-			<span class="font-medium">{data.message.recipient}</span>
+			<span class="font-medium">{data.messageResult?.data.recipient}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Send count</span>
-			<span class="font-medium">{data.message.send_count}</span>
+			<span class="font-medium">{data.messageResult?.data.send_count}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Status</span>
-			<span class="flex gap-2 font-medium">{data.message.status} <StatusIcon class={statusIconClasses} /></span>
+			<span class="flex gap-2 font-medium"
+				>{data.messageResult?.data.status} <StatusIcon class={statusIconClasses} /></span
+			>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Channel</span>
-			<span class="font-medium">{data.message.channel}</span>
+			<span class="font-medium">{data.messageResult?.data.channel}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Type</span>
-			<span class="flex gap-2 font-medium">{data.message.type} <TypeIcon class={typeIconClasses} /></span>
+			<span class="flex gap-2 font-medium">{data.messageResult?.data.type} <TypeIcon class={typeIconClasses} /></span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Template type</span>
 			<span class="flex gap-2 font-medium">
-				{data.message.template_type}
+				{data.messageResult?.data.template_type}
 				<TemplateTypeIcon class={templateTypeIconClasses} />
 			</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Subject</span>
-			<span class="font-medium">{data.message.subject}</span>
+			<span class="font-medium">{data.messageResult?.data.subject}</span>
 		</div>
 		<div class="col-span-1 flex flex-col sm:col-span-2">
 			<span class="text-muted-foreground">Body</span>
-			<span class="font-medium">{data.message.body}</span>
+			<span class="font-medium">{data.messageResult?.data.body}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Created time</span>
-			<time class="font-medium">{fmt.format(new Date(data.message.created_at))}</time>
+			<time class="font-medium">{fmt.format(new Date(data.messageResult?.data.created_at))}</time>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Updated time</span>
-			<time class="font-medium">{fmt.format(new Date(data.message.updated_at))}</time>
+			<time class="font-medium">{fmt.format(new Date(data.messageResult?.data.updated_at))}</time>
 		</div>
 	</div>
 
-	{#if data.message.dispatches && data.message.dispatches.length > 0}
+	{#if data.messageResult?.data.dispatches && data.messageResult?.data.dispatches.length > 0}
 		<p class="mt-8 text-lg">Message dispatches</p>
 		<Table.Root>
 			<Table.Caption>A list of message dispatches</Table.Caption>
@@ -135,7 +139,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each data.message.dispatches as dispatch (dispatch)}
+				{#each data.messageResult?.data.dispatches as dispatch (dispatch)}
 					<Table.Row>
 						<Table.Cell class="font-medium">{dispatch.id}</Table.Cell>
 						<Table.Cell>{dispatch.message_id}</Table.Cell>

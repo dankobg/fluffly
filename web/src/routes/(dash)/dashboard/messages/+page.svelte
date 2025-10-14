@@ -13,5 +13,5 @@
 			<p class="text-muted-foreground">List of courier messages</p>
 		</div>
 	</div>
-	<DataTable data={data.messages ?? []} {columns} />
+	<DataTable data={data.messagesResult?.data ?? []} {columns} />
 </div>

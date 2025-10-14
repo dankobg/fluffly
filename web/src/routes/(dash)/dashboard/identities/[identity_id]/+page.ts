@@ -3,13 +3,13 @@ import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params }) => {
 	try {
-		const identityRes = await fluffly.GET('/identities/{id}', {
+		const identityResult = await fluffly.GET('/identities/{id}', {
 			params: {
 				path: { id: params.identity_id }
 			}
 		});
 		return {
-			identity: identityRes.data
+			identityResult
 		};
 	} catch (error) {
 		console.log('err', error);

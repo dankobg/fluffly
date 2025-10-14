@@ -38,14 +38,14 @@
 	type UpdateIdentitySchema = v.InferInput<typeof updateIdentitySchema>;
 
 	const initialIdentitySchema: UpdateIdentitySchema = {
-		schemaId: data?.identity?.schema_id ?? '',
-		state: (data?.identity?.state as unknown as UpdateIdentityBodyState) ?? UpdateIdentityBodyState.active,
+		schemaId: data?.identityResult?.data?.schema_id ?? '',
+		state: (data?.identityResult?.data?.state as unknown as UpdateIdentityBodyState) ?? UpdateIdentityBodyState.active,
 		traits: {
-			first_name: (data?.identity?.traits as CustomTraits)?.['first_name'] ?? '',
-			last_name: (data?.identity?.traits as CustomTraits)?.['last_name'] ?? '',
-			email: (data?.identity?.traits as CustomTraits)?.['email'] ?? '',
-			username: (data?.identity?.traits as CustomTraits)?.['username'] ?? '',
-			avatar_url: (data?.identity?.traits as CustomTraits)?.['avatar_url'] ?? ''
+			first_name: (data?.identityResult?.data?.traits as CustomTraits)?.['first_name'] ?? '',
+			last_name: (data?.identityResult?.data?.traits as CustomTraits)?.['last_name'] ?? '',
+			email: (data?.identityResult?.data?.traits as CustomTraits)?.['email'] ?? '',
+			username: (data?.identityResult?.data?.traits as CustomTraits)?.['username'] ?? '',
+			avatar_url: (data?.identityResult?.data?.traits as CustomTraits)?.['avatar_url'] ?? ''
 		},
 		password: '',
 		hashedPassword: ''
@@ -65,7 +65,7 @@
 				toast.error('Invalid form, please fix errors and try again');
 				return;
 			}
-			if (!data.identity) {
+			if (!data.identityResult?.data) {
 				return;
 			}
 			try {
@@ -88,7 +88,7 @@
 				const identityRes = await fluffly.PUT('/identities/{id}', {
 					body,
 					params: {
-						path: { id: data.identity.id }
+						path: { id: data.identityResult?.data.id }
 					}
 				});
 				if (identityRes.data) {
@@ -107,11 +107,11 @@
 	const { form, enhance, errors } = supForm;
 
 	async function onSetUnverifiedAddressClick() {
-		if (!data.identity) {
+		if (!data.identityResult?.data) {
 			return;
 		}
-		const index = (data.identity.verifiable_addresses ?? []).findIndex(
-			x => x.value === (data?.identity?.traits as CustomTraits)?.['email']
+		const index = (data.identityResult?.data.verifiable_addresses ?? []).findIndex(
+			x => x.value === (data?.identityResult?.data?.traits as CustomTraits)?.['email']
 		);
 		if (index === -1) {
 			return;
@@ -138,11 +138,11 @@
 			await fluffly.PATCH('/identities/{id}', {
 				body: jsonPatch,
 				params: {
-					path: { id: data.identity.id }
+					path: { id: data.identityResult?.data.id }
 				}
 			});
 			toast.success('email set to unverified');
-			invalidate(`data:identity-${data.identity.id}`);
+			invalidate(`data:identity-${data.identityResult?.data.id}`);
 		} catch (error) {
 			console.log('err', error);
 			toast.error('set email to unverified failed');
@@ -150,11 +150,11 @@
 	}
 
 	async function onSetVerifiedAddressClick() {
-		if (!data.identity) {
+		if (!data.identityResult?.data) {
 			return;
 		}
-		const index = (data.identity.verifiable_addresses ?? []).findIndex(
-			x => x.value === (data?.identity?.traits as CustomTraits)?.['email']
+		const index = (data.identityResult?.data.verifiable_addresses ?? []).findIndex(
+			x => x.value === (data?.identityResult?.data?.traits as CustomTraits)?.['email']
 		);
 		if (index === -1) {
 			return;
@@ -181,11 +181,11 @@
 			await fluffly.PATCH('/identities/{id}', {
 				body: jsonPatch,
 				params: {
-					path: { id: data.identity.id }
+					path: { id: data.identityResult?.data.id }
 				}
 			});
 			toast.success('email set to verified');
-			invalidate(`data:identity-${data.identity.id}`);
+			invalidate(`data:identity-${data.identityResult?.data.id}`);
 		} catch (error) {
 			console.log('err', error);
 			toast.error('set email to verified failed');
@@ -197,7 +197,7 @@
 	<Card.Header>
 		<Card.Title>Update identity</Card.Title>
 		<Card.Description
-			>Update identity details for {(data?.identity?.traits as CustomTraits)?.['email']}</Card.Description
+			>Update identity details for {(data?.identityResult?.data?.traits as CustomTraits)?.['email']}</Card.Description
 		>
 	</Card.Header>
 
@@ -215,7 +215,7 @@
 											{$form.schemaId ? $form.schemaId : 'Select a schema id'}
 										</Select.Trigger>
 										<Select.Content>
-											{#each data.schemas ?? [] as schema}
+											{#each data.schemasResult?.data ?? [] as schema}
 												<Select.Item value={schema?.id ?? ''} label={schema?.id ?? ''} />
 											{/each}
 										</Select.Content>
@@ -342,14 +342,15 @@
 	<Card.Header>
 		<Card.Title>Update verified address</Card.Title>
 		<Card.Description>
-			Update verified address state for: {(data?.identity?.traits as CustomTraits)?.['email']}
+			Update verified address state for: {(data?.identityResult?.data?.traits as CustomTraits)?.['email']}
 		</Card.Description>
 	</Card.Header>
 
 	<Card.Content>
 		{@const verified =
-			data.identity?.verifiable_addresses?.find(x => x.value === (data.identity?.traits as CustomTraits)?.['email'])
-				?.verified ?? false}
+			data.identityResult?.data?.verifiable_addresses?.find(
+				x => x.value === (data.identityResult?.data?.traits as CustomTraits)?.['email']
+			)?.verified ?? false}
 		{#if verified}
 			<Button onclick={onSetUnverifiedAddressClick}>Set unverified</Button>
 		{:else}

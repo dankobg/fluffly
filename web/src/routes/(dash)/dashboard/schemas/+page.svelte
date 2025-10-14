@@ -13,5 +13,5 @@
 			<p class="text-muted-foreground">List of identity schemas</p>
 		</div>
 	</div>
-	<DataTable data={data.schemas ?? []} {columns} />
+	<DataTable data={data.schemasResult?.data ?? []} {columns} />
 </div>

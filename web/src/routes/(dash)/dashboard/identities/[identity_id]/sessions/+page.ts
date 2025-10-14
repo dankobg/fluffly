@@ -17,17 +17,17 @@ export const load: PageLoad = async ({ url, params, depends }) => {
 		if (pageToken) {
 			listIdentitySessionsParams.query!.page_token = pageToken;
 		}
-		const sessionsRes = await fluffly.GET('/identities/{id}/sessions', {
+		const sessionsResult = await fluffly.GET('/identities/{id}/sessions', {
 			params: listIdentitySessionsParams
 		});
-		const identityRes = await fluffly.GET('/identities/{id}', {
+		const identityResult = await fluffly.GET('/identities/{id}', {
 			params: {
 				path: { id: params.identity_id }
 			}
 		});
 		return {
-			identity: identityRes.data,
-			sessions: sessionsRes.data
+			identityResult,
+			sessionsResult
 		};
 	} catch (error) {
 		console.log('err', error);

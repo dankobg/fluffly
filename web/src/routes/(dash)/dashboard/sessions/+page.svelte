@@ -19,5 +19,5 @@
 			<p class="text-muted-foreground">List of sessions</p>
 		</div>
 	</div>
-	<DataTable data={data.sessions ?? []} columns={cols} />
+	<DataTable data={data.sessionsResult?.data ?? []} columns={cols} />
 </div>

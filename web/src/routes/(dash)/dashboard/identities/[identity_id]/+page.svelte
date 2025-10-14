@@ -18,9 +18,9 @@
 		hour12: false
 	});
 
-	let StateIcon = $derived(data.identity?.state && stateIcons.get(data.identity.state));
+	let StateIcon = $derived(data.identityResult?.data?.state && stateIcons.get(data.identityResult?.data.state));
 	let stateIconClasses = $derived.by(() => {
-		switch (data.identity?.state as IdentityState) {
+		switch (data.identityResult?.data?.state as IdentityState) {
 			case IdentityState.active:
 				return 'text-green-400';
 			case IdentityState.inactive:
@@ -31,13 +31,13 @@
 	});
 
 	async function onConfirmDeleteIdentity() {
-		if (!data.identity) {
+		if (!data.identityResult?.data) {
 			return;
 		}
 		try {
 			await fluffly.DELETE('/identities/{id}', {
 				params: {
-					path: { id: data.identity.id }
+					path: { id: data.identityResult?.data.id }
 				}
 			});
 			goto('/dashboard/identities');
@@ -58,16 +58,16 @@
 </script>
 
 {#snippet deleteIdentityDescriptionSnippet()}
-	{@const email = (data?.identity?.traits as CustomTraits)?.['email']}
+	{@const email = (data?.identityResult?.data?.traits as CustomTraits)?.['email']}
 	This action cannot be undone. This will delete the identity <strong>{email}</strong> completely.
 {/snippet}
 
-{#if data.identity}
+{#if data.identityResult?.data}
 	<section class="mb-6 gap-4">
 		<p class="mb-6 text-lg">Actions</p>
 		<div class="flex gap-4">
-			<Button href="/dashboard/identities/{data.identity.id}/sessions">View sessions</Button>
-			<Button href="/dashboard/identities/{data.identity.id}/edit">Edit identity</Button>
+			<Button href="/dashboard/identities/{data.identityResult?.data.id}/sessions">View sessions</Button>
+			<Button href="/dashboard/identities/{data.identityResult?.data.id}/edit">Edit identity</Button>
 			<Button variant="destructive" onclick={onDeleteIdentityClick}>Delete identity</Button>
 		</div>
 	</section>
@@ -77,49 +77,56 @@
 	<div class="grid grid-cols-1 gap-x-8 gap-y-4 text-sm sm:grid-cols-2">
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">ID</span>
-			<span class="font-medium">{data.identity.id}</span>
+			<span class="font-medium">{data.identityResult?.data.id}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">E-Mail</span>
-			<span class="font-medium">{(data.identity.traits as CustomTraits)['email'] ?? ''}</span>
+			<span class="font-medium">{(data.identityResult?.data.traits as CustomTraits)['email'] ?? ''}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">First name</span>
-			<span class="font-medium">{(data.identity.traits as CustomTraits)['first_name'] ?? ''}</span>
+			<span class="font-medium">{(data.identityResult?.data.traits as CustomTraits)['first_name'] ?? ''}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Last name</span>
-			<span class="font-medium">{(data.identity.traits as CustomTraits)['last_name'] ?? ''}</span>
+			<span class="font-medium">{(data.identityResult?.data.traits as CustomTraits)['last_name'] ?? ''}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Avatar URL</span>
-			<span class="font-medium">{(data.identity.traits as CustomTraits)['avatar_url'] ?? ''}</span>
+			<span class="font-medium">{(data.identityResult?.data.traits as CustomTraits)['avatar_url'] ?? ''}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Schema ID</span>
-			<span class="font-medium">{data.identity.schema_id}</span>
+			<span class="font-medium">{data.identityResult?.data.schema_id}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Schema URL</span>
-			<span class="font-medium">{data.identity.schema_url}</span>
+			<span class="font-medium">{data.identityResult?.data.schema_url}</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">State</span>
-			<span class="flex gap-2 font-medium">{data.identity.state} <StateIcon class={stateIconClasses} /></span>
+			<span class="flex gap-2 font-medium"
+				>{data.identityResult?.data.state} <StateIcon class={stateIconClasses} /></span
+			>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">State changed time</span>
 			<time class="font-medium"
-				>{data.identity.state_changed_at && fmt.format(new Date(data.identity.state_changed_at))}</time
+				>{data.identityResult?.data.state_changed_at &&
+					fmt.format(new Date(data.identityResult?.data.state_changed_at))}</time
 			>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Created time</span>
-			<time class="font-medium">{data.identity.created_at && fmt.format(new Date(data.identity.created_at))}</time>
+			<time class="font-medium"
+				>{data.identityResult?.data.created_at && fmt.format(new Date(data.identityResult?.data.created_at))}</time
+			>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Updated time</span>
-			<time class="font-medium">{data.identity.updated_at && fmt.format(new Date(data.identity.updated_at))}</time>
+			<time class="font-medium"
+				>{data.identityResult?.data.updated_at && fmt.format(new Date(data.identityResult?.data.updated_at))}</time
+			>
 		</div>
 	</div>
 
@@ -137,7 +144,7 @@
 			</Table.Row>
 		</Table.Header>
 		<Table.Body>
-			{#each Object.values(data.identity.credentials ?? {}) as credential}
+			{#each Object.values(data.identityResult?.data.credentials ?? {}) as credential}
 				<Table.Row>
 					<Table.Cell class="font-medium">{credential.type}</Table.Cell>
 					<Table.Cell class="font-medium">{credential.version}</Table.Cell>
@@ -150,7 +157,7 @@
 		</Table.Body>
 	</Table.Root>
 
-	{#if data.identity.recovery_addresses && data.identity.recovery_addresses.length > 0}
+	{#if data.identityResult?.data.recovery_addresses && data.identityResult?.data.recovery_addresses.length > 0}
 		<p class="mt-8 text-lg">Recovery addresses</p>
 		<Table.Root>
 			<Table.Caption>A list of recovery addresses</Table.Caption>
@@ -164,7 +171,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each data.identity.recovery_addresses as recAddr (recAddr)}
+				{#each data.identityResult?.data.recovery_addresses as recAddr (recAddr)}
 					<Table.Row>
 						<Table.Cell class="font-medium">{recAddr.id}</Table.Cell>
 						<Table.Cell>{recAddr.value}</Table.Cell>
@@ -177,7 +184,7 @@
 		</Table.Root>
 	{/if}
 
-	{#if data.identity.verifiable_addresses && data.identity.verifiable_addresses.length > 0}
+	{#if data.identityResult?.data.verifiable_addresses && data.identityResult?.data.verifiable_addresses.length > 0}
 		<p class="mt-8 text-lg">Verifiable addresses:</p>
 		<Table.Root>
 			<Table.Caption>A list of verifiable addresses</Table.Caption>
@@ -194,7 +201,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each data.identity.verifiable_addresses as verAddr (verAddr)}
+				{#each data.identityResult?.data.verifiable_addresses as verAddr (verAddr)}
 					<Table.Row>
 						<Table.Cell class="font-medium">{verAddr.id}</Table.Cell>
 						<Table.Cell>{verAddr.value}</Table.Cell>

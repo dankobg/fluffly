@@ -136,7 +136,7 @@
 											{$form.schemaId ? $form.schemaId : 'Select a schema id'}
 										</Select.Trigger>
 										<Select.Content>
-											{#each data.schemas ?? [] as schema}
+											{#each data.schemasResult?.data ?? [] as schema}
 												<Select.Item value={schema?.id ?? ''} label={schema?.id ?? ''} />
 											{/each}
 										</Select.Content>

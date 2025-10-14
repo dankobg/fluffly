@@ -13,5 +13,5 @@
 			<p class="text-muted-foreground">List of identities</p>
 		</div>
 	</div>
-	<DataTable data={data.identities ?? []} {columns} />
+	<DataTable data={data.identitiesResult?.data ?? []} {columns} />
 </div>

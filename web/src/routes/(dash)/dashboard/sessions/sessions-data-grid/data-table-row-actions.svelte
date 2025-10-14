@@ -38,7 +38,7 @@
 		try {
 			await fluffly.DELETE('/sessions/{id}', {
 				params: {
-					path: { id: row.getValue('id') }
+					path: { id: `${row.getValue('id')}` }
 				}
 			});
 			toast.success('session deactivated');
@@ -55,7 +55,7 @@
 		try {
 			await fluffly.PATCH('/sessions/{id}/extend', {
 				params: {
-					path: { id: row.getValue('id') }
+					path: { id: `${row.getValue('id')}` }
 				}
 			});
 			toast.success('session extended');

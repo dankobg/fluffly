@@ -20,11 +20,11 @@ export const load: PageLoad = async ({ url, depends }) => {
 		if (pageToken) {
 			listSessionsParams.query!.page_token = pageToken;
 		}
-		const sessionsRes = await fluffly.GET('/sessions', {
+		const sessionsResult = await fluffly.GET('/sessions', {
 			params: listSessionsParams
 		});
 		return {
-			sessions: sessionsRes.data
+			sessionsResult
 		};
 	} catch (error) {
 		console.log('err', error);

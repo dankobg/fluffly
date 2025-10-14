@@ -14,13 +14,13 @@ export const load: PageLoad = async ({ params, url }) => {
 		if (expand.length > 0) {
 			getSessionParams.query!.expand = expand;
 		}
-		const sessionRes = await fluffly.GET('/sessions/{id}', {
+		const sessionResult = await fluffly.GET('/sessions/{id}', {
 			params: {
 				path: { id: params.session_id }
 			}
 		});
 		return {
-			session: sessionRes.data
+			sessionResult
 		};
 	} catch (error) {
 		console.log('err', error);
