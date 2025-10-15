@@ -291,7 +291,7 @@
 								encType="application/x-www-form-urlencoded"
 								data-provider={provider.name}
 							>
-								<input type="hidden" name="csrf_token" bind:value={data.csrf} readonly required />
+								<input type="hidden" name="csrf_token" value={data.csrf} readonly required />
 								<input type="hidden" name="provider" value={provider.name} readonly required />
 
 								<Tooltip.Provider>

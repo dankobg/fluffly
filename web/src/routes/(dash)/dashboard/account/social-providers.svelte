@@ -60,7 +60,7 @@
 						class="w-full space-y-6"
 					>
 						<input type="hidden" name="link" value={provider.attributes.value} readonly required />
-						<input type="hidden" name="csrf_token" bind:value={data.csrf} readonly required />
+						<input type="hidden" name="csrf_token" value={data.csrf} readonly required />
 
 						<div class="flex w-full justify-start gap-4">
 							<img
@@ -89,7 +89,7 @@
 						class="w-full space-y-6"
 					>
 						<input type="hidden" name="unlink" value={provider.attributes.value} readonly required />
-						<input type="hidden" name="csrf_token" bind:value={data.csrf} readonly required />
+						<input type="hidden" name="csrf_token" value={data.csrf} readonly required />
 
 						<div class="flex w-full justify-between gap-4">
 							<img

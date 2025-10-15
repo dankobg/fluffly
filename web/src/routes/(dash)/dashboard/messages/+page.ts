@@ -1,7 +1,7 @@
 import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async ({fetch,}) => {
+export const load: PageLoad = async ({ fetch }) => {
 	try {
 		const messagesResult = await fluffly.GET('/courier/messages', {
 			fetch,
