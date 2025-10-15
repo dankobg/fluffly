@@ -49,10 +49,12 @@ export const load: PageLoad = (async ({ url, depends }) => {
 			}
 			if (instanceOfGenericError(error)) {
 				if (error.id === 'session_inactive' || error.id === 'session_refresh_required') {
-					handleFlowErrAction(
-						config.routes.login.path + `?return_to=${encodeURIComponent(window.location.href)}`,
-						error.message
-					);
+					if (browser) {
+						handleFlowErrAction(
+							config.routes.login.path + `?return_to=${encodeURIComponent(window.location.href)}`,
+							error.message
+						);
+					}
 				} else if (error.id === 'security_csrf_violation' || error.id === 'security_identity_mismatch') {
 					handleFlowErrAction(config.routes.settings.path, error.message);
 				}

@@ -107,7 +107,9 @@ export const load: PageLoad = (async ({ url }) => {
 							} else if (isErrorIdSecurityCsrfViolation(err.error?.id)) {
 								handleFlowErrAction(config.routes.login.path, err.error.message);
 							} else if (isErrorIdSessionAal1Required(err.error?.id)) {
-								goto(`${config.routes.login.path}?aal=aal1&return_to=${window.location.href}`);
+								if (browser) {
+									goto(`${config.routes.login.path}?aal=aal1&return_to=${window.location.href}`);
+								}
 							} else if (isErrorIdSecurityIdentityMismatch(err.error?.id)) {
 								goto('/');
 							} else if (isErrorIdSessionAal2Required(err.error?.id)) {
