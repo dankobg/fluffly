@@ -56,13 +56,15 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const subjectSnippet = createRawSnippet<[string]>(getSubject => {
-				const subject = getSubject();
+			const subjectSnippet = createRawSnippet<[{ subject: string }]>(getSubject => {
+				const { subject } = getSubject();
 				return {
 					render: () => `<div>${subject}</div>`
 				};
 			});
-			return renderSnippet(subjectSnippet, row.getValue('subject'));
+			return renderSnippet(subjectSnippet, {
+				subject: row.original.subject
+			});
 		},
 		enableSorting: false
 	},
@@ -75,13 +77,15 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const bodySnippet = createRawSnippet<[string]>(getBody => {
-				const body = getBody();
+			const bodySnippet = createRawSnippet<[{ body: string }]>(getBody => {
+				const { body } = getBody();
 				return {
 					render: () => `<div>${body}</div>`
 				};
 			});
-			return renderSnippet(bodySnippet, row.getValue('body'));
+			return renderSnippet(bodySnippet, {
+				body: row.original.body
+			});
 		},
 		enableSorting: false
 	},
@@ -94,13 +98,15 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const channelSnippet = createRawSnippet<[string]>(getChannel => {
-				const channel = getChannel();
+			const channelSnippet = createRawSnippet<[{ channel: string | undefined }]>(getChannel => {
+				const { channel } = getChannel();
 				return {
 					render: () => `<div>${channel}</div>`
 				};
 			});
-			return renderSnippet(channelSnippet, row.getValue('channel'));
+			return renderSnippet(channelSnippet, {
+				channel: row.original.channel
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
@@ -115,13 +121,15 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const recipientSnippet = createRawSnippet<[string]>(getRecipient => {
-				const recipient = getRecipient();
+			const recipientSnippet = createRawSnippet<[{ recipient: string }]>(getRecipient => {
+				const { recipient } = getRecipient();
 				return {
 					render: () => `<div>${recipient}</div>`
 				};
 			});
-			return renderSnippet(recipientSnippet, row.getValue('recipient'));
+			return renderSnippet(recipientSnippet, {
+				recipient: row.original.recipient
+			});
 		},
 		filterFn: (row, id, value) => {
 			return (row.getValue(id) as string).includes(value);
@@ -162,7 +170,7 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 		}
 	},
 	{
-		accessorKey: 'templateType',
+		accessorKey: 'template_type',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Message'], unknown>, {
 				title: 'Template type',
@@ -179,7 +187,7 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 		}
 	},
 	{
-		accessorKey: 'sendCount',
+		accessorKey: 'send_count',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Message'], unknown>, {
 				title: 'Send count',
@@ -187,20 +195,22 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const sendCountSnippet = createRawSnippet<[number]>(getSendCount => {
-				const sendCount = getSendCount();
+			const sendCountSnippet = createRawSnippet<[{ sendCount: number }]>(getSendCount => {
+				const { sendCount } = getSendCount();
 				return {
 					render: () => `<div>${sendCount}</div>`
 				};
 			});
-			return renderSnippet(sendCountSnippet, row.getValue('sendCount'));
+			return renderSnippet(sendCountSnippet, {
+				sendCount: row.original.send_count
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
 	},
 	{
-		accessorKey: 'createdAt',
+		accessorKey: 'created_at',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Message'], unknown>, {
 				title: 'Create time',
@@ -213,20 +223,22 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 				timeStyle: 'short',
 				hour12: false
 			});
-			const createdAtSnippet = createRawSnippet<[string]>(getCreatedAt => {
-				const createdAt = getCreatedAt();
+			const createdAtSnippet = createRawSnippet<[{ createdAt: string }]>(getCreatedAt => {
+				const { createdAt } = getCreatedAt();
 				return {
-					render: () => `<div>${createdAt}</div>`
+					render: () => `<div>${fmt.format(new Date(createdAt))}</div>`
 				};
 			});
-			return renderSnippet(createdAtSnippet, fmt.format(row.getValue('createdAt')));
+			return renderSnippet(createdAtSnippet, {
+				createdAt: row.original.created_at
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
 	},
 	{
-		accessorKey: 'updatedAt',
+		accessorKey: 'updated_at',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Message'], unknown>, {
 				title: 'Update time',
@@ -239,13 +251,15 @@ export const columns: ColumnDef<components['schemas']['Message']>[] = [
 				timeStyle: 'short',
 				hour12: false
 			});
-			const updatedAtSnippet = createRawSnippet<[string]>(getUpdatedAt => {
-				const updatedAt = getUpdatedAt();
+			const updatedAtSnippet = createRawSnippet<[{ updatedAt: string }]>(getUpdatedAt => {
+				const { updatedAt } = getUpdatedAt();
 				return {
-					render: () => `<div>${updatedAt}</div>`
+					render: () => `<div>${fmt.format(new Date(updatedAt))}</div>`
 				};
 			});
-			return renderSnippet(updatedAtSnippet, fmt.format(row.getValue('updatedAt')));
+			return renderSnippet(updatedAtSnippet, {
+				updatedAt: row.original.updated_at
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));

@@ -5,7 +5,7 @@ export const load: PageLoad = async () => {
 	try {
 		const schemasResult = await fluffly.GET('/schemas', {
 			params: {
-				query: { page_size: 1_000 }
+				query: { page_size: 500 }
 			}
 		});
 		return {

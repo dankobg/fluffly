@@ -19,7 +19,7 @@
 	let { table, identity }: { table: Table<TData>; identity: components['schemas']['Identity'] | undefined } = $props();
 
 	const isFiltered = $derived(table.getState().columnFilters.length > 0);
-	const aalCol = $derived(table.getColumn('authenticatorAssuranceLevel'));
+	const aalCol = $derived(table.getColumn('authenticator_assurance_level'));
 
 	async function onConfirmDeleteIdentitySessions() {
 		if (!identity) {

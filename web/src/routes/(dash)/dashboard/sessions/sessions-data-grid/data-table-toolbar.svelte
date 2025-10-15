@@ -21,7 +21,7 @@
 	let { table }: { table: Table<TData> } = $props();
 
 	const isFiltered = $derived(table.getState().columnFilters.length > 0);
-	const aalCol = $derived(table.getColumn('authenticatorAssuranceLevel'));
+	const aalCol = $derived(table.getColumn('authenticator_assurance_level'));
 	const expandOptions = Object.values(PathsSessionsGetParametersQueryExpand);
 
 	const searchParams = new SvelteURLSearchParams(page.url.searchParams);
@@ -57,7 +57,7 @@
 	<div class="flex gap-2">
 		{#each expandOptions as opt, i}
 			{@const checked = expandSessions.expanded.includes(opt)}
-			<div>
+			<div class="flex items-center gap-1">
 				<Checkbox
 					id="expand-{opt}"
 					aria-labelledby="expand-{opt}-label"

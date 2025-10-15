@@ -578,7 +578,7 @@ paths:
           schema:
             default: 250
             format: int64
-            maximum: 1000
+            maximum: 500
             minimum: 1
             type: integer
         - description: The next page token.
@@ -1184,7 +1184,7 @@ paths:
           schema:
             default: 250
             format: int64
-            maximum: 1000
+            maximum: 500
             minimum: 1
             type: integer
         - description: >-
@@ -2009,7 +2009,7 @@ components:
     PaginationPageSize:
       type: integer
       minimum: 1
-      maximum: 1000
+      maximum: 500
       default: 50
       description: Number of items per page
     PaginationMeta:

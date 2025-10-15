@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ url, params, depends }) => {
 	try {
 		const listIdentitySessionsParams: operations['listIdentitySessions']['parameters'] = {
 			path: { id: params.identity_id },
-			query: { page_size: 1_000 }
+			query: { page_size: 500 }
 		};
 		const active = url.searchParams.get('active');
 		if (active) {

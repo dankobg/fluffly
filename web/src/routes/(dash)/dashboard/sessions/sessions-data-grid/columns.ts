@@ -6,7 +6,7 @@ import DataTableColumnHeader from '$lib/components/data-grid-shared/data-table-c
 import DataTableRowActions from './data-table-row-actions.svelte';
 import { createRawSnippet } from 'svelte';
 import DataTableCellActive from './data-table-cell-active.svelte';
-import type { components } from '$lib/gen/fluffly_openapi';
+import type { AuthenticatorAssuranceLevel, components } from '$lib/gen/fluffly_openapi';
 import type { CustomTraits } from '$lib/kratos/service';
 
 export const columns: ColumnDef<components['schemas']['Session']>[] = [
@@ -61,7 +61,7 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 		}
 	},
 	{
-		accessorKey: 'authenticatedAt',
+		accessorKey: 'authenticated_at',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Authenticated time',
@@ -74,20 +74,22 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 				timeStyle: 'short',
 				hour12: false
 			});
-			const authenticatedAtSnippet = createRawSnippet<[string]>(getAuthenticatedAt => {
-				const authenticatedAt = getAuthenticatedAt();
+			const authenticatedAtSnippet = createRawSnippet<[{ authenticatedAt: string | undefined }]>(getAuthenticatedAt => {
+				const { authenticatedAt } = getAuthenticatedAt();
 				return {
-					render: () => `<div>${authenticatedAt}</div>`
+					render: () => `<div>${authenticatedAt && fmt.format(new Date(authenticatedAt))}</div>`
 				};
 			});
-			return renderSnippet(authenticatedAtSnippet, fmt.format(row.getValue('authenticatedAt')));
+			return renderSnippet(authenticatedAtSnippet, {
+				authenticatedAt: row.original.authenticated_at
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
 	},
 	{
-		accessorKey: 'authenticationMethods',
+		accessorKey: 'authentication_methods',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Authentication methods',
@@ -95,24 +97,26 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const authMethodsSnippet = createRawSnippet<[string]>(getAuthMethods => {
-				const authMethods = getAuthMethods();
+			const authMethodsSnippet = createRawSnippet<[{ authenticationMethods: string }]>(getAuthMethods => {
+				const { authenticationMethods } = getAuthMethods();
 				return {
-					render: () => `<div>${authMethods}</div>`
+					render: () => `<div>${authenticationMethods}</div>`
 				};
 			});
 			const value =
 				row.original.authentication_methods
 					?.map(x => `${x.method} - ${x.aal}${x.provider ? ` - ${x.provider}` : ''}`)
 					.join(', ') ?? '';
-			return renderSnippet(authMethodsSnippet, value);
+			return renderSnippet(authMethodsSnippet, {
+				authenticationMethods: value
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
 	},
 	{
-		accessorKey: 'authenticatorAssuranceLevel',
+		accessorKey: 'authenticator_assurance_level',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Authenticator assurance level',
@@ -120,20 +124,22 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const aalSnippet = createRawSnippet<[string]>(getAal => {
-				const aal = getAal();
+			const aalSnippet = createRawSnippet<[{ aal: AuthenticatorAssuranceLevel | undefined }]>(getAal => {
+				const { aal } = getAal();
 				return {
-					render: () => `<div>${aal}</div>`
+					render: () => `<div>${aal && aal}</div>`
 				};
 			});
-			return renderSnippet(aalSnippet, row.getValue('authenticatorAssuranceLevel'));
+			return renderSnippet(aalSnippet, {
+				aal: row.original.authenticator_assurance_level
+			});
 		},
 		filterFn: (row, id, value) => {
 			return (row.getValue(id) as string).includes(value);
 		}
 	},
 	{
-		accessorKey: 'expiresAt',
+		accessorKey: 'expires_at',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Expires time',
@@ -146,20 +152,22 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 				timeStyle: 'short',
 				hour12: false
 			});
-			const expiresAtSnippet = createRawSnippet<[string]>(getExpiresAt => {
-				const expiresAt = getExpiresAt();
+			const expiresAtSnippet = createRawSnippet<[{ expiresAt: string | undefined }]>(getExpiresAt => {
+				const { expiresAt } = getExpiresAt();
 				return {
-					render: () => `<div>${expiresAt}</div>`
+					render: () => `<div>${expiresAt && fmt.format(new Date(expiresAt))}</div>`
 				};
 			});
-			return renderSnippet(expiresAtSnippet, fmt.format(row.getValue('expiresAt')));
+			return renderSnippet(expiresAtSnippet, {
+				expiresAt: row.original.expires_at
+			});
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
 	},
 	{
-		accessorKey: 'issuedAt',
+		accessorKey: 'issued_at',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Issued time',
@@ -172,65 +180,15 @@ export const columns: ColumnDef<components['schemas']['Session']>[] = [
 				timeStyle: 'short',
 				hour12: false
 			});
-			const issuedAtSnippet = createRawSnippet<[string]>(getIssuedAt => {
-				const issuedAt = getIssuedAt();
+			const issuedAtSnippet = createRawSnippet<[{ issuedAt: string | undefined }]>(getIssuedAt => {
+				const { issuedAt } = getIssuedAt();
 				return {
-					render: () => `<div>${issuedAt}</div>`
+					render: () => `<div>${issuedAt && fmt.format(new Date(issuedAt))}</div>`
 				};
 			});
-			return renderSnippet(issuedAtSnippet, fmt.format(row.getValue('issuedAt')));
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
-		}
-	},
-	{
-		accessorKey: 'createdAt',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
-				title: 'Create time',
-				column
+			return renderSnippet(issuedAtSnippet, {
+				issuedAt: row.original.issued_at
 			});
-		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const createdAtSnippet = createRawSnippet<[string]>(getCreatedAt => {
-				const createdAt = getCreatedAt();
-				return {
-					render: () => `<div>${createdAt}</div>`
-				};
-			});
-			return renderSnippet(createdAtSnippet, fmt.format(row.getValue('createdAt')));
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
-		}
-	},
-	{
-		accessorKey: 'updatedAt',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
-				title: 'Update time',
-				column
-			});
-		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const updatedAtSnippet = createRawSnippet<[string]>(getUpdatedAt => {
-				const updatedAt = getUpdatedAt();
-				return {
-					render: () => `<div>${updatedAt}</div>`
-				};
-			});
-			return renderSnippet(updatedAtSnippet, fmt.format(row.getValue('updatedAt')));
 		},
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
@@ -253,13 +211,15 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const identityEmailSnippet = createRawSnippet<[string]>(getIdentityEmail => {
-				const email = getIdentityEmail();
+			const identityEmailSnippet = createRawSnippet<[{ email: string }]>(getIdentityEmail => {
+				const { email } = getIdentityEmail();
 				return {
 					render: () => `<div>${email ?? ''}</div>`
 				};
 			});
-			return renderSnippet(identityEmailSnippet, row.getValue('email'));
+			return renderSnippet(identityEmailSnippet, {
+				email: row.getValue('email') as string
+			});
 		},
 		filterFn: (row, id, value) => {
 			return (row.getValue(id) as string).includes(value);
@@ -275,13 +235,15 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const identityUsernameSnippet = createRawSnippet<[string]>(getUsername => {
-				const username = getUsername();
+			const identityUsernameSnippet = createRawSnippet<[{ username: string }]>(getUsername => {
+				const { username } = getUsername();
 				return {
 					render: () => `<div>${username ?? ''}</div>`
 				};
 			});
-			return renderSnippet(identityUsernameSnippet, row.getValue('username'));
+			return renderSnippet(identityUsernameSnippet, {
+				username: row.getValue('username') as string
+			});
 		},
 		filterFn: (row, id, value) => {
 			return (row.getValue(id) as string).includes(value);
@@ -289,7 +251,7 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 	},
 	{
 		accessorFn: row => row.identity?.traits,
-		id: 'fullName',
+		id: 'full_name',
 		header: ({ column }) => {
 			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
 				title: 'Full name',
@@ -297,15 +259,17 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 			});
 		},
 		cell: ({ row }) => {
-			const identityFullNameSnippet = createRawSnippet<[string]>(getIdentityFullName => {
-				const fullName = getIdentityFullName();
+			const identityFullNameSnippet = createRawSnippet<[{ fullName: string }]>(getIdentityFullName => {
+				const { fullName } = getIdentityFullName();
 				return {
 					render: () => `<div>${fullName}</div>`
 				};
 			});
-			const traits = row.getValue('fullName') as { first_name?: string; last_name?: string };
+			const traits = row.getValue('full_name') as { first_name?: string; last_name?: string };
 			const fullName = `${traits?.first_name ?? ''}${traits?.last_name ? ' ' : ''}${traits?.last_name ?? ''}`;
-			return renderSnippet(identityFullNameSnippet, fullName);
+			return renderSnippet(identityFullNameSnippet, {
+				fullName
+			});
 		},
 		filterFn: (row, id, value) => {
 			const traits = row.getValue(id) as { first_name?: string; last_name?: string };

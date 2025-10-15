@@ -6,7 +6,7 @@ export const load: PageLoad = async ({ depends }) => {
 	try {
 		const identitiesResult = await fluffly.GET('/identities', {
 			params: {
-				query: { page_size: 1_000 }
+				query: { page_size: 500 }
 			}
 		});
 		return {

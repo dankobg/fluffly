@@ -6,6 +6,10 @@
 	let { data, params }: PageProps = $props();
 </script>
 
+{#if data.messagesResult?.error}
+	<pre>{JSON.stringify(data.messagesResult.error, null, 2)}</pre>
+{/if}
+
 <div class="flex h-full flex-1 flex-col space-y-8 p-8">
 	<div class="flex items-center justify-between space-y-2">
 		<div>

@@ -9,7 +9,7 @@ var (
 	defaultPageSize = 50
 	minPage         = 1
 	minPageSize     = 1
-	maxPageSize     = 1000
+	maxPageSize     = 500
 )
 
 func getPaginationParams(page *api.PaginationPage, pageSize *api.PaginationPageSize) api.PaginationParams {

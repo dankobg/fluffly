@@ -6,7 +6,7 @@ export const load: PageLoad = async ({ url, depends }) => {
 	depends('data:sessions');
 	try {
 		const listSessionsParams: operations['listSessions']['parameters'] = {
-			query: { page_size: 1_000 }
+			query: { page_size: 500 }
 		};
 		const active = url.searchParams.get('active');
 		if (active) {
