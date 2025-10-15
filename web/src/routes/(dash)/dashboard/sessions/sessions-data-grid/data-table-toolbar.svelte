@@ -92,17 +92,6 @@
 				class="h-8 w-[150px] lg:w-[250px]"
 			/>
 			<Input
-				placeholder="Filter by username..."
-				value={(table.getColumn('username')?.getFilterValue() as string) ?? ''}
-				oninput={e => {
-					table.getColumn('username')?.setFilterValue(e.currentTarget.value);
-				}}
-				onchange={e => {
-					table.getColumn('username')?.setFilterValue(e.currentTarget.value);
-				}}
-				class="h-8 w-[150px] lg:w-[250px]"
-			/>
-			<Input
 				placeholder="Filter by full name..."
 				value={(table.getColumn('fullName')?.getFilterValue() as string) ?? ''}
 				oninput={e => {

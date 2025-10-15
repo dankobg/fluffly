@@ -68,10 +68,6 @@ export const config = {
 			label: 'Password',
 			priority: 50
 		},
-		'traits.username': {
-			label: 'Username',
-			priority: 40
-		},
 		'traits.first_name': {
 			label: 'First name',
 			priority: 30

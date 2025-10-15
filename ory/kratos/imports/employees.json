@@ -3,7 +3,6 @@
     "schema_id": "employee",
     "traits": {
       "email": "fluffly@test.com",
-      "username": "fluffly",
       "first_name": "Fluffly",
       "last_name": "Flufflyson"
     },
@@ -27,7 +26,6 @@
     "schema_id": "employee",
     "traits": {
       "email": "dev@test.com",
-      "username": "dev",
       "first_name": "Dev First",
       "last_name": "Dev Last"
     },
@@ -51,7 +49,6 @@
     "schema_id": "employee",
     "traits": {
       "email": "admin@test.com",
-      "username": "admin",
       "first_name": "Admin First",
       "last_name": "Admin Last"
     },
@@ -75,7 +72,6 @@
     "schema_id": "employee",
     "traits": {
       "email": "danko@test.com",
-      "username": "danko",
       "first_name": "Danko",
       "last_name": "Petrovic"
     },

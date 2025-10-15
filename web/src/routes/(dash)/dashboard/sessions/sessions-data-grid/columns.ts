@@ -226,30 +226,6 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 		}
 	},
 	{
-		accessorFn: row => (row.identity?.traits as CustomTraits)?.['username'],
-		id: 'username',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Session'], unknown>, {
-				title: 'Username',
-				column
-			});
-		},
-		cell: ({ row }) => {
-			const identityUsernameSnippet = createRawSnippet<[{ username: string }]>(getUsername => {
-				const { username } = getUsername();
-				return {
-					render: () => `<div>${username ?? ''}</div>`
-				};
-			});
-			return renderSnippet(identityUsernameSnippet, {
-				username: row.getValue('username') as string
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
-		}
-	},
-	{
 		accessorFn: row => row.identity?.traits,
 		id: 'full_name',
 		header: ({ column }) => {

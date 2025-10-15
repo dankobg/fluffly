@@ -31,7 +31,6 @@
 			first_name: v.string(),
 			last_name: v.string(),
 			email: v.pipe(v.string(), v.minLength(1, 'E-Mail is required'), v.email('E-Mail must be a valid email')),
-			username: v.pipe(v.string(), v.minLength(1, 'Username is required')),
 			avatar_url: v.string()
 		}),
 		password: v.union([v.literal(''), v.pipe(v.string(), v.minLength(8, 'Password must have min. 8 characters'))]),
@@ -48,7 +47,6 @@
 			first_name: '',
 			last_name: '',
 			email: '',
-			username: '',
 			avatar_url: ''
 		},
 		password: '',
@@ -186,18 +184,6 @@
 								{#snippet children({ props })}
 									<Form.Label>Last name</Form.Label>
 									<Input {...props} bind:value={$form.traits.last_name} />
-								{/snippet}
-							</Form.Control>
-							<Form.Description />
-							<Form.FieldErrors />
-						</Form.Field>
-					</div>
-					<div class="grid gap-2">
-						<Form.Field form={supForm} name="traits.username">
-							<Form.Control>
-								{#snippet children({ props })}
-									<Form.Label>Username</Form.Label>
-									<Input {...props} bind:value={$form.traits.username} />
 								{/snippet}
 							</Form.Control>
 							<Form.Description />

@@ -228,11 +228,11 @@
 						<Form.Field form={supForm} name="identifier">
 							<Form.Control>
 								{#snippet children({ props })}
-									<Form.Label>Identifier</Form.Label>
-									<Input {...props} bind:value={$form.identifier} />
+									<Form.Label>E-Mail</Form.Label>
+									<Input {...props} type="email" bind:value={$form.identifier} />
 								{/snippet}
 							</Form.Control>
-							<Form.Description>Use your email or username</Form.Description>
+							<Form.Description />
 							<Form.FieldErrors />
 						</Form.Field>
 					</div>

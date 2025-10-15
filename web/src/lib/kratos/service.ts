@@ -2,7 +2,6 @@ import type { Session } from '@ory/client-fetch';
 
 export type CustomTraits = {
 	email: string;
-	username: string;
 	first_name?: string;
 	last_name?: string;
 	avatar_url?: string;
@@ -11,7 +10,6 @@ export type CustomTraits = {
 export interface User {
 	id: string;
 	email?: string;
-	username?: string;
 	firstName?: string;
 	lastName?: string;
 	avatarUrl?: string;
@@ -43,7 +41,6 @@ export function createSessionService(session: Session | null): SessionService {
 		user: {
 			id: session.identity.id,
 			email: session.identity.traits?.email,
-			username: session.identity.traits?.username,
 			firstName: session.identity.traits?.first_name,
 			lastName: session.identity.traits?.last_name,
 			avatarUrl: session.identity.traits?.avatar_url,
