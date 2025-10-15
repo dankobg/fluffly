@@ -1,4 +1,4 @@
-name: ✨ Fluffly chess workflow
+name: ✨ Fluffly workflow
 
 on:
   push:
@@ -93,7 +93,7 @@ jobs:
         uses: github/codeql-action/analyze@v3
 
   publish:
-    name: 🎉 Build and deploy fluffly chess
+    name: 🎉 Build and deploy fluffly
     runs-on: ${{ matrix.platform }}
     needs: [lint, test]
 

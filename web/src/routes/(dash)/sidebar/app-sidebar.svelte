@@ -25,7 +25,7 @@
 		<Sidebar.Header>
 			<div class="flex h-14 items-center justify-center gap-4">
 				<img src="/images/logo.svg" alt="Fluffly logo" class="m-0 h-full max-w-full p-0" />
-				<span>Fluffly chess</span>
+				<span>Fluffly</span>
 			</div>
 		</Sidebar.Header>
 
@@ -65,7 +65,7 @@
 		<Sidebar.Header>
 			<div class="flex h-14 items-center justify-center gap-4">
 				<img src="/images/logo.svg" alt="Fluffly logo" class="m-0 h-full max-w-full p-0" />
-				<span>Fluffly chess</span>
+				<span>Fluffly</span>
 			</div>
 		</Sidebar.Header>
 

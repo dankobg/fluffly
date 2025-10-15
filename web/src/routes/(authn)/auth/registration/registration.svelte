@@ -195,7 +195,7 @@
 	<Card.Root class="mx-auto max-w-md">
 		<Card.Header>
 			<Card.Title class="text-center text-2xl">Register</Card.Title>
-			<Card.Description>Create a new account to play some chess</Card.Description>
+			<Card.Description>Create a new account to expore your fluffy friends</Card.Description>
 		</Card.Header>
 
 		<Card.Content>
@@ -277,7 +277,7 @@
 					<div class="inline-flex w-full items-center justify-center">
 						<hr class="my-8 h-px w-full border-0 bg-gray-200 dark:bg-gray-700" />
 						<span
-							class="absolute left-1/2 -translate-x-1/2 bg-card px-3 font-medium text-gray-900 dark:bg-card dark:text-white"
+							class="bg-card dark:bg-card absolute left-1/2 -translate-x-1/2 px-3 font-medium text-gray-900 dark:text-white"
 						>
 							or signup with
 						</span>
@@ -296,7 +296,7 @@
 
 								<Tooltip.Provider>
 									<Tooltip.Root delayDuration={100}>
-										<Tooltip.Trigger type="submit" class="rounded hover:bg-primary/10">
+										<Tooltip.Trigger type="submit" class="hover:bg-primary/10 rounded">
 											<img
 												class="h-12 w-12 object-cover"
 												src="/images/providers/{provider.name}.svg"
