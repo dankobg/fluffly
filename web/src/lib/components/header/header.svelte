@@ -6,9 +6,6 @@
 	import { navItems } from './nav-items';
 	import ModeSwitcher from '$lib/components/mode-switcher/mode-switcher.svelte';
 	import IconLogout from '@lucide/svelte/icons/log-out';
-	import IconSettings from '@lucide/svelte/icons/settings';
-	import IconLogin from '@lucide/svelte/icons/log-in';
-	import IconRegister from '@lucide/svelte/icons/user-round-plus';
 	import IconUserIcon from '@lucide/svelte/icons/user';
 	import IconGauge from '@lucide/svelte/icons/gauge';
 	import IconMenu from '@lucide/svelte/icons/menu';
@@ -24,7 +21,7 @@
 	let { logoutUrl, user }: Props = $props();
 </script>
 
-<header class="sticky top-0 flex h-16 max-w-[1920px] items-center gap-4 bg-background px-4 md:mx-auto md:px-6">
+<header class="bg-background sticky top-0 flex h-16 max-w-[1920px] items-center gap-4 px-4 md:mx-auto md:px-6">
 	<nav class="flex w-full items-center justify-start text-lg font-medium md:gap-5 lg:gap-6">
 		<Sheet.Root>
 			<Sheet.Trigger class="flex md:hidden">
@@ -40,7 +37,7 @@
 					{#each navItems as navItem (navItem.label)}
 						<a
 							href={navItem.href}
-							class="text-muted-foreground transition-all hover:text-primary"
+							class="text-muted-foreground hover:text-primary transition-all"
 							class:text-primary={page.url.pathname === navItem.href}>{navItem.label}</a
 						>
 					{/each}
@@ -57,7 +54,7 @@
 			{#each navItems as item (item.label)}
 				<a
 					href={item.href}
-					class="text-lg text-muted-foreground transition-all hover:text-primary"
+					class="text-muted-foreground hover:text-primary text-lg transition-all"
 					class:text-primary={page.url.pathname === item.href}>{item.label}</a
 				>
 			{/each}
@@ -84,12 +81,6 @@
 					<DropdownMenu.GroupHeading>{user.fullName ?? user.email}</DropdownMenu.GroupHeading>
 					<DropdownMenu.Separator />
 					<DropdownMenu.Group>
-						<DropdownMenu.Item>
-							<IconSettings class="mr-2 size-4" />
-							<span>Settings</span>
-						</DropdownMenu.Item>
-					</DropdownMenu.Group>
-					<DropdownMenu.Group>
 						<a href="/dashboard">
 							<DropdownMenu.Item class="cursor-pointer">
 								<IconGauge class="mr-2 size-4" />
@@ -114,8 +105,8 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	{:else}
-		<a href={config.routes.login.path} class="text-lg text-muted-foreground transition-all hover:text-primary">Login</a>
-		<a href={config.routes.registration.path} class="text-lg text-muted-foreground transition-all hover:text-primary">
+		<a href={config.routes.login.path} class="text-muted-foreground hover:text-primary text-lg transition-all">Login</a>
+		<a href={config.routes.registration.path} class="text-muted-foreground hover:text-primary text-lg transition-all">
 			Register
 		</a>
 	{/if}

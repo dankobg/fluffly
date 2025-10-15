@@ -6,6 +6,5 @@
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>
 
-<!-- <Header user={data.auth.user ?? undefined} logoutUrl={data.logoutUrl} /> -->
-<Header user={undefined} logoutUrl={undefined} />
+<Header user={data.auth.user ?? undefined} logoutUrl={data.logoutUrl} />
 {@render children()}
