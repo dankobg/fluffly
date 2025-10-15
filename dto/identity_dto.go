@@ -48,7 +48,6 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 			id = &parsed
 		}
 		verifiableAddresses = append(verifiableAddresses, api.VerifiableIdentityAddress{
-
 			ID:         id,
 			Status:     verAddr.Status,
 			Value:      verAddr.Value,
