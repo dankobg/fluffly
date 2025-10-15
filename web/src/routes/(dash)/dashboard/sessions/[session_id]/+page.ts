@@ -2,7 +2,7 @@ import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 import { PathsSessionsIdGetParametersQueryExpand, type operations } from '$lib/gen/fluffly_openapi';
 
-export const load: PageLoad = async ({ params, url }) => {
+export const load: PageLoad = async ({ fetch, params, url }) => {
 	try {
 		const getSessionParams: operations['getSession']['parameters'] = {
 			path: { id: params.session_id },
@@ -15,6 +15,7 @@ export const load: PageLoad = async ({ params, url }) => {
 			getSessionParams.query!.expand = expand;
 		}
 		const sessionResult = await fluffly.GET('/sessions/{id}', {
+			fetch,
 			params: {
 				path: { id: params.session_id }
 			}

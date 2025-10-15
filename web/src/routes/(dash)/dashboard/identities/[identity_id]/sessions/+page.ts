@@ -2,7 +2,7 @@ import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 import type { operations } from '$lib/gen/fluffly_openapi';
 
-export const load: PageLoad = async ({ url, params, depends }) => {
+export const load: PageLoad = async ({ fetch, url, params, depends }) => {
 	depends(`data:identity-sessions-${params.identity_id}`);
 	try {
 		const listIdentitySessionsParams: operations['listIdentitySessions']['parameters'] = {
@@ -18,9 +18,11 @@ export const load: PageLoad = async ({ url, params, depends }) => {
 			listIdentitySessionsParams.query!.page_token = pageToken;
 		}
 		const sessionsResult = await fluffly.GET('/identities/{id}/sessions', {
+			fetch,
 			params: listIdentitySessionsParams
 		});
 		const identityResult = await fluffly.GET('/identities/{id}', {
+			fetch,
 			params: {
 				path: { id: params.identity_id }
 			}

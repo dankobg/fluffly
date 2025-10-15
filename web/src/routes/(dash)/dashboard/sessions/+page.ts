@@ -2,7 +2,7 @@ import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 import type { operations, PathsSessionsGetParametersQueryExpand } from '$lib/gen/fluffly_openapi';
 
-export const load: PageLoad = async ({ url, depends }) => {
+export const load: PageLoad = async ({ fetch, url, depends }) => {
 	depends('data:sessions');
 	try {
 		const listSessionsParams: operations['listSessions']['parameters'] = {
@@ -21,6 +21,7 @@ export const load: PageLoad = async ({ url, depends }) => {
 			listSessionsParams.query!.page_token = pageToken;
 		}
 		const sessionsResult = await fluffly.GET('/sessions', {
+			fetch,
 			params: listSessionsParams
 		});
 		return {

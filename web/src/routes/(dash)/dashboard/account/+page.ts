@@ -81,10 +81,12 @@ export const load: PageLoad = (async ({ url, depends }) => {
 							if (isErrorIdSecurityCsrfViolation(err.error?.id)) {
 								handleFlowErrAction(config.routes.settings.path, err.error.message);
 							} else if (isErrorIdSessionInactive(err.error?.id)) {
-								handleFlowErrAction(
-									config.routes.login.path + `?return_to=${encodeURIComponent(window.location.href)}`,
-									err.error.message
-								);
+								if (browser) {
+									handleFlowErrAction(
+										config.routes.login.path + `?return_to=${encodeURIComponent(window.location.href)}`,
+										err.error.message
+									);
+								}
 							} else if (isErrorIdSecurityIdentityMismatch(err?.error.id)) {
 								goto('/');
 							}
