@@ -241,14 +241,14 @@ const identityColumns: ColumnDef<components['schemas']['Session']>[] = [
 					render: () => `<div>${fullName}</div>`
 				};
 			});
-			const traits = row.getValue('full_name') as { first_name?: string; last_name?: string };
+			const traits = row.getValue('full_name') as CustomTraits
 			const fullName = `${traits?.first_name ?? ''}${traits?.last_name ? ' ' : ''}${traits?.last_name ?? ''}`;
 			return renderSnippet(identityFullNameSnippet, {
 				fullName
 			});
 		},
 		filterFn: (row, id, value) => {
-			const traits = row.getValue(id) as { first_name?: string; last_name?: string };
+			const traits = row.getValue(id) as CustomTraits
 			return `${traits.first_name} ${traits.last_name}`.toLowerCase().includes((value as string).toLowerCase());
 		}
 	}

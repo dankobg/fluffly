@@ -16,7 +16,7 @@
 	const isFiltered = $derived(table.getState().columnFilters.length > 0);
 	const statusCol = $derived(table.getColumn('status'));
 	const typeCol = $derived(table.getColumn('type'));
-	const templateTypeCol = $derived(table.getColumn('templateType'));
+	const templateTypeCol = $derived(table.getColumn('template_type'));
 </script>
 
 <div class="flex items-center justify-between">
