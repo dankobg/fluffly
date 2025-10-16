@@ -47,16 +47,19 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 			}
 			id = &parsed
 		}
-		verifiableAddresses = append(verifiableAddresses, api.VerifiableIdentityAddress{
-			ID:         id,
-			Status:     verAddr.Status,
-			Value:      verAddr.Value,
-			Verified:   verAddr.Verified,
-			VerifiedAt: nullable.NewNullableWithValue(*verAddr.VerifiedAt),
-			Via:        api.VerifiableIdentityAddressVia(verAddr.Via),
-			CreatedAt:  verAddr.CreatedAt,
-			UpdatedAt:  verAddr.UpdatedAt,
-		})
+		verIdentityAddr := api.VerifiableIdentityAddress{
+			ID:        id,
+			Status:    verAddr.Status,
+			Value:     verAddr.Value,
+			Verified:  verAddr.Verified,
+			Via:       api.VerifiableIdentityAddressVia(verAddr.Via),
+			CreatedAt: verAddr.CreatedAt,
+			UpdatedAt: verAddr.UpdatedAt,
+		}
+		if verAddr.VerifiedAt != nil {
+			verIdentityAddr.VerifiedAt = nullable.NewNullableWithValue(*verAddr.VerifiedAt)
+		}
+		verifiableAddresses = append(verifiableAddresses, verIdentityAddr)
 	}
 	id, err := uuid.Parse(identity.Id)
 	if err != nil {
@@ -71,11 +74,13 @@ func IdentityToResponse(identity kratos.Identity) (api.Identity, error) {
 		SchemaID:            identity.SchemaId,
 		SchemaURL:           identity.SchemaUrl,
 		State:               (*api.IdentityState)(identity.State),
-		StateChangedAt:      nullable.NewNullableWithValue(*identity.StateChangedAt),
 		Traits:              identity.Traits,
 		VerifiableAddresses: &verifiableAddresses,
 		CreatedAt:           identity.CreatedAt,
 		UpdatedAt:           identity.UpdatedAt,
+	}
+	if identity.StateChangedAt != nil {
+		resp.StateChangedAt = nullable.NewNullableWithValue(*identity.StateChangedAt)
 	}
 	return resp, nil
 }
