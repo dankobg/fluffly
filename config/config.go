@@ -6,12 +6,17 @@ import (
 	"strings"
 	"time"
 
+	_ "embed"
+
 	"github.com/joho/godotenv"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/providers/rawbytes"
 	"github.com/knadh/koanf/v2"
 )
+
+//go:embed config_defaults.yaml
+var configDefaults []byte
 
 const (
 	prefix     = "FLUFFLY"
@@ -20,7 +25,7 @@ const (
 	sliceDelim = ","
 )
 
-var knownKeys = []string{"server", "cors", "postgres", "redis", "email", "logger"}
+var knownKeys = []string{"server", "cors", "postgres", "redis", "email", "logger", "minio"}
 
 // Fluffly contains common fluffly app settings
 type Fluffly struct {
@@ -164,7 +169,7 @@ func loadFromEnv(k *koanf.Koanf) error {
 }
 
 func loadDefaults(k *koanf.Koanf) error {
-	return k.Load(file.Provider("config/defaults.yaml"), yaml.Parser())
+	return k.Load(rawbytes.Provider(configDefaults), yaml.Parser())
 }
 
 func getConfig(k *koanf.Koanf) (*Config, error) {

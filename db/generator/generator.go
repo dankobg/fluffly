@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dankobg/fluffly/config"
 	"github.com/dankobg/fluffly/persistence/dbcustom"
 	"github.com/go-jet/jet/v2/generator/metadata"
 	"github.com/go-jet/jet/v2/generator/postgres"
@@ -10,14 +11,18 @@ import (
 )
 
 func main() {
-	// @TODO: reuse cfg vars, and use as a separate go pkg to isolate deps
+	cfg, _, e := config.New()
+	if e != nil {
+		panic(e)
+	}
+
 	err := postgres.Generate("../../db/gen", postgres.DBConnection{
-		Host:       "localhost",
-		Port:       5432,
-		User:       "test",
-		Password:   "test",
-		SslMode:    "disable",
-		DBName:     "test",
+		Host:       cfg.Database.Host,
+		Port:       cfg.Database.Port,
+		User:       cfg.Database.User,
+		Password:   cfg.Database.Password,
+		SslMode:    cfg.Database.SSLMode,
+		DBName:     cfg.Database.DB,
 		SchemaName: "public",
 	}, template.Default(p.Dialect).
 		UseSchema(func(schema metadata.Schema) template.Schema {
@@ -36,7 +41,6 @@ func main() {
 					}),
 				)
 		}))
-
 	if err != nil {
 		panic(err)
 	}
