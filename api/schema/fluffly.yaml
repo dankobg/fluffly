@@ -905,6 +905,8 @@ paths:
         include credentials (e.g. social sign in connections) in the response by
         using the `include_credential` query parameter.
       operationId: getIdentity
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID must be set to the ID of identity you want to get
           in: path
