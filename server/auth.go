@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3filter"
 	orykratos "github.com/ory/client-go"
 )
 
@@ -66,11 +67,11 @@ func GetSession(ctx context.Context) *orykratos.Session {
 func (a *ApiHandler) RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sess := GetSession(r.Context())
-		if sess == nil {
+		if !sessionExists(sess) {
 			http.Error(w, "session is required", http.StatusUnauthorized)
 			return
 		}
-		if sess.Active != nil && !*sess.Active {
+		if !sessionValid(sess) {
 			http.Error(w, "session is invalid or has already expired", http.StatusUnauthorized)
 		}
 		next.ServeHTTP(w, r)
@@ -80,12 +81,20 @@ func (a *ApiHandler) RequireAuth(next http.Handler) http.Handler {
 func (a *ApiHandler) RequireAnonymous(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sess := GetSession(r.Context())
-		if sess != nil && sess.Active != nil && *sess.Active {
+		if sessionValid(sess) {
 			http.Error(w, "must have no session", http.StatusUnauthorized)
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func sessionExists(sess *orykratos.Session) bool {
+	return sess != nil
+}
+
+func sessionValid(sess *orykratos.Session) bool {
+	return sess != nil && sess.Active != nil && *sess.Active
 }
 
 func (a *ApiHandler) AttachSessionData(next http.Handler) http.Handler {
@@ -130,6 +139,19 @@ func (a *ApiHandler) AttachSessionData(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func authFunc(ctx context.Context, in *openapi3filter.AuthenticationInput) error {
+	if in.SecuritySchemeName == "cookieAuth" && in.SecurityScheme.Name == "ory_kratos_session" {
+		sess := GetSession(ctx)
+		if !sessionExists(sess) {
+			return fmt.Errorf("session is required")
+		}
+		if !sessionValid(sess) {
+			return fmt.Errorf("session is invalid or has already expired")
+		}
+	}
+	return nil
 }
 
 func authzIdentityID(id string) string {

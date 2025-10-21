@@ -9,6 +9,7 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/api/validators"
 	"github.com/dankobg/fluffly/data"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 )
 
@@ -89,6 +90,9 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 
 	oapiMiddleware := nethttpmiddleware.OapiRequestValidatorWithOptions(openapi, &nethttpmiddleware.Options{
 		SilenceServersWarning: true,
+		Options: openapi3filter.Options{
+			AuthenticationFunc: authFunc,
+		},
 	})
 
 	oapiMux := http.NewServeMux()

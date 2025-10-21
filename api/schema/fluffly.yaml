@@ -46,6 +46,8 @@ paths:
       operationId: listCountries
       summary: List countries
       description: List countries
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -74,6 +76,8 @@ paths:
       operationId: createCountry
       summary: Create country
       description: Create a country
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       requestBody:
@@ -100,6 +104,8 @@ paths:
       operationId: getCountry
       summary: Get country by id
       description: Return a specific country by id
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -126,6 +132,8 @@ paths:
       operationId: updateCountry
       summary: Update country
       description: Update a country
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -159,6 +167,8 @@ paths:
       operationId: deleteCountry
       summary: Delete country by id
       description: Delete a specific country by id
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -212,6 +222,8 @@ paths:
       operationId: createOrganization
       summary: Create organization
       description: Create an organization that helps adopt animals
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       requestBody:
@@ -264,6 +276,8 @@ paths:
       operationId: updateOrganization
       summary: Update organization
       description: Update an organization that helps adopt animals
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -297,6 +311,8 @@ paths:
       operationId: deleteOrganization
       summary: Delete organization by id
       description: Delete a specific organization by id
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -350,6 +366,8 @@ paths:
       operationId: createAnimal
       summary: Create animal
       description: Create an animal that can be adopted
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       requestBody:
@@ -402,6 +420,8 @@ paths:
       operationId: updateAnimal
       summary: Update animal
       description: Update an animal that helps adopt animals
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -435,6 +455,8 @@ paths:
       operationId: deleteAnimal
       summary: Delete animal by id
       description: Delete a specific animal by id
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -460,6 +482,8 @@ paths:
       operationId: likeAnimal
       summary: Like animal
       description: Give a like for an animal that you find cool
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -485,6 +509,8 @@ paths:
       operationId: unlikeAnimal
       summary: Unlike animal
       description: Unlike an animal that you liked before
+      security:
+        - cookieAuth: []
       tags:
         - fluffly
       parameters:
@@ -509,6 +535,8 @@ paths:
     get:
       description: Returns a list of all identity schemas currently in use.
       operationId: listIdentitySchemas
+      security:
+        - cookieAuth: []
       parameters:
         - description: >-
             Page Size
@@ -545,6 +573,8 @@ paths:
     get:
       description: Return a specific identity schema.
       operationId: getIdentitySchema
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID must be set to the ID of schema you want to get
           in: path
@@ -571,6 +601,8 @@ paths:
     get:
       description: Lists all messages by given status and recipient.
       operationId: listCourierMessages
+      security:
+        - cookieAuth: []
       parameters:
         - description: This is the number of items per page to return.
           in: query
@@ -620,6 +652,8 @@ paths:
     get:
       description: Gets a specific messages by the given ID.
       operationId: getCourierMessage
+      security:
+        - cookieAuth: []
       parameters:
         - description: MessageID is the ID of the message.
           in: path
@@ -650,6 +684,8 @@ paths:
         [identities](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
         in the system. Note: filters cannot be combined.
       operationId: listIdentities
+      security:
+        - cookieAuth: []
       parameters:
         - description: Page Size
           in: query
@@ -766,6 +802,8 @@ paths:
         for instance passwords, social sign in configurations or multifactor
         methods.
       operationId: batchPatchIdentities
+      security:
+        - cookieAuth: []
       requestBody:
         content:
           application/json:
@@ -801,6 +839,8 @@ paths:
         for instance passwords, social sign in configurations or multifactor
         methods.
       operationId: createIdentity
+      security:
+        - cookieAuth: []
       requestBody:
         content:
           application/json:
@@ -836,6 +876,8 @@ paths:
 
         assumed that is has been deleted already.
       operationId: deleteIdentity
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -920,6 +962,8 @@ paths:
         The fields `id`, `stateChangedAt` and `credentials` can not be updated
         using this method.
       operationId: patchIdentity
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID must be set to the ID of identity you want to update
           in: path
@@ -961,6 +1005,8 @@ paths:
         payload (except credentials) is expected. It is possible to update the
         identity's credentials as well.
       operationId: updateIdentity
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID must be set to the ID of identity you want to update
           in: path
@@ -1002,6 +1048,8 @@ paths:
 
         You cannot delete password or code auth credentials through this API.
       operationId: deleteIdentityCredentials
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -1079,6 +1127,8 @@ paths:
         Calling this endpoint irrecoverably and permanently deletes and
         invalidates all sessions that belong to the given Identity.
       operationId: deleteIdentitySessions
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -1104,6 +1154,8 @@ paths:
     get:
       description: This endpoint returns all sessions that belong to the given Identity.
       operationId: listIdentitySessions
+      security:
+        - cookieAuth: []
       parameters:
         - description: >-
             Page Size
@@ -1171,6 +1223,8 @@ paths:
     get:
       description: Listing all sessions that exist.
       operationId: listSessions
+      security:
+        - cookieAuth: []
       parameters:
         - description: >-
             Items per Page
@@ -1246,6 +1300,8 @@ paths:
         Calling this endpoint deactivates the specified session. Session data is
         not deleted.
       operationId: disableSession
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID is the session's ID.
           in: path
@@ -1273,6 +1329,8 @@ paths:
         Getting a session object with all specified expandables that exist in an
         administrative context.
       operationId: getSession
+      security:
+        - cookieAuth: []
       parameters:
         - description: >-
             ExpandOptions is a query parameter encoded list of all properties
@@ -1336,6 +1394,8 @@ paths:
         Retrieve the session ID from the `/sessions/whoami` endpoint /
         `toSession` SDK method.
       operationId: extendSession
+      security:
+        - cookieAuth: []
       parameters:
         - description: ID is the session's ID.
           in: path
@@ -1370,6 +1430,8 @@ paths:
 
         (or activate) their account.
       operationId: createRecoveryCodeForIdentity
+      security:
+        - cookieAuth: []
       requestBody:
         content:
           application/json:
@@ -1401,6 +1463,8 @@ paths:
 
         (or activate) their account.
       operationId: createRecoveryLinkForIdentity
+      security:
+        - cookieAuth: []
       parameters:
         - in: query
           name: return_to
@@ -1958,6 +2022,12 @@ paths:
   #       - fluffly
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: ory_kratos_session
+
   responses:
     UnexpectedError:
       description: Unexpected error

@@ -111,7 +111,7 @@ func (a *ApiHandler) createUserRelationTuples(ctx context.Context, identityID st
 					Namespace: "Identity",
 					Object:    authzIdentityID(identityID),
 					Relation:  "owners",
-					Subject:   rts.NewSubjectID(identityID),
+					Subject:   rts.NewSubjectID(authzIdentityID(identityID)),
 				},
 			},
 			{
