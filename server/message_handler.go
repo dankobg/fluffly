@@ -55,7 +55,11 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 
 func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCourierMessageRequestObject) (api.GetCourierMessageResponseObject, error) {
 	sess := GetSession(ctx)
-
+	req := a.Kratos.Admin.CourierAPI.GetCourierMessage(ctx, request.ID)
+	courierMessage, courierMessageResp, err := req.Execute()
+	if err != nil {
+		return api.GetCourierMessage404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Courier message not found"}}, nil
+	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "CourierMessage",
@@ -65,12 +69,6 @@ func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCouri
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetCourierMessagedefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
-	req := a.Kratos.Admin.CourierAPI.GetCourierMessage(ctx, request.ID)
-	courierMessage, courierMessageResp, err := req.Execute()
-	if err != nil {
-		return api.GetCourierMessage404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Courier message not found"}}, nil
 	}
 	defer courierMessageResp.Body.Close()
 	resp, err := dto.MessageToResponse(*courierMessage)

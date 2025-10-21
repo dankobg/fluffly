@@ -48,7 +48,11 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 
 func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdentitySchemaRequestObject) (api.GetIdentitySchemaResponseObject, error) {
 	sess := GetSession(ctx)
-
+	req := a.Kratos.Admin.IdentityAPI.GetIdentitySchema(ctx, request.ID)
+	identitySchema, identitySchemaResp, err := req.Execute()
+	if err != nil {
+		return api.GetIdentitySchema404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "schema not found"}}, nil
+	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Schema",
@@ -58,12 +62,6 @@ func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdent
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetIdentitySchemadefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
-	req := a.Kratos.Admin.IdentityAPI.GetIdentitySchema(ctx, request.ID)
-	identitySchema, identitySchemaResp, err := req.Execute()
-	if err != nil {
-		return api.GetIdentitySchema404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "schema not found"}}, nil
 	}
 	defer identitySchemaResp.Body.Close()
 	return api.GetIdentitySchema200JSONResponse(identitySchema), nil

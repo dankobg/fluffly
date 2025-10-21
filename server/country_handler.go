@@ -155,7 +155,13 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 
 func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryRequestObject) (api.GetCountryResponseObject, error) {
 	sess := GetSession(ctx)
-
+	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
+	if err != nil {
+		if errors.Is(err, postgres.ErrCountryNotFound) {
+			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil
+		}
+		return nil, fmt.Errorf("failed to get a country by id: %w", err)
+	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Country",
@@ -165,14 +171,6 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetCountrydefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
-	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
-	if err != nil {
-		if errors.Is(err, postgres.ErrCountryNotFound) {
-			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil
-		}
-		return nil, fmt.Errorf("failed to get a country by id: %w", err)
 	}
 	resp := api.GetCountry200JSONResponse(dto.CountryToResponse(country))
 	return resp, nil

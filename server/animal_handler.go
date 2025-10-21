@@ -325,6 +325,13 @@ func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsReq
 }
 
 func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequestObject) (api.GetAnimalResponseObject, error) {
+	animalWithJoinData, err := a.persistor.Animal().GetAnimalByID(ctx, request.ID)
+	if err != nil {
+		if errors.Is(err, postgres.ErrAnimalNotFound) {
+			return api.GetAnimal404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Animal not found"}}, nil
+		}
+		return nil, fmt.Errorf("failed to get an animal by id: %w", err)
+	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
@@ -334,14 +341,6 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetAnimaldefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
-	animalWithJoinData, err := a.persistor.Animal().GetAnimalByID(ctx, request.ID)
-	if err != nil {
-		if errors.Is(err, postgres.ErrAnimalNotFound) {
-			return api.GetAnimal404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Animal not found"}}, nil
-		}
-		return nil, fmt.Errorf("failed to get an animal by id: %w", err)
 	}
 	resp := api.GetAnimal200JSONResponse(dto.AnimalWithJoinDataToResponse(animalWithJoinData, a.uploader))
 	return resp, nil

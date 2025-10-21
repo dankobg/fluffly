@@ -60,18 +60,6 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 
 func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionRequestObject) (api.GetSessionResponseObject, error) {
 	sess := GetSession(ctx)
-
-	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
-		Tuple: &rts.RelationTuple{
-			Namespace: "Session",
-			Object:    authzSessionID(request.ID),
-			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
-		},
-	}); err != nil || !checkResp.Allowed {
-		return api.GetSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
 	req := a.Kratos.Admin.IdentityAPI.GetSession(ctx, request.ID)
 	if request.Params.Expand != nil {
 		expands := make([]string, 0, len(*request.Params.Expand))
@@ -83,6 +71,16 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 	session, sessionResp, err := req.Execute()
 	if err != nil {
 		return api.GetSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+	}
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Session",
+			Object:    authzSessionID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
 	}
 	defer sessionResp.Body.Close()
 	resp, err := dto.SessionToResponse(*session)

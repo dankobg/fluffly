@@ -68,18 +68,6 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 
 func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityRequestObject) (api.GetIdentityResponseObject, error) {
 	sess := GetSession(ctx)
-
-	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
-		Tuple: &rts.RelationTuple{
-			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
-			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
-		},
-	}); err != nil || !checkResp.Allowed {
-		return api.GetIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
 	req := a.Kratos.Admin.IdentityAPI.GetIdentity(ctx, request.ID)
 	if request.Params.IncludeCredential != nil {
 		includeParams := make([]string, 0, len(*request.Params.IncludeCredential))
@@ -91,6 +79,16 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 	identity, identityResp, err := req.Execute()
 	if err != nil {
 		return api.GetIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+	}
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
 	}
 	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)

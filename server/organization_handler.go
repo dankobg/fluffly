@@ -254,6 +254,13 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 }
 
 func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganizationRequestObject) (api.GetOrganizationResponseObject, error) {
+	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
+	if err != nil {
+		if errors.Is(err, postgres.ErrOrganizationNotFound) {
+			return api.GetOrganization404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Organization not found"}}, nil
+		}
+		return nil, fmt.Errorf("failed to get an organization by id: %w", err)
+	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Organization",
@@ -263,14 +270,6 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetOrganizationdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
-	}
-
-	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
-	if err != nil {
-		if errors.Is(err, postgres.ErrOrganizationNotFound) {
-			return api.GetOrganization404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Organization not found"}}, nil
-		}
-		return nil, fmt.Errorf("failed to get an organization by id: %w", err)
 	}
 	resp := api.GetOrganization200JSONResponse(dto.OrganizationWithJoinDataToResponse(organizationWithJoinData, a.uploader))
 	return resp, nil
