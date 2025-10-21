@@ -7,9 +7,23 @@ import (
 
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsRequestObject) (api.ListSessionsResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Sessions",
+			Object:    "sessions",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListSessionsdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.ListSessions(ctx)
 	if request.Params.Active != nil {
 		req = req.Active(*request.Params.Active)
@@ -44,17 +58,20 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 	return resp, nil
 }
 
-func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSessionRequestObject) (api.DisableSessionResponseObject, error) {
-	req := a.Kratos.Admin.IdentityAPI.DisableSession(ctx, request.ID)
-	disableSessionResp, err := req.Execute()
-	if err != nil {
-		return api.DisableSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
-	}
-	defer disableSessionResp.Body.Close()
-	return api.DisableSession204Response{}, nil
-}
-
 func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionRequestObject) (api.GetSessionResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Session",
+			Object:    authzSessionID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.GetSession(ctx, request.ID)
 	if request.Params.Expand != nil {
 		expands := make([]string, 0, len(*request.Params.Expand))
@@ -75,7 +92,43 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 	return api.GetSession200JSONResponse(resp), nil
 }
 
+func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSessionRequestObject) (api.DisableSessionResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Session",
+			Object:    authzSessionID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DisableSession401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+	}
+
+	req := a.Kratos.Admin.IdentityAPI.DisableSession(ctx, request.ID)
+	disableSessionResp, err := req.Execute()
+	if err != nil {
+		return api.DisableSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+	}
+	defer disableSessionResp.Body.Close()
+	return api.DisableSession204Response{}, nil
+}
+
 func (a *ApiHandler) ExtendSession(ctx context.Context, request api.ExtendSessionRequestObject) (api.ExtendSessionResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Session",
+			Object:    authzSessionID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ExtendSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.ExtendSession(ctx, request.ID)
 	session, sessionResp, err := req.Execute()
 	if err != nil {

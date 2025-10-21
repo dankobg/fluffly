@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "Countries",
+    "object": "countries",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Countries",
+    "object": "countries",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

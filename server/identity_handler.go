@@ -11,9 +11,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/oapi-codegen/nullable"
 	"github.com/ory/client-go"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentitiesRequestObject) (api.ListIdentitiesResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identities",
+			Object:    "identities",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListIdentitiesdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.ListIdentities(ctx)
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
@@ -53,6 +67,19 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 }
 
 func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityRequestObject) (api.GetIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.GetIdentity(ctx, request.ID)
 	if request.Params.IncludeCredential != nil {
 		includeParams := make([]string, 0, len(*request.Params.IncludeCredential))
@@ -74,6 +101,19 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 }
 
 func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdentityRequestObject) (api.CreateIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identities",
+			Object:    "identities",
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.CreateIdentity(ctx)
 	if request.Body != nil {
 		var credentials *client.IdentityWithCredentials
@@ -173,6 +213,19 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 }
 
 func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdentityRequestObject) (api.UpdateIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.UpdateIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.UpdateIdentity(ctx, request.ID)
 	if request.Body != nil {
 		var credentials *client.IdentityWithCredentials
@@ -229,6 +282,19 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 }
 
 func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdentityRequestObject) (api.DeleteIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentity(ctx, request.ID)
 	deleteIdentityResp, err := req.Execute()
 	if err != nil {
@@ -239,6 +305,19 @@ func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdent
 }
 
 func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentityRequestObject) (api.PatchIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.PatchIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.PatchIdentity(ctx, request.ID)
 	if request.Body != nil {
 		patches := make([]client.JsonPatch, 0, len(*request.Body))
@@ -265,6 +344,19 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 }
 
 func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.BatchPatchIdentitiesRequestObject) (api.BatchPatchIdentitiesResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identities",
+			Object:    "identities",
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.BatchPatchIdentitiesdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.BatchPatchIdentities(ctx)
 	if request.Body != nil {
 		patch := client.PatchIdentitiesBody{}
@@ -310,6 +402,19 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 }
 
 func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.DeleteIdentityCredentialsRequestObject) (api.DeleteIdentityCredentialsResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteIdentityCredentialsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentityCredentials(ctx, request.ID, string(request.Type))
 	if request.Params.Identifier != nil {
 		req = req.Identifier(*request.Params.Identifier)
@@ -323,6 +428,19 @@ func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.
 }
 
 func (a *ApiHandler) DeleteIdentitySessions(ctx context.Context, request api.DeleteIdentitySessionsRequestObject) (api.DeleteIdentitySessionsResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentitySessions(ctx, request.ID)
 	deleteIdentitySessionsResp, err := req.Execute()
 	if err != nil {
@@ -333,6 +451,19 @@ func (a *ApiHandler) DeleteIdentitySessions(ctx context.Context, request api.Del
 }
 
 func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListIdentitySessionsRequestObject) (api.ListIdentitySessionsResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.ListIdentitySessions(ctx, request.ID)
 	if request.Params.Active != nil {
 		req = req.Active(*request.Params.Active)
@@ -359,41 +490,20 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 	return resp, nil
 }
 
-func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListIdentitySchemasRequestObject) (api.ListIdentitySchemasResponseObject, error) {
-	req := a.Kratos.Admin.IdentityAPI.ListIdentitySchemas(ctx)
-	if request.Params.PageSize != nil {
-		req = req.PageSize(*request.Params.PageSize)
-	}
-	if request.Params.PageToken != nil && *request.Params.PageToken != "1" {
-		req = req.PageToken(*request.Params.PageToken)
-	}
-	schemaContainers, schemaContainersResp, err := req.Execute()
-	if err != nil {
-		return api.ListIdentitySchemasdefaultJSONResponse{Body: api.Error{Code: http.StatusBadRequest, Message: err.Error()}}, nil
-	}
-	defer schemaContainersResp.Body.Close()
-	resp := make(api.ListIdentitySchemas200JSONResponse, 0, len(schemaContainers))
-	for _, sc := range schemaContainers {
-		res, err := dto.SchemaContainerToResponse(sc)
-		if err != nil {
-			return nil, err
-		}
-		resp = append(resp, res)
-	}
-	return resp, nil
-}
-
-func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdentitySchemaRequestObject) (api.GetIdentitySchemaResponseObject, error) {
-	req := a.Kratos.Admin.IdentityAPI.GetIdentitySchema(ctx, request.ID)
-	identitySchema, identitySchemaResp, err := req.Execute()
-	if err != nil {
-		return api.GetIdentitySchema404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "schema not found"}}, nil
-	}
-	defer identitySchemaResp.Body.Close()
-	return api.GetIdentitySchema200JSONResponse(identitySchema), nil
-}
-
 func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request api.CreateRecoveryCodeForIdentityRequestObject) (api.CreateRecoveryCodeForIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.Body.IdentityID.String()),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateRecoveryCodeForIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.CreateRecoveryCodeForIdentity(ctx)
 	if request.Body != nil {
 		req = req.CreateRecoveryCodeForIdentityBody(client.CreateRecoveryCodeForIdentityBody{
@@ -415,6 +525,19 @@ func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request 
 }
 
 func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request api.CreateRecoveryLinkForIdentityRequestObject) (api.CreateRecoveryLinkForIdentityResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Identity",
+			Object:    authzIdentityID(request.Body.IdentityID.String()),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateRecoveryLinkForIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.IdentityAPI.CreateRecoveryLinkForIdentity(ctx)
 	if request.Body != nil {
 		req = req.CreateRecoveryLinkForIdentityBody(client.CreateRecoveryLinkForIdentityBody{

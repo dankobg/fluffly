@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -129,4 +130,32 @@ func (a *ApiHandler) AttachSessionData(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func authzIdentityID(id string) string {
+	return fmt.Sprintf("identity:%s", id)
+}
+
+func authzCourierMessageID(id string) string {
+	return fmt.Sprintf("courier_message:%s", id)
+}
+
+func authzSchemaID(id string) string {
+	return fmt.Sprintf("schema:%s", id)
+}
+
+func authzSessionID(id string) string {
+	return fmt.Sprintf("session:%s", id)
+}
+
+func authzCountryID(id int64) string {
+	return fmt.Sprintf("country:%d", id)
+}
+
+func authzAnimalID(id int64) string {
+	return fmt.Sprintf("animal:%d", id)
+}
+
+func authzOrganizationID(id int64) string {
+	return fmt.Sprintf("organization:%d", id)
 }

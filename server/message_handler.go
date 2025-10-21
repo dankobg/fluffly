@@ -7,9 +7,23 @@ import (
 	api "github.com/dankobg/fluffly/api/gen"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/ory/client-go"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCourierMessagesRequestObject) (api.ListCourierMessagesResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "CourierMessages",
+			Object:    "courier_messages",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListCourierMessagesdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.CourierAPI.ListCourierMessages(ctx)
 	if request.Params.PageSize != nil {
 		req = req.PageSize(*request.Params.PageSize)
@@ -40,6 +54,19 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 }
 
 func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCourierMessageRequestObject) (api.GetCourierMessageResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "CourierMessage",
+			Object:    authzCourierMessageID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetCourierMessagedefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	req := a.Kratos.Admin.CourierAPI.GetCourierMessage(ctx, request.ID)
 	courierMessage, courierMessageResp, err := req.Execute()
 	if err != nil {

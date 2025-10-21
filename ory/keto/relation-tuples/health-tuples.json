@@ -1,0 +1,54 @@
+[
+  {
+    "namespace": "Health",
+    "object": "ready",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "Health",
+    "object": "ready",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Health",
+    "object": "ready",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Health",
+    "object": "alive",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "Health",
+    "object": "alive",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Health",
+    "object": "alive",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

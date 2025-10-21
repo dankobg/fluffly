@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "CourierMessages",
+    "object": "courier_messages",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "CourierMessages",
+    "object": "courier_messages",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

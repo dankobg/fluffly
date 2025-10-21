@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "Schemas",
+    "object": "schemas",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Schemas",
+    "object": "schemas",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

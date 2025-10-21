@@ -13,6 +13,7 @@ import (
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 const (
@@ -20,6 +21,19 @@ const (
 )
 
 func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateOrganizationRequestObject) (api.CreateOrganizationResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Organizations",
+			Object:    "organizations",
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateOrganization401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	form, err := request.Body.ReadForm(createOrganizationFileMaxMemory)
 	if err != nil {
 		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
@@ -176,6 +190,19 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 }
 
 func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateOrganizationRequestObject) (api.UpdateOrganizationResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Organization",
+			Object:    authzOrganizationID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.UpdateOrganization401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	organizationSetter := dbtype.OrganizationSetter{
 		Name:             request.Body.Name,
 		Website:          request.Body.Website,
@@ -205,6 +232,19 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 }
 
 func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteOrganizationRequestObject) (api.DeleteOrganizationResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Organization",
+			Object:    authzOrganizationID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteOrganization401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+	}
+
 	_, err := a.persistor.Organization().DeleteOrganizationByID(ctx, request.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete an organization by id: %w", err)
@@ -214,6 +254,17 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 }
 
 func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganizationRequestObject) (api.GetOrganizationResponseObject, error) {
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Organization",
+			Object:    authzOrganizationID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID("*"),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetOrganizationdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrOrganizationNotFound) {
@@ -226,6 +277,17 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 }
 
 func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrganizationsRequestObject) (api.ListOrganizationsResponseObject, error) {
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Organizations",
+			Object:    "organizations",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID("*"),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListOrganizationsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	var filters dbtype.OrganizationFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	organizations, err := a.persistor.Organization().ListOrganizations(ctx, filters)

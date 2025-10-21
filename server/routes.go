@@ -38,7 +38,9 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 
 	// static files
 	mux.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.FS(data.MustPublicFS()))))
-	mux.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir))))
+	if a.Cfg.FileStorage == "local" {
+		mux.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir))))
+	}
 
 	cors, err := NewCORS(a.Cfg.Cors)
 	if err != nil {

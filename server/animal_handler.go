@@ -15,6 +15,7 @@ import (
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/google/uuid"
 	"github.com/oapi-codegen/nullable"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 const (
@@ -22,6 +23,19 @@ const (
 )
 
 func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalRequestObject) (api.CreateAnimalResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animals",
+			Object:    "animals",
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	form, err := request.Body.ReadForm(createAnimalFileMaxMemory)
 	if err != nil {
 		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
@@ -207,6 +221,19 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 }
 
 func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalRequestObject) (api.UpdateAnimalResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animal",
+			Object:    authzAnimalID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.UpdateAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	animalSetter := dbtype.AnimalSetter{
 		UserID:         request.Body.UserID,
 		OrganizationID: request.Body.OrganizationID,
@@ -246,6 +273,19 @@ func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalR
 }
 
 func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalRequestObject) (api.DeleteAnimalResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animal",
+			Object:    authzAnimalID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteAnimal401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+	}
+
 	_, err := a.persistor.Animal().DeleteAnimalByID(ctx, request.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete an animal by id: %w", err)
@@ -255,6 +295,18 @@ func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalR
 }
 
 func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsRequestObject) (api.ListAnimalsResponseObject, error) {
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animals",
+			Object:    "animals",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID("*"),
+		},
+	}); err != nil || !checkResp.Allowed {
+		fmt.Println("err", err, checkResp.Allowed)
+		return api.ListAnimalsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	var filters dbtype.AnimalFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	animals, err := a.persistor.Animal().ListAnimals(ctx, filters)
@@ -273,6 +325,17 @@ func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsReq
 }
 
 func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequestObject) (api.GetAnimalResponseObject, error) {
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animal",
+			Object:    authzAnimalID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID("*"),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetAnimaldefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	animalWithJoinData, err := a.persistor.Animal().GetAnimalByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrAnimalNotFound) {
@@ -285,8 +348,20 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 }
 
 func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalRequestObject) (api.LikeAnimalResponseObject, error) {
-	// @TODO: remove hardcoded value
-	userID := uuid.MustParse("6e482ec1-64c4-4f34-93ba-392f4e473444")
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animal",
+			Object:    authzAnimalID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.LikeAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
+	userID := uuid.MustParse(sess.Identity.Id)
 	if err := a.persistor.Animal().LikeAnimal(ctx, userID, request.ID); err != nil {
 		msg := "failed to like an animal"
 		var e1 postgres.ErrAnimalUniqueViolation
@@ -305,8 +380,20 @@ func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalReque
 }
 
 func (a *ApiHandler) UnlikeAnimal(ctx context.Context, request api.UnlikeAnimalRequestObject) (api.UnlikeAnimalResponseObject, error) {
-	// @TODO: remove hardcoded value
-	userID := uuid.MustParse("6e482ec1-64c4-4f34-93ba-392f4e473444")
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Animal",
+			Object:    authzAnimalID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.UnlikeAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
+	userID := uuid.MustParse(sess.Identity.Id)
 	if err := a.persistor.Animal().UnlikeAnimal(ctx, userID, request.ID); err != nil {
 		return nil, fmt.Errorf("failed to unlike an animal: %w", err)
 	}

@@ -1,7 +1,13 @@
 [
   {
-    "namespace": "Identities",
-    "object": "identities",
+    "namespace": "Organizations",
+    "object": "organizations",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "Organizations",
+    "object": "organizations",
     "relation": "viewers",
     "subject_set": {
       "namespace": "Group",
@@ -10,8 +16,8 @@
     }
   },
   {
-    "namespace": "Identities",
-    "object": "identities",
+    "namespace": "Organizations",
+    "object": "organizations",
     "relation": "viewers",
     "subject_set": {
       "namespace": "Group",
@@ -20,8 +26,8 @@
     }
   },
   {
-    "namespace": "Identities",
-    "object": "identities",
+    "namespace": "Organizations",
+    "object": "organizations",
     "relation": "managers",
     "subject_set": {
       "namespace": "Group",

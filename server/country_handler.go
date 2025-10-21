@@ -12,9 +12,23 @@ import (
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/ptr"
 	"github.com/oapi-codegen/nullable"
+	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountryRequestObject) (api.CreateCountryResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Countries",
+			Object:    "countries",
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.CreateCountry401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	countrySetter := dbtype.CountrySetter{
 		Name:       nullable.NewNullableWithValue(request.Body.Name),
 		IsoAlpha2:  nullable.NewNullableWithValue(request.Body.IsoAlpha2),
@@ -41,6 +55,19 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 }
 
 func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountryRequestObject) (api.UpdateCountryResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Country",
+			Object:    authzCountryID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.UpdateCountry401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	countrySetter := dbtype.CountrySetter{}
 	if request.Body.Name != nil {
 		countrySetter.Name = nullable.NewNullableWithValue(*request.Body.Name)
@@ -74,6 +101,19 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 }
 
 func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountryRequestObject) (api.DeleteCountryResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Country",
+			Object:    authzCountryID(request.ID),
+			Relation:  "manage",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.DeleteCountry401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+	}
+
 	_, err := a.persistor.Country().DeleteCountryByID(ctx, request.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete a country by id: %w", err)
@@ -83,6 +123,19 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 }
 
 func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountriesRequestObject) (api.ListCountriesResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Countries",
+			Object:    "countries",
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.ListCountriesdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	var filters dbtype.CountryFilters
 	filters.Pagination = ptr.Of(getPaginationParams(request.Params.Page, request.Params.PageSize))
 	countries, err := a.persistor.Country().ListCountries(ctx, filters)
@@ -101,6 +154,19 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 }
 
 func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryRequestObject) (api.GetCountryResponseObject, error) {
+	sess := GetSession(ctx)
+
+	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
+		Tuple: &rts.RelationTuple{
+			Namespace: "Country",
+			Object:    authzCountryID(request.ID),
+			Relation:  "view",
+			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+		},
+	}); err != nil || !checkResp.Allowed {
+		return api.GetCountrydefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+	}
+
 	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrCountryNotFound) {

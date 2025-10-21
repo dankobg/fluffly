@@ -100,16 +100,16 @@ func (a *ApiHandler) createUserRelationTuples(ctx context.Context, identityID st
 				Action: rts.RelationTupleDelta_ACTION_INSERT,
 				RelationTuple: &rts.RelationTuple{
 					Namespace: "Group",
-					Object:    "customers",
+					Object:    "customer",
 					Relation:  "members",
-					Subject:   rts.NewSubjectID(identityID),
+					Subject:   rts.NewSubjectID(authzIdentityID(identityID)),
 				},
 			},
 			{
 				Action: rts.RelationTupleDelta_ACTION_INSERT,
 				RelationTuple: &rts.RelationTuple{
 					Namespace: "Identity",
-					Object:    identityID,
+					Object:    authzIdentityID(identityID),
 					Relation:  "owners",
 					Subject:   rts.NewSubjectID(identityID),
 				},
@@ -118,9 +118,9 @@ func (a *ApiHandler) createUserRelationTuples(ctx context.Context, identityID st
 				Action: rts.RelationTupleDelta_ACTION_INSERT,
 				RelationTuple: &rts.RelationTuple{
 					Namespace: "Identity",
-					Object:    identityID,
+					Object:    authzIdentityID(identityID),
 					Relation:  "parents",
-					Subject:   rts.NewSubjectSet("Identities", "identities/", ""),
+					Subject:   rts.NewSubjectSet("Identities", "identities", ""),
 				},
 			},
 		},
