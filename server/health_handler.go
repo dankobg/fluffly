@@ -17,7 +17,7 @@ func (a *ApiHandler) GetHealthAlive(ctx context.Context, request api.GetHealthAl
 			Subject:   rts.NewSubjectID("*"),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetHealthAlivedefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetHealthAlivedefaultJSONResponse{StatusCode: http.StatusForbidden, Body: newUnauthorizedErr("health_permission", "invalid permission")}, nil
 	}
 
 	return api.GetHealthAlive200JSONResponse{Alive: true}, nil
@@ -32,7 +32,7 @@ func (a *ApiHandler) GetHealthReady(ctx context.Context, request api.GetHealthRe
 			Subject:   rts.NewSubjectID("*"),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetHealthReadydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetHealthReadydefaultJSONResponse{StatusCode: http.StatusForbidden, Body: newUnauthorizedErr("health_permission", "invalid permission")}, nil
 	}
 
 	return api.GetHealthReady200JSONResponse{Ready: true}, nil

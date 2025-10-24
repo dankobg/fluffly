@@ -31,18 +31,18 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateOrganization401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
 	}
 
 	form, err := request.Body.ReadForm(createOrganizationFileMaxMemory)
 	if err != nil {
-		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "failed to read a form data", err.Error())}, nil
 	}
 	defer form.RemoveAll()
 	orgData := form.Value["data"][0]
 	var input api.CreateOrganizationBody
 	if err := json.Unmarshal([]byte(orgData), &input); err != nil {
-		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.CreateOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_internal", "failed to unmarshal non file data")}, nil
 	}
 
 	photoFileHeaders := form.File["photos"]
@@ -85,7 +85,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 		go func() {
 			_ = a.deleteUploadedFiles(ctx, filesToDelete, 5)
 		}()
-		return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
+		return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "file_upload", "failed to upload files")}, nil
 	}
 
 	var organizationCreateSetter dbtype.OrganizationCreateSetter
@@ -173,17 +173,18 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 	organization, err := a.persistor.Organization().CreateOrganization(ctx, organizationCreateSetter)
 	if err != nil {
 		msg := "could not create an organzation"
+		var reason string
 		var e1 postgres.ErrOrganizationUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", organization integrity error"
-			return api.CreateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "organization integrity error"
+			return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to create an organzation")
+		return api.CreateOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_save", msg, reason)}, nil
 	}
 	resp := api.CreateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
 	return resp, nil
@@ -200,7 +201,7 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.UpdateOrganization401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.UpdateOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
 	}
 
 	organizationSetter := dbtype.OrganizationSetter{
@@ -215,17 +216,18 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 	organization, err := a.persistor.Organization().UpdateOrganization(ctx, request.ID, organizationSetter)
 	if err != nil {
 		msg := "could not update an organzation"
+		var reason string
 		var e1 postgres.ErrOrganizationUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.UpdateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.UpdateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_edit", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", organization integrity error"
-			return api.UpdateOrganization400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "organization integrity error"
+			return api.UpdateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_edit", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to update an organzation")
+		return api.UpdateOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_edit", msg, reason)}, nil
 	}
 	resp := api.UpdateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
 	return resp, nil
@@ -242,7 +244,7 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteOrganization401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+		return api.DeleteOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
 	}
 
 	_, err := a.persistor.Organization().DeleteOrganizationByID(ctx, request.ID)
@@ -257,7 +259,7 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 	organizationWithJoinData, err := a.persistor.Organization().GetOrganizationByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrOrganizationNotFound) {
-			return api.GetOrganization404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Organization not found"}}, nil
+			return api.GetOrganization404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("organization_not_found", "organization not found")}, nil
 		}
 		return nil, fmt.Errorf("failed to get an organization by id: %w", err)
 	}
@@ -269,7 +271,7 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 			Subject:   rts.NewSubjectID("*"),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetOrganizationdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetOrganizationdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: newGenericErr(http.StatusUnauthorized, "organization_permission", "invalid permission")}, nil
 	}
 	resp := api.GetOrganization200JSONResponse(dto.OrganizationWithJoinDataToResponse(organizationWithJoinData, a.uploader))
 	return resp, nil
@@ -284,7 +286,7 @@ func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrga
 			Subject:   rts.NewSubjectID("*"),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListOrganizationsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListOrganizationsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: newGenericErr(http.StatusUnauthorized, "organization_permission", "invalid permission")}, nil
 	}
 
 	var filters dbtype.OrganizationFilters

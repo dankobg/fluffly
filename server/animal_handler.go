@@ -33,23 +33,23 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
 	}
 
 	form, err := request.Body.ReadForm(createAnimalFileMaxMemory)
 	if err != nil {
-		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.CreateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "failed to read a form data", err.Error())}, nil
 	}
 	defer form.RemoveAll()
 	animalData := form.Value["data"][0]
 	var input api.CreateAnimalBody
 	if err := json.Unmarshal([]byte(animalData), &input); err != nil {
-		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.CreateAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_internal", "failed to unmarshal non file data")}, nil
 	}
 
 	mainImageFileHeaders := form.File["image"]
 	if len(mainImageFileHeaders) == 0 && (input.ImageURL.IsNull() || (!input.ImageURL.IsNull() && input.ImageURL.MustGet() == "")) {
-		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "Provide image file or image_url as main animal photo"}}, nil
+		return api.CreateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_image_missing", "Provide image file or image_url for main animal photo", err.Error())}, nil
 	}
 	photoFileHeaders := form.File["photos"]
 	videoFileHeaders := form.File["videos"]
@@ -103,7 +103,7 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 		go func() {
 			_ = a.deleteUploadedFiles(ctx, filesToDelete, 5)
 		}()
-		return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: "failed to upload files"}}, nil
+		return api.CreateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "file_upload", "failed to upload files")}, nil
 	}
 
 	var animalCreateSetter dbtype.AnimalCreateSetter
@@ -204,17 +204,18 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 	animal, err := a.persistor.Animal().CreateAnimal(ctx, animalCreateSetter)
 	if err != nil {
 		msg := "could not create an animal"
+		var reason string
 		var e1 postgres.ErrAnimalUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.CreateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_save", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", animal integrity error"
-			return api.CreateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "animal integrity error"
+			return api.CreateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_save", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to create an animal")
+		return api.CreateAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_save", msg, reason)}, nil
 	}
 	resp := api.CreateAnimal201JSONResponse(dto.AnimalToResponse(animal))
 	return resp, nil
@@ -231,7 +232,7 @@ func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalR
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.UpdateAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.UpdateAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
 	}
 
 	animalSetter := dbtype.AnimalSetter{
@@ -256,17 +257,18 @@ func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalR
 	animal, err := a.persistor.Animal().UpdateAnimal(ctx, request.ID, animalSetter)
 	if err != nil {
 		msg := "could not update an animal"
+		var reason string
 		var e1 postgres.ErrAnimalUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.UpdateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.UpdateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_edit", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", animal integrity error"
-			return api.UpdateAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "animal integrity error"
+			return api.UpdateAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_edit", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to update an animal")
+		return api.UpdateAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_edit", msg, reason)}, nil
 	}
 	resp := api.UpdateAnimal201JSONResponse(dto.AnimalToResponse(animal))
 	return resp, nil
@@ -283,7 +285,7 @@ func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalR
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteAnimal401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+		return api.DeleteAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
 	}
 
 	_, err := a.persistor.Animal().DeleteAnimalByID(ctx, request.ID)
@@ -304,7 +306,7 @@ func (a *ApiHandler) ListAnimals(ctx context.Context, request api.ListAnimalsReq
 		},
 	}); err != nil || !checkResp.Allowed {
 		fmt.Println("err", err, checkResp.Allowed)
-		return api.ListAnimalsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListAnimalsdefaultJSONResponse{StatusCode: http.StatusForbidden, Body: newUnauthorizedErr("animal_permission", "invalid permission")}, nil
 	}
 
 	var filters dbtype.AnimalFilters
@@ -328,7 +330,7 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 	animalWithJoinData, err := a.persistor.Animal().GetAnimalByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrAnimalNotFound) {
-			return api.GetAnimal404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Animal not found"}}, nil
+			return api.GetAnimal404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("animal_not_found", "animal not found")}, nil
 		}
 		return nil, fmt.Errorf("failed to get an animal by id: %w", err)
 	}
@@ -340,7 +342,7 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 			Subject:   rts.NewSubjectID("*"),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetAnimaldefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetAnimaldefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: newGenericErr(http.StatusUnauthorized, "animal_permission", "invalid permission")}, nil
 	}
 	resp := api.GetAnimal200JSONResponse(dto.AnimalWithJoinDataToResponse(animalWithJoinData, a.uploader))
 	return resp, nil
@@ -357,23 +359,24 @@ func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalReque
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.LikeAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.LikeAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
 	}
 
 	userID := uuid.MustParse(sess.Identity.Id)
 	if err := a.persistor.Animal().LikeAnimal(ctx, userID, request.ID); err != nil {
 		msg := "failed to like an animal"
+		var reason string
 		var e1 postgres.ErrAnimalUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.LikeAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.LikeAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_like", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", animal integrity error"
-			return api.LikeAnimal400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "animal integrity error"
+			return api.LikeAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_like", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to like an animal")
+		return api.LikeAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_like", msg, reason)}, nil
 	}
 	return api.EmptyResponseResponse{}, nil
 }
@@ -389,7 +392,7 @@ func (a *ApiHandler) UnlikeAnimal(ctx context.Context, request api.UnlikeAnimalR
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.UnlikeAnimal401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.UnlikeAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
 	}
 
 	userID := uuid.MustParse(sess.Identity.Id)

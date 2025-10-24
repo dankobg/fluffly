@@ -26,7 +26,7 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateCountry401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
 	}
 
 	countrySetter := dbtype.CountrySetter{
@@ -38,17 +38,18 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 	country, err := a.persistor.Country().CreateCountry(ctx, countrySetter)
 	if err != nil {
 		msg := "could not create a country"
+		var reason string
 		var e1 postgres.ErrCountryUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.CreateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.CreateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_save", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", country integrity error"
-			return api.CreateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "country integrity error"
+			return api.CreateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_save", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("failed to create a country")
+		return api.CreateCountrydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "country_save", msg, reason)}, nil
 	}
 	resp := api.CreateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
@@ -65,7 +66,7 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.UpdateCountry401JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.UpdateCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
 	}
 
 	countrySetter := dbtype.CountrySetter{}
@@ -84,17 +85,18 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 	country, err := a.persistor.Country().UpdateCountry(ctx, request.ID, countrySetter)
 	if err != nil {
 		msg := "could not update a country"
+		var reason string
 		var e1 postgres.ErrCountryUniqueViolation
 		if errors.As(err, &e1) {
-			msg += ", duplicate " + e1.Name
-			return api.UpdateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "duplicate " + e1.Name
+			return api.UpdateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_edit", msg, reason)}, nil
 		}
 		var e2 postgres.IntegrityViolationError
 		if errors.As(err, &e2) {
-			msg += ", country integrity error"
-			return api.UpdateCountry400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: msg}}, nil
+			reason = "country integrity error"
+			return api.UpdateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_edit", msg, reason)}, nil
 		}
-		return nil, fmt.Errorf("could not update a country")
+		return api.UpdateCountrydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "country_edit", msg, reason)}, nil
 	}
 	resp := api.UpdateCountry201JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
@@ -111,7 +113,7 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteCountry401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+		return api.DeleteCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
 	}
 
 	_, err := a.persistor.Country().DeleteCountryByID(ctx, request.ID)
@@ -133,7 +135,7 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListCountriesdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListCountries403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
 	}
 
 	var filters dbtype.CountryFilters
@@ -158,7 +160,7 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 	country, err := a.persistor.Country().GetCountryByID(ctx, request.ID)
 	if err != nil {
 		if errors.Is(err, postgres.ErrCountryNotFound) {
-			return api.GetCountry404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Country not found"}}, nil
+			return api.GetCountry404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("country_not_found", "country not found")}, nil
 		}
 		return nil, fmt.Errorf("failed to get a country by id: %w", err)
 	}
@@ -170,7 +172,7 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetCountrydefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
 	}
 	resp := api.GetCountry200JSONResponse(dto.CountryToResponse(country))
 	return resp, nil

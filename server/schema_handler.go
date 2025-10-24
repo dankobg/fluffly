@@ -20,7 +20,7 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 			Subject:   rts.NewSubjectID(sess.Identity.Id),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListIdentitySchemasdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListIdentitySchemas403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("schema_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.ListIdentitySchemas(ctx)
@@ -32,7 +32,7 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 	}
 	schemaContainers, schemaContainersResp, err := req.Execute()
 	if err != nil {
-		return api.ListIdentitySchemasdefaultJSONResponse{Body: api.Error{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+		return api.ListIdentitySchemasdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "schemas_list", "failed to list identity schemas")}, nil
 	}
 	defer schemaContainersResp.Body.Close()
 	resp := make(api.ListIdentitySchemas200JSONResponse, 0, len(schemaContainers))
@@ -51,7 +51,7 @@ func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdent
 	req := a.Kratos.Admin.IdentityAPI.GetIdentitySchema(ctx, request.ID)
 	identitySchema, identitySchemaResp, err := req.Execute()
 	if err != nil {
-		return api.GetIdentitySchema404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "schema not found"}}, nil
+		return api.GetIdentitySchema404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("schema_not_found", "schema not found")}, nil
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
@@ -61,7 +61,7 @@ func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdent
 			Subject:   rts.NewSubjectID(sess.Identity.Id),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetIdentitySchemadefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetIdentitySchema403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("schema_permission", "invalid permission")}, nil
 	}
 	defer identitySchemaResp.Body.Close()
 	return api.GetIdentitySchema200JSONResponse(identitySchema), nil

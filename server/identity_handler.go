@@ -25,7 +25,7 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListIdentitiesdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListIdentities403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.ListIdentities(ctx)
@@ -52,7 +52,7 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 	}
 	identities, identitiesResp, err := req.Execute()
 	if err != nil {
-		return api.ListIdentitiesdefaultJSONResponse{Body: api.Error{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+		return api.ListIdentitiesdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identities_list", "failed to list identities")}, nil
 	}
 	defer identitiesResp.Body.Close()
 	resp := make(api.ListIdentities200JSONResponse, 0, len(identities))
@@ -78,7 +78,7 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 	}
 	identity, identityResp, err := req.Execute()
 	if err != nil {
-		return api.GetIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.GetIdentity404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("identity_not_found", "identity not found")}, nil
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
@@ -88,7 +88,7 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
@@ -109,7 +109,7 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.CreateIdentity(ctx)
@@ -221,7 +221,7 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.UpdateIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.UpdateIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.UpdateIdentity(ctx, request.ID)
@@ -269,7 +269,7 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 	}
 	identity, identityResp, err := req.Execute()
 	if err != nil {
-		return api.UpdateIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.UpdateIdentitydefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_edit", "failed to edit identity")}, nil
 	}
 	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
@@ -290,13 +290,14 @@ func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdent
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.DeleteIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentity(ctx, request.ID)
 	deleteIdentityResp, err := req.Execute()
 	if err != nil {
-		return api.DeleteIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.DeleteIdentitydefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_delete", "failed to delete identity")}, nil
+
 	}
 	defer deleteIdentityResp.Body.Close()
 	return api.DeleteIdentity204Response{}, nil
@@ -313,7 +314,7 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.PatchIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.PatchIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.PatchIdentity(ctx, request.ID)
@@ -331,7 +332,7 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 	}
 	identity, identityResp, err := req.Execute()
 	if err != nil {
-		return api.PatchIdentity404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.PatchIdentitydefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_patch", "failed to patch identity")}, nil
 	}
 	defer identityResp.Body.Close()
 	resp, err := dto.IdentityToResponse(*identity)
@@ -352,7 +353,7 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.BatchPatchIdentitiesdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.BatchPatchIdentities403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.BatchPatchIdentities(ctx)
@@ -362,7 +363,7 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 	}
 	batchPatchIdentities, batchPatchIdentitiesResp, err := req.Execute()
 	if err != nil {
-		return api.BatchPatchIdentities400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusNotFound, Message: "batch patch failed"}}, nil
+		return api.BatchPatchIdentitiesdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_batch_patch", "failed to batch patch identity")}, nil
 	}
 	defer batchPatchIdentitiesResp.Body.Close()
 	identitiesPatches := make([]api.IdentityPatchResponse, 0)
@@ -410,7 +411,7 @@ func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteIdentityCredentialsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.DeleteIdentityCredentials403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentityCredentials(ctx, request.ID, string(request.Type))
@@ -419,7 +420,7 @@ func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.
 	}
 	deleteIdentityCredentialsResp, err := req.Execute()
 	if err != nil {
-		return api.DeleteIdentityCredentials404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.DeleteIdentityCredentialsdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_delete_credentials", "failed to delete identity")}, nil
 	}
 	defer deleteIdentityCredentialsResp.Body.Close()
 	return api.DeleteIdentityCredentials204Response{}, nil
@@ -436,13 +437,13 @@ func (a *ApiHandler) DeleteIdentitySessions(ctx context.Context, request api.Del
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DeleteIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.DeleteIdentitySessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.DeleteIdentitySessions(ctx, request.ID)
 	deleteIdentitySessionsResp, err := req.Execute()
 	if err != nil {
-		return api.DeleteIdentitySessions404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "identity not found"}}, nil
+		return api.DeleteIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_delete_sessions", "failed to delete identity sessions")}, nil
 	}
 	defer deleteIdentitySessionsResp.Body.Close()
 	return api.DeleteIdentitySessions204Response{}, nil
@@ -459,7 +460,7 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListIdentitySessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.ListIdentitySessions(ctx, request.ID)
@@ -474,7 +475,7 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 	}
 	identitySessions, identitySessionsResp, err := req.Execute()
 	if err != nil {
-		return api.ListIdentitySessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.ListIdentitySessionsdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identities_list", "failed to list identities")}, nil
 	}
 	defer identitySessionsResp.Body.Close()
 	resp := make(api.ListIdentitySessions200JSONResponse, 0, len(identitySessions))
@@ -499,7 +500,7 @@ func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request 
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateRecoveryCodeForIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateRecoveryCodeForIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.CreateRecoveryCodeForIdentity(ctx)
@@ -512,7 +513,7 @@ func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request 
 	}
 	recoveryCodeForIdentity, recoveryCodeForIdentityResp, err := req.Execute()
 	if err != nil {
-		return api.CreateRecoveryCodeForIdentity400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: "failed to create code"}}, nil
+		return api.CreateRecoveryCodeForIdentitydefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_create_recovery_code", "failed to create recovery code for identity")}, nil
 	}
 	defer recoveryCodeForIdentityResp.Body.Close()
 	resp, err := dto.RecoveryCodeForIdentityToResponse(*recoveryCodeForIdentity)
@@ -533,7 +534,7 @@ func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request 
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.CreateRecoveryLinkForIdentitydefaultJSONResponse{StatusCode: http.StatusUnauthorized, Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.CreateRecoveryLinkForIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.CreateRecoveryLinkForIdentity(ctx)
@@ -545,7 +546,7 @@ func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request 
 	}
 	recoveryLinkForIdentity, recoveryLinkForIdentityResp, err := req.Execute()
 	if err != nil {
-		return api.CreateRecoveryLinkForIdentity400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: "failed to create link"}}, nil
+		return api.CreateRecoveryLinkForIdentitydefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "identity_create_recovery_link", "failed to create recovery link for identity")}, nil
 	}
 	defer recoveryLinkForIdentityResp.Body.Close()
 	resp, err := dto.RecoveryLinkForIdentityToResponse(*recoveryLinkForIdentity)

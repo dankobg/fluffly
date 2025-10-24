@@ -21,7 +21,7 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListSessionsdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListSessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.ListSessions(ctx)
@@ -43,7 +43,7 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 	}
 	sessions, sessionsResp, err := req.Execute()
 	if err != nil {
-		return api.ListSessions400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.ListSessionsdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "sessions_list", "failed to list sessions")}, nil
 	}
 	defer sessionsResp.Body.Close()
 	resp := make(api.ListSessions200JSONResponse, 0, len(sessions))
@@ -70,7 +70,7 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 	}
 	session, sessionResp, err := req.Execute()
 	if err != nil {
-		return api.GetSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+		return api.GetSessiondefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "session_get", "failed to get session")}, nil
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
@@ -80,7 +80,7 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
 	}
 	defer sessionResp.Body.Close()
 	resp, err := dto.SessionToResponse(*session)
@@ -101,13 +101,13 @@ func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSess
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.DisableSession401JSONResponse{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}, nil
+		return api.DisableSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.DisableSession(ctx, request.ID)
 	disableSessionResp, err := req.Execute()
 	if err != nil {
-		return api.DisableSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+		return api.DisableSessiondefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "session_disable", "failed to disable session")}, nil
 	}
 	defer disableSessionResp.Body.Close()
 	return api.DisableSession204Response{}, nil
@@ -124,13 +124,13 @@ func (a *ApiHandler) ExtendSession(ctx context.Context, request api.ExtendSessio
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ExtendSessiondefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ExtendSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.IdentityAPI.ExtendSession(ctx, request.ID)
 	session, sessionResp, err := req.Execute()
 	if err != nil {
-		return api.ExtendSession400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: http.StatusBadRequest, Message: err.Error()}}, nil
+		return api.ExtendSessiondefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "session_extend", "failed to extend session")}, nil
 	}
 	defer sessionResp.Body.Close()
 	resp, err := dto.SessionToResponse(*session)

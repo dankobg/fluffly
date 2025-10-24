@@ -21,7 +21,7 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.ListCourierMessagesdefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.ListCourierMessages403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("message_permission", "invalid permission")}, nil
 	}
 
 	req := a.Kratos.Admin.CourierAPI.ListCourierMessages(ctx)
@@ -39,7 +39,7 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 	}
 	courierMessages, courierMessagesResp, err := req.Execute()
 	if err != nil {
-		return api.ListCourierMessages400JSONResponse{GenericErrorJSONResponse: api.GenericErrorJSONResponse{Code: 400, Message: err.Error()}}, nil
+		return api.ListCourierMessagesdefaultJSONResponse{StatusCode: http.StatusServiceUnavailable, Body: newGenericErr(http.StatusServiceUnavailable, "message_list", "failed to list courier messages")}, nil
 	}
 	defer courierMessagesResp.Body.Close()
 	resp := make(api.ListCourierMessages200JSONResponse, 0)
@@ -58,7 +58,7 @@ func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCouri
 	req := a.Kratos.Admin.CourierAPI.GetCourierMessage(ctx, request.ID)
 	courierMessage, courierMessageResp, err := req.Execute()
 	if err != nil {
-		return api.GetCourierMessage404JSONResponse{NotFoundErrorJSONResponse: api.NotFoundErrorJSONResponse{Code: http.StatusNotFound, Message: "Courier message not found"}}, nil
+		return api.GetCourierMessage404JSONResponse{NotFoundErrorResponseJSONResponse: newNotFoundResp("message_not_found", "courier message not found")}, nil
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
@@ -68,7 +68,7 @@ func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCouri
 			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
-		return api.GetCourierMessagedefaultJSONResponse{Body: api.Error{Code: http.StatusUnauthorized, Message: http.StatusText(http.StatusUnauthorized)}}, nil
+		return api.GetCourierMessage403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("message_permission", "invalid permission")}, nil
 	}
 	defer courierMessageResp.Body.Close()
 	resp, err := dto.MessageToResponse(*courierMessage)

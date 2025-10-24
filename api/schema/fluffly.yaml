@@ -24,7 +24,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Healthy"
         default:
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /health/ready:
     get:
       operationId: getHealthReady
@@ -40,7 +40,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Ready"
         default:
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /countries:
     get:
       operationId: listCountries
@@ -70,8 +70,12 @@ paths:
                       $ref: "#/components/schemas/Country"
                   meta:
                     $ref: "#/components/schemas/PaginationMeta"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     post:
       operationId: createCountry
       summary: Create country
@@ -93,12 +97,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Country"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/countries/{id}":
     get:
       operationId: getCountry
@@ -123,11 +128,16 @@ paths:
               schema:
                 $ref: "#/components/schemas/Country"
           description: identitySchema
+        "400":
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     patch:
       operationId: updateCountry
       summary: Update country
@@ -157,12 +167,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Country"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     delete:
       operationId: deleteCountry
       summary: Delete country by id
@@ -183,12 +194,13 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /organizations:
     get:
       operationId: listOrganizations
@@ -217,7 +229,7 @@ paths:
                   meta:
                     $ref: "#/components/schemas/PaginationMeta"
         default:
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     post:
       operationId: createOrganization
       summary: Create organization
@@ -239,12 +251,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Organization"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/organizations/{id}":
     get:
       operationId: getOrganization
@@ -268,10 +281,9 @@ paths:
                 $ref: "#/components/schemas/Organization"
           description: identitySchema
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     patch:
       operationId: updateOrganization
       summary: Update organization
@@ -301,12 +313,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Organization"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     delete:
       operationId: deleteOrganization
       summary: Delete organization by id
@@ -327,12 +340,13 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /animals:
     get:
       operationId: listAnimals
@@ -361,7 +375,7 @@ paths:
                   meta:
                     $ref: "#/components/schemas/PaginationMeta"
         default:
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     post:
       operationId: createAnimal
       summary: Create animal
@@ -383,12 +397,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Animal"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/animals/{id}":
     get:
       operationId: getAnimal
@@ -412,10 +427,9 @@ paths:
                 $ref: "#/components/schemas/Animal"
           description: identitySchema
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     patch:
       operationId: updateAnimal
       summary: Update animal
@@ -445,12 +459,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Animal"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     delete:
       operationId: deleteAnimal
       summary: Delete animal by id
@@ -471,12 +486,13 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/animals/{id}/like":
     post:
       operationId: likeAnimal
@@ -498,12 +514,13 @@ paths:
         "201":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/animals/{id}/unlike":
     post:
       operationId: unlikeAnimal
@@ -525,18 +542,22 @@ paths:
         "201":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /schemas:
     get:
-      description: Returns a list of all identity schemas currently in use.
       operationId: listIdentitySchemas
+      summary: Get all Identity Schemas
+      description: Returns a list of all identity schemas currently in use.
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: >-
             Page Size
@@ -563,18 +584,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/IdentitySchemas"
           description: List Identity JSON Schemas Response
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Get all Identity Schemas
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/schemas/{id}":
     get:
-      description: Return a specific identity schema.
       operationId: getIdentitySchema
+      description: Return a specific identity schema.
+      summary: Get Identity JSON Schema
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID must be set to the ID of schema you want to get
           in: path
@@ -589,20 +613,23 @@ paths:
               schema:
                 $ref: "#/components/schemas/IdentitySchema"
           description: identitySchema
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Get Identity JSON Schema
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /courier/messages:
     get:
-      description: Lists all messages by given status and recipient.
       operationId: listCourierMessages
+      description: Lists all messages by given status and recipient.
+      summary: List Messages
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: This is the number of items per page to return.
           in: query
@@ -642,18 +669,22 @@ paths:
                   $ref: "#/components/schemas/Message"
                 type: array
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-      summary: List Messages
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/courier/messages/{id}":
     get:
-      description: Gets a specific messages by the given ID.
       operationId: getCourierMessage
+      description: Gets a specific messages by the given ID.
+      summary: Get a Message
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: MessageID is the ID of the message.
           in: path
@@ -669,23 +700,27 @@ paths:
                 $ref: "#/components/schemas/Message"
           description: message
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-      summary: Get a Message
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /identities:
     get:
+      operationId: listIdentities
       description: >-
         Lists all
         [identities](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
         in the system. Note: filters cannot be combined.
-      operationId: listIdentities
+      summary: List Identities
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: Page Size
           in: query
@@ -783,13 +818,14 @@ paths:
                   $ref: "#/components/schemas/Identity"
                 type: array
           description: Paginated Identity List Response
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: List Identities
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     patch:
+      operationId: batchPatchIdentities
       description: >-
         Creates multiple
 
@@ -801,9 +837,11 @@ paths:
 
         for instance passwords, social sign in configurations or multifactor
         methods.
-      operationId: batchPatchIdentities
+      summary: Create multiple identities
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       requestBody:
         content:
           application/json:
@@ -818,16 +856,18 @@ paths:
                 $ref: "#/components/schemas/BatchPatchIdentitiesResponse"
           description: batchPatchIdentitiesResponse
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "409":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Create multiple identities
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     post:
+      operationId: createIdentity
+      summary: Create an Identity
       description: >-
         Create an
         [identity](https://www.ory.sh/docs/kratos/concepts/identity-user-model).
@@ -838,9 +878,10 @@ paths:
 
         for instance passwords, social sign in configurations or multifactor
         methods.
-      operationId: createIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       requestBody:
         content:
           application/json:
@@ -855,17 +896,19 @@ paths:
                 $ref: "#/components/schemas/Identity"
           description: identity
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "409":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Create an Identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/identities/{id}":
     delete:
+      operationId: deleteIdentity
+      summary: Delete an Identity
       description: >-
         Calling this endpoint irrecoverably and permanently deletes the
         [identity](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
@@ -875,9 +918,10 @@ paths:
         identity was not found, in which case it is
 
         assumed that is has been deleted already.
-      operationId: deleteIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -888,15 +932,17 @@ paths:
       responses:
         "204":
           $ref: "#/components/responses/EmptyResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Delete an Identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     get:
+      operationId: getIdentity
+      summary: Get an Identity
       description: >-
         Return an
         [identity](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
@@ -904,9 +950,10 @@ paths:
 
         include credentials (e.g. social sign in connections) in the response by
         using the `include_credential` query parameter.
-      operationId: getIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID must be set to the ID of identity you want to get
           in: path
@@ -947,15 +994,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/Identity"
           description: identity
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Get an Identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     patch:
+      operationId: patchIdentity
+      summary: Patch an Identity
       description: >-
         Partially updates an
         [identity's](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
@@ -963,9 +1012,10 @@ paths:
 
         The fields `id`, `stateChangedAt` and `credentials` can not be updated
         using this method.
-      operationId: patchIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID must be set to the ID of identity you want to update
           in: path
@@ -987,18 +1037,20 @@ paths:
                 $ref: "#/components/schemas/Identity"
           description: identity
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         "409":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Patch an Identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     put:
+      operationId: updateIdentity
+      summary: Update an Identity
       description: >-
         This endpoint updates an
         [identity](https://www.ory.sh/docs/kratos/concepts/identity-user-model).
@@ -1006,9 +1058,10 @@ paths:
 
         payload (except credentials) is expected. It is possible to update the
         identity's credentials as well.
-      operationId: updateIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID must be set to the ID of identity you want to update
           in: path
@@ -1030,28 +1083,31 @@ paths:
                 $ref: "#/components/schemas/Identity"
           description: identity
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         "409":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Update an Identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/identities/{id}/credentials/{type}":
     delete:
+      operationId: deleteIdentityCredentials
+      summary: Delete a credential for a specific identity
       description: >-
         Delete an
         [identity](https://www.ory.sh/docs/kratos/concepts/identity-user-model)
         credential by its type.
 
         You cannot delete password or code auth credentials through this API.
-      operationId: deleteIdentityCredentials
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -1115,22 +1171,25 @@ paths:
       responses:
         "204":
           $ref: "#/components/responses/EmptyResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Delete a credential for a specific identity
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/identities/{id}/sessions":
     delete:
+      operationId: deleteIdentitySessions
+      summary: Delete & Invalidate an Identity's Sessions
       description: >-
         Calling this endpoint irrecoverably and permanently deletes and
         invalidates all sessions that belong to the given Identity.
-      operationId: deleteIdentitySessions
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID is the identity's ID.
           in: path
@@ -1142,22 +1201,23 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/UnexpectedError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Delete & Invalidate an Identity's Sessions
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
     get:
-      description: This endpoint returns all sessions that belong to the given Identity.
       operationId: listIdentitySessions
+      summary: List an Identity's Sessions
+      description: This endpoint returns all sessions that belong to the given Identity.
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: >-
             Page Size
@@ -1212,21 +1272,24 @@ paths:
                 type: array
           description: List Identity Sessions Response
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: List an Identity's Sessions
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /sessions:
     get:
-      description: Listing all sessions that exist.
       operationId: listSessions
+      summary: List All Sessions
+      description: Listing all sessions that exist.
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: >-
             Items per Page
@@ -1289,19 +1352,19 @@ paths:
             The response given when listing sessions in an administrative
             context.
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: List All Sessions
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/sessions/{id}":
     delete:
+      operationId: disableSession
       description: >-
         Calling this endpoint deactivates the specified session. Session data is
         not deleted.
-      operationId: disableSession
       security:
         - cookieAuth: []
       parameters:
@@ -1315,24 +1378,28 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
         "401":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
+          $ref: "#/components/responses/UnexpectedErrorResponse"
       summary: Deactivate a Session
       tags:
         - fluffly
     get:
+      operationId: getSession
+      summary: Get Session
       description: >-
         This endpoint is useful for:
 
         Getting a session object with all specified expandables that exist in an
         administrative context.
-      operationId: getSession
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: >-
             ExpandOptions is a query parameter encoded list of all properties
@@ -1364,15 +1431,17 @@ paths:
                 $ref: "#/components/schemas/Session"
           description: session
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Get Session
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   "/sessions/{id}/extend":
     patch:
+      operationId: extendSession
+      summary: Extend a Session
       description: >-
         Calling this endpoint extends the given session ID. If
         `session.earliest_possible_extend` is set it
@@ -1395,9 +1464,10 @@ paths:
 
         Retrieve the session ID from the `/sessions/whoami` endpoint /
         `toSession` SDK method.
-      operationId: extendSession
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - description: ID is the session's ID.
           in: path
@@ -1415,25 +1485,28 @@ paths:
         "204":
           $ref: "#/components/responses/EmptyResponse"
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Extend a Session
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /recovery/code:
     post:
+      operationId: createRecoveryCodeForIdentity
+      summary: Create a Recovery Code
       description: >-
         This endpoint creates a recovery code which should be given to the user
         in order for them to recover
 
         (or activate) their account.
-      operationId: createRecoveryCodeForIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       requestBody:
         content:
           application/json:
@@ -1448,25 +1521,28 @@ paths:
                 $ref: "#/components/schemas/RecoveryCodeForIdentity"
           description: recoveryCodeForIdentity
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Create a Recovery Code
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   /recovery/link:
     post:
+      operationId: createRecoveryLinkForIdentity
+      summary: Create a Recovery Link
       description: >-
         This endpoint creates a recovery link which should be given to the user
         in order for them to recover
 
         (or activate) their account.
-      operationId: createRecoveryLinkForIdentity
       security:
         - cookieAuth: []
+      tags:
+        - fluffly
       parameters:
         - in: query
           name: return_to
@@ -1486,15 +1562,15 @@ paths:
                 $ref: "#/components/schemas/RecoveryLinkForIdentity"
           description: recoveryLinkForIdentity
         "400":
-          $ref: "#/components/responses/GenericError"
+          $ref: "#/components/responses/GenericErrorResponse"
+        "401":
+          $ref: "#/components/responses/UnauthenticatedErrorResponse"
+        "403":
+          $ref: "#/components/responses/UnauthorizedErrorResponse"
         "404":
-          $ref: "#/components/responses/NotFoundError"
+          $ref: "#/components/responses/NotFoundErrorResponse"
         default:
-          $ref: "#/components/responses/UnexpectedError"
-          description: errorGeneric
-      summary: Create a Recovery Link
-      tags:
-        - fluffly
+          $ref: "#/components/responses/UnexpectedErrorResponse"
   # /credentials:
   #   post:
   #     description: >-
@@ -2031,30 +2107,40 @@ components:
       name: ory_kratos_session
 
   responses:
-    UnexpectedError:
+    UnexpectedErrorResponse:
       description: Unexpected error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
-    GenericError:
-      description: Unexpected error
+            $ref: "#/components/schemas/APIError"
+    GenericErrorResponse:
+      description: API error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
-    NotFoundError:
-      description: Unexpected error
+            $ref: "#/components/schemas/APIError"
+    NotFoundErrorResponse:
+      description: Not found
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Error"
+            $ref: "#/components/schemas/APIError"
+    UnauthenticatedErrorResponse:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
+    UnauthorizedErrorResponse:
+      description: Not authorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIError"
     EmptyResponse:
       description: >-
-        Empty responses are sent when, for example, resources are deleted. The
-        HTTP status code for empty responses is
-
-        typically 201 or 204
+        Empty responses are sent when, for example, resources are deleted. 
+        The HTTP status code for empty responses is typically 201 or 204
 
   parameters:
     PaginationPage:
@@ -3459,19 +3545,29 @@ components:
         JSON, SQL, and Swagger and is NULLable-
       nullable: true
       type: object
-    Error:
+    APIError:
       type: object
       required:
         - code
+        - status_code
         - message
       properties:
         code:
+          type: string
+          description: Error unique code
+        status_code:
           type: integer
           format: int32
-          description: Error code
+          description: HTTP status code
         message:
           type: string
           description: Error message
+        reason:
+          type: string
+          description: Error reason description
+        details:
+          type: object
+          description: Other error details
     AmountInCent:
       format: int64
       type: integer
