@@ -9,7 +9,7 @@
 		switch (value) {
 			case 'customer':
 				return 'text-blue-400';
-			case 'employee':
+			case 'developer':
 				return 'text-purple-400';
 		}
 	});

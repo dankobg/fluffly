@@ -22,7 +22,7 @@ func (a *ApiHandler) ListIdentities(ctx context.Context, request api.ListIdentit
 			Namespace: "Identities",
 			Object:    "identities",
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListIdentities403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -83,9 +83,9 @@ func (a *ApiHandler) GetIdentity(ctx context.Context, request api.GetIdentityReq
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -106,7 +106,7 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 			Namespace: "Identities",
 			Object:    "identities",
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -216,9 +216,9 @@ func (a *ApiHandler) UpdateIdentity(ctx context.Context, request api.UpdateIdent
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.UpdateIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -285,9 +285,9 @@ func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdent
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -309,9 +309,9 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.PatchIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -350,7 +350,7 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 			Namespace: "Identities",
 			Object:    "identities",
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.BatchPatchIdentities403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -406,9 +406,9 @@ func (a *ApiHandler) DeleteIdentityCredentials(ctx context.Context, request api.
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteIdentityCredentials403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -432,9 +432,9 @@ func (a *ApiHandler) DeleteIdentitySessions(ctx context.Context, request api.Del
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteIdentitySessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -455,9 +455,9 @@ func (a *ApiHandler) ListIdentitySessions(ctx context.Context, request api.ListI
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.ID),
+			Object:    AuthzIdentityID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListIdentitySessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -495,9 +495,9 @@ func (a *ApiHandler) CreateRecoveryCodeForIdentity(ctx context.Context, request 
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.Body.IdentityID.String()),
+			Object:    AuthzIdentityID(request.Body.IdentityID.String()),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateRecoveryCodeForIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil
@@ -529,9 +529,9 @@ func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request 
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Identity",
-			Object:    authzIdentityID(request.Body.IdentityID.String()),
+			Object:    AuthzIdentityID(request.Body.IdentityID.String()),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateRecoveryLinkForIdentity403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("identity_permission", "invalid permission")}, nil

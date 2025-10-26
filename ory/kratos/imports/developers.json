@@ -1,6 +1,6 @@
 [
   {
-    "schema_id": "employee",
+    "schema_id": "developer",
     "traits": {
       "email": "fluffly@test.com",
       "first_name": "Fluffly",
@@ -23,7 +23,7 @@
     }
   },
   {
-    "schema_id": "employee",
+    "schema_id": "developer",
     "traits": {
       "email": "dev@test.com",
       "first_name": "Dev First",
@@ -46,7 +46,7 @@
     }
   },
   {
-    "schema_id": "employee",
+    "schema_id": "developer",
     "traits": {
       "email": "admin@test.com",
       "first_name": "Admin First",
@@ -69,7 +69,7 @@
     }
   },
   {
-    "schema_id": "employee",
+    "schema_id": "developer",
     "traits": {
       "email": "danko@test.com",
       "first_name": "Danko",

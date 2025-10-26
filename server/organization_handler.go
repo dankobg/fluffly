@@ -28,7 +28,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 			Namespace: "Organizations",
 			Object:    "organizations",
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
@@ -196,9 +196,9 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Organization",
-			Object:    authzOrganizationID(request.ID),
+			Object:    AuthzOrganizationID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.UpdateOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
@@ -239,9 +239,9 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Organization",
-			Object:    authzOrganizationID(request.ID),
+			Object:    AuthzOrganizationID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteOrganization403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_permission", "invalid permission")}, nil
@@ -266,7 +266,7 @@ func (a *ApiHandler) GetOrganization(ctx context.Context, request api.GetOrganiz
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Organization",
-			Object:    authzOrganizationID(request.ID),
+			Object:    AuthzOrganizationID(request.ID),
 			Relation:  "view",
 			Subject:   rts.NewSubjectID("*"),
 		},

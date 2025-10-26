@@ -173,8 +173,8 @@ identity:
   schemas:
     - id: customer
       url: file:///etc/config/kratos/schemas/customer.identity.schema.json
-    - id: employee
-      url: file:///etc/config/kratos/schemas/employee.identity.schema.json
+    - id: developer
+      url: file:///etc/config/kratos/schemas/developer.identity.schema.json
 
 courier:
   message_retries: 5

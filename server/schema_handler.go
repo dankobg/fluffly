@@ -17,7 +17,7 @@ func (a *ApiHandler) ListIdentitySchemas(ctx context.Context, request api.ListId
 			Namespace: "Schemas",
 			Object:    "schemas",
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(sess.Identity.Id),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListIdentitySchemas403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("schema_permission", "invalid permission")}, nil
@@ -56,9 +56,9 @@ func (a *ApiHandler) GetIdentitySchema(ctx context.Context, request api.GetIdent
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Schema",
-			Object:    authzSchemaID(request.ID),
+			Object:    AuthzSchemaID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(sess.Identity.Id),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetIdentitySchema403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("schema_permission", "invalid permission")}, nil

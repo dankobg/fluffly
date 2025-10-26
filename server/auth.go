@@ -154,30 +154,30 @@ func authFunc(ctx context.Context, in *openapi3filter.AuthenticationInput) error
 	return nil
 }
 
-func authzIdentityID(id string) string {
+func AuthzIdentityID(id string) string {
 	return fmt.Sprintf("identity:%s", id)
 }
 
-func authzCourierMessageID(id string) string {
+func AuthzCourierMessageID(id string) string {
 	return fmt.Sprintf("courier_message:%s", id)
 }
 
-func authzSchemaID(id string) string {
+func AuthzSchemaID(id string) string {
 	return fmt.Sprintf("schema:%s", id)
 }
 
-func authzSessionID(id string) string {
+func AuthzSessionID(id string) string {
 	return fmt.Sprintf("session:%s", id)
 }
 
-func authzCountryID(id int64) string {
+func AuthzCountryID(id int64) string {
 	return fmt.Sprintf("country:%d", id)
 }
 
-func authzAnimalID(id int64) string {
+func AuthzAnimalID(id int64) string {
 	return fmt.Sprintf("animal:%d", id)
 }
 
-func authzOrganizationID(id int64) string {
+func AuthzOrganizationID(id int64) string {
 	return fmt.Sprintf("organization:%d", id)
 }

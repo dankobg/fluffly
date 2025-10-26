@@ -30,7 +30,7 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 			Namespace: "Animals",
 			Object:    "animals",
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
@@ -227,9 +227,9 @@ func (a *ApiHandler) UpdateAnimal(ctx context.Context, request api.UpdateAnimalR
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
-			Object:    authzAnimalID(request.ID),
+			Object:    AuthzAnimalID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.UpdateAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
@@ -280,9 +280,9 @@ func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalR
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
-			Object:    authzAnimalID(request.ID),
+			Object:    AuthzAnimalID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
@@ -337,7 +337,7 @@ func (a *ApiHandler) GetAnimal(ctx context.Context, request api.GetAnimalRequest
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
-			Object:    authzAnimalID(request.ID),
+			Object:    AuthzAnimalID(request.ID),
 			Relation:  "view",
 			Subject:   rts.NewSubjectID("*"),
 		},
@@ -354,9 +354,9 @@ func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalReque
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
-			Object:    authzAnimalID(request.ID),
+			Object:    AuthzAnimalID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.LikeAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil
@@ -387,9 +387,9 @@ func (a *ApiHandler) UnlikeAnimal(ctx context.Context, request api.UnlikeAnimalR
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Animal",
-			Object:    authzAnimalID(request.ID),
+			Object:    AuthzAnimalID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.UnlikeAnimal403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_permission", "invalid permission")}, nil

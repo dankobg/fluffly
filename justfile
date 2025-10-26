@@ -242,7 +242,7 @@ pg-dropall:
 
 # Import kratos identities
 kratos-import-identities:
-	docker compose exec kratos /bin/sh -c "cd /etc/config/kratos/imports && kratos import identities employees.json customers.json -e http://localhost:4434 --format json"
+	docker compose exec kratos /bin/sh -c "cd /etc/config/kratos/imports && kratos import identities developers.json customers.json -e http://localhost:4434 --format json"
 
 # Create keto relation tuples
 keto-create-tuples:

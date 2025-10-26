@@ -16,9 +16,9 @@ export const states = Object.values(IdentityState).map(value => ({
 
 export const schemaIdIcons = new Map([
 	['customer', IconUser],
-	['employee', IconShieldUser]
+	['developer', IconShieldUser]
 ]);
-export const schemaIds = ['customer', 'employee'].map(value => ({
+export const schemaIds = ['customer', 'developer'].map(value => ({
 	label: value,
 	value,
 	icon: schemaIdIcons.get(value)

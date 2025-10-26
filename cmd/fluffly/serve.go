@@ -1,5 +1,5 @@
 //go:generate go run ../../db/generator/generator.go
-package main
+package fluffly
 
 import (
 	"context"
@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/alecthomas/kong"
 	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/auth/kratos"
 	"github.com/dankobg/fluffly/config"
@@ -26,10 +25,6 @@ import (
 	"github.com/dankobg/fluffly/persistence/postgres"
 	"github.com/dankobg/fluffly/server"
 )
-
-var CLI struct {
-	Serve ServeCommand `cmd:"" help:"Run Fluffly Server"`
-}
 
 type ServeCommand struct{}
 
@@ -152,15 +147,4 @@ func (s *ServeCommand) Run() error {
 
 	logger.Info("server shut down")
 	return errors.Join(shutdownErrors...)
-}
-
-func main() {
-	ctx := kong.Parse(
-		&CLI,
-		kong.Name("fluffly"),
-		kong.Description("Fluffly pet finder app, find your best pal"),
-	)
-
-	err := ctx.Run()
-	ctx.FatalIfErrorf(err)
 }

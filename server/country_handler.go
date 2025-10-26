@@ -23,7 +23,7 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 			Namespace: "Countries",
 			Object:    "countries",
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.CreateCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
@@ -61,9 +61,9 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Country",
-			Object:    authzCountryID(request.ID),
+			Object:    AuthzCountryID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.UpdateCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
@@ -108,9 +108,9 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Country",
-			Object:    authzCountryID(request.ID),
+			Object:    AuthzCountryID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DeleteCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
@@ -132,7 +132,7 @@ func (a *ApiHandler) ListCountries(ctx context.Context, request api.ListCountrie
 			Namespace: "Countries",
 			Object:    "countries",
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListCountries403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil
@@ -167,9 +167,9 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Country",
-			Object:    authzCountryID(request.ID),
+			Object:    AuthzCountryID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetCountry403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("country_permission", "invalid permission")}, nil

@@ -18,7 +18,7 @@ func (a *ApiHandler) ListSessions(ctx context.Context, request api.ListSessionsR
 			Namespace: "Sessions",
 			Object:    "sessions",
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListSessions403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
@@ -75,9 +75,9 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Session",
-			Object:    authzSessionID(request.ID),
+			Object:    AuthzSessionID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
@@ -96,9 +96,9 @@ func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSess
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Session",
-			Object:    authzSessionID(request.ID),
+			Object:    AuthzSessionID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.DisableSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil
@@ -119,9 +119,9 @@ func (a *ApiHandler) ExtendSession(ctx context.Context, request api.ExtendSessio
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "Session",
-			Object:    authzSessionID(request.ID),
+			Object:    AuthzSessionID(request.ID),
 			Relation:  "manage",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ExtendSession403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("session_permission", "invalid permission")}, nil

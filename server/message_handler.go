@@ -18,7 +18,7 @@ func (a *ApiHandler) ListCourierMessages(ctx context.Context, request api.ListCo
 			Namespace: "CourierMessages",
 			Object:    "courier_messages",
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.ListCourierMessages403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("message_permission", "invalid permission")}, nil
@@ -63,9 +63,9 @@ func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCouri
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
 			Namespace: "CourierMessage",
-			Object:    authzCourierMessageID(request.ID),
+			Object:    AuthzCourierMessageID(request.ID),
 			Relation:  "view",
-			Subject:   rts.NewSubjectID(authzIdentityID(sess.Identity.Id)),
+			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
 	}); err != nil || !checkResp.Allowed {
 		return api.GetCourierMessage403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("message_permission", "invalid permission")}, nil

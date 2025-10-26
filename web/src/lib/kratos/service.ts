@@ -14,7 +14,7 @@ export interface User {
 	lastName?: string;
 	avatarUrl?: string;
 	role?: string;
-	isEmployee?: boolean;
+	isDeveloper?: boolean;
 	fullName?: string;
 }
 
@@ -48,14 +48,14 @@ export function createSessionService(session: Session | null): SessionService {
 				switch (session.identity?.schema_id) {
 					case 'default':
 						return 'default';
-					case 'employee':
-						return 'employee';
+					case 'developer':
+						return 'developer';
 					default:
 						return 'default';
 				}
 			},
-			get isEmployee(): boolean {
-				return this.role === 'employee';
+			get isDeveloper(): boolean {
+				return this.role === 'developer';
 			},
 			get fullName(): string {
 				return `${this.firstName || ''}${this.lastName ? ` ${this.lastName}` : ''}`.trim();
