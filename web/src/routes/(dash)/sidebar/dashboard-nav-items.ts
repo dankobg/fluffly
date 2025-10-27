@@ -4,6 +4,7 @@ import IconUsers from '@lucide/svelte/icons/users';
 import IconMail from '@lucide/svelte/icons/mail';
 import IconFingerprint from '@lucide/svelte/icons/fingerprint';
 import IconNewspaper from '@lucide/svelte/icons/newspaper';
+import IconEarth from '@lucide/svelte/icons/earth';
 
 export const customerDashboardNavItems = [
 	{
@@ -82,6 +83,17 @@ export const developerDashboardNavItems = [
 				title: 'Messages',
 				url: '/dashboard/messages',
 				icon: IconMail
+			}
+		]
+	},
+	{
+		title: 'Countries',
+		url: '#',
+		items: [
+			{
+				title: 'Countries',
+				url: '/dashboard/countries',
+				icon: IconEarth
 			}
 		]
 	}
