@@ -18,5 +18,25 @@
       "object": "developer",
       "relation": "members"
     }
+  },
+  {
+    "namespace": "Schema",
+    "object": "schema:customer",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Schema",
+    "object": "schema:developer",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
   }
 ]

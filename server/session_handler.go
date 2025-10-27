@@ -74,8 +74,10 @@ func (a *ApiHandler) GetSession(ctx context.Context, request api.GetSessionReque
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
-			Namespace: "Session",
-			Object:    AuthzSessionID(request.ID),
+			// Namespace: "Session",
+			// Object:    AuthzSessionID(request.ID),
+			Namespace: "Sessions",
+			Object:    "sessions",
 			Relation:  "view",
 			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
@@ -95,8 +97,10 @@ func (a *ApiHandler) DisableSession(ctx context.Context, request api.DisableSess
 
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
-			Namespace: "Session",
-			Object:    AuthzSessionID(request.ID),
+			// Namespace: "Session",
+			// Object:    AuthzSessionID(request.ID),
+			Namespace: "Sessions",
+			Object:    "sessions",
 			Relation:  "manage",
 			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
@@ -118,8 +122,10 @@ func (a *ApiHandler) ExtendSession(ctx context.Context, request api.ExtendSessio
 
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
-			Namespace: "Session",
-			Object:    AuthzSessionID(request.ID),
+			// Namespace: "Session",
+			// Object:    AuthzSessionID(request.ID),
+			Namespace: "Sessions",
+			Object:    "sessions",
 			Relation:  "manage",
 			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},

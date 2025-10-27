@@ -62,8 +62,10 @@ func (a *ApiHandler) GetCourierMessage(ctx context.Context, request api.GetCouri
 	}
 	if checkResp, err := a.Keto.Check.Check(ctx, &rts.CheckRequest{
 		Tuple: &rts.RelationTuple{
-			Namespace: "CourierMessage",
-			Object:    AuthzCourierMessageID(request.ID),
+			// Namespace: "CourierMessage",
+			// Object:    AuthzCourierMessageID(request.ID),
+			Namespace: "CourierMessages",
+			Object:    "courier_messages",
 			Relation:  "view",
 			Subject:   rts.NewSubjectID(AuthzIdentityID(sess.Identity.Id)),
 		},
