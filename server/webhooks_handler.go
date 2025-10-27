@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/oapi-codegen/nullable"
 	orykratos "github.com/ory/client-go"
-	rts "github.com/ory/keto/proto/ory/keto/relation_tuples/v1alpha2"
 )
 
 func (a *ApiHandler) registrationAfterPassword(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +27,7 @@ func (a *ApiHandler) registrationAfterPassword(w http.ResponseWriter, r *http.Re
 		http.Error(w, "unauthorized", http.StatusBadRequest)
 		return
 	}
-	if err := a.createUserRelationTuples(r.Context(), payload.Identity.Id); err != nil {
+	if err := createUserRelationTuples(r.Context(), a.Keto, payload.Identity.Id); err != nil {
 		a.Log.Error("failed to insert user relation-tuple", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to insert user relation-tuple", http.StatusBadRequest)
 		return
@@ -69,7 +67,7 @@ func (a *ApiHandler) registrationAfterOidc(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "unauthorized", http.StatusBadRequest)
 		return
 	}
-	if err := a.createUserRelationTuples(r.Context(), payload.Identity.Id); err != nil {
+	if err := createUserRelationTuples(r.Context(), a.Keto, payload.Identity.Id); err != nil {
 		a.Log.Error("failed to insert user relation-tuple", slog.String("identity_id", payload.Identity.Id), slog.Any("error", err))
 		http.Error(w, "failed to insert user relation-tuple", http.StatusBadRequest)
 		return
@@ -91,39 +89,4 @@ func (a *ApiHandler) registrationAfterOidc(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{}`))
-}
-
-func (a *ApiHandler) createUserRelationTuples(ctx context.Context, identityID string) error {
-	_, err := a.Keto.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
-		RelationTupleDeltas: []*rts.RelationTupleDelta{
-			{
-				Action: rts.RelationTupleDelta_ACTION_INSERT,
-				RelationTuple: &rts.RelationTuple{
-					Namespace: "Group",
-					Object:    "customer",
-					Relation:  "members",
-					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
-				},
-			},
-			{
-				Action: rts.RelationTupleDelta_ACTION_INSERT,
-				RelationTuple: &rts.RelationTuple{
-					Namespace: "Identity",
-					Object:    AuthzIdentityID(identityID),
-					Relation:  "owners",
-					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
-				},
-			},
-			{
-				Action: rts.RelationTupleDelta_ACTION_INSERT,
-				RelationTuple: &rts.RelationTuple{
-					Namespace: "Identity",
-					Object:    AuthzIdentityID(identityID),
-					Relation:  "parents",
-					Subject:   rts.NewSubjectSet("Identities", "identities", ""),
-				},
-			},
-		},
-	})
-	return err
 }

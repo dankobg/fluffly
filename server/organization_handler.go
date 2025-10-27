@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/dankobg/fluffly/api/gen"
+	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
@@ -187,6 +189,13 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 		return api.CreateOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_save", msg, reason)}, nil
 	}
 	resp := api.CreateOrganization201JSONResponse(dto.OrganizationToResponse(organization))
+
+	// @TODO: use outbox pattern
+	if err := createOrganizationRelationTuples(ctx, a.Keto, sess.Identity.Id, resp.ID); err != nil {
+		a.Log.Error("failed to insert organization relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Int64("organization_id", resp.ID), slog.Any("error", err))
+		return api.CreateOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_permissions", "failed to create permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -252,6 +261,13 @@ func (a *ApiHandler) DeleteOrganization(ctx context.Context, request api.DeleteO
 		return nil, fmt.Errorf("failed to delete an organization by id: %w", err)
 	}
 	resp := api.DeleteOrganization204Response{}
+
+	// @TODO: use outbox pattern
+	if err := deleteOrganizationRelationTuples(ctx, a.Keto, request.ID); err != nil {
+		a.Log.Error("failed to delete organization relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Int64("organization_id", request.ID), slog.Any("error", err))
+		return api.DeleteOrganizationdefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "organization_permissions", "failed to delete permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -304,4 +320,79 @@ func (a *ApiHandler) ListOrganizations(ctx context.Context, request api.ListOrga
 		Meta: getPaginationMeta(request.Params.Page, request.Params.PageSize, organizations.TotalCount),
 	}
 	return resp, nil
+}
+
+func createOrganizationRelationTuples(ctx context.Context, c *keto.Client, identityID string, organizationID int64) error {
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: []*rts.RelationTupleDelta{
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Organization",
+					Object:    AuthzOrganizationID(organizationID),
+					Relation:  "owners",
+					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+				},
+			},
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Organization",
+					Object:    AuthzOrganizationID(organizationID),
+					Relation:  "parents",
+					Subject:   rts.NewSubjectSet("Organizations", "organizations", ""),
+				},
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to insert organization relation tuples: %w", err)
+	}
+	return nil
+}
+
+func deleteOrganizationRelationTuples(ctx context.Context, c *keto.Client, organizationID int64) error {
+	ownersResp, err := c.Read.ListRelationTuples(ctx, &rts.ListRelationTuplesRequest{
+		RelationQuery: &rts.RelationQuery{
+			Namespace: ptr.Of("Organization"),
+			Object:    ptr.Of(AuthzOrganizationID(organizationID)),
+			Relation:  ptr.Of("owners"),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list organization relation tuples: %w", err)
+	}
+
+	tuplesToDelete := []*rts.RelationTupleDelta{
+		{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Organization",
+				Object:    AuthzOrganizationID(organizationID),
+				Relation:  "parents",
+				Subject:   rts.NewSubjectSet("Organizations", "organizations", ""),
+			},
+		},
+	}
+	for _, tuple := range ownersResp.RelationTuples {
+		subject := tuple.GetSubject()
+		if subject == nil {
+			continue
+		}
+		tuplesToDelete = append(tuplesToDelete, &rts.RelationTupleDelta{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Organization",
+				Object:    AuthzOrganizationID(organizationID),
+				Relation:  "owners",
+				Subject:   rts.NewSubjectID(subject.GetId()),
+			},
+		})
+	}
+
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: tuplesToDelete,
+	}); err != nil {
+		return fmt.Errorf("failed to delete organization relation tuples: %w", err)
+	}
+	return nil
 }

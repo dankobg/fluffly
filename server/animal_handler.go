@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/dankobg/fluffly/api/gen"
+	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/db/gen/test/public/model"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence/dbtype"
@@ -218,6 +220,13 @@ func (a *ApiHandler) CreateAnimal(ctx context.Context, request api.CreateAnimalR
 		return api.CreateAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_save", msg, reason)}, nil
 	}
 	resp := api.CreateAnimal201JSONResponse(dto.AnimalToResponse(animal))
+
+	// @TODO: use outbox pattern
+	if err := createAnimalRelationTuples(ctx, a.Keto, sess.Identity.Id, resp.ID); err != nil {
+		a.Log.Error("failed to insert animal relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Int64("animal_id", resp.ID), slog.Any("error", err))
+		return api.CreateAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_permissions", "failed to create permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -293,6 +302,13 @@ func (a *ApiHandler) DeleteAnimal(ctx context.Context, request api.DeleteAnimalR
 		return nil, fmt.Errorf("failed to delete an animal by id: %w", err)
 	}
 	resp := api.DeleteAnimal204Response{}
+
+	// @TODO: use outbox pattern
+	if err := deleteAnimalRelationTuples(ctx, a.Keto, request.ID); err != nil {
+		a.Log.Error("failed to delete animal relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Int64("animal_id", request.ID), slog.Any("error", err))
+		return api.DeleteAnimaldefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "animal_permissions", "failed to delete permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -400,4 +416,79 @@ func (a *ApiHandler) UnlikeAnimal(ctx context.Context, request api.UnlikeAnimalR
 		return nil, fmt.Errorf("failed to unlike an animal: %w", err)
 	}
 	return api.EmptyResponseResponse{}, nil
+}
+
+func createAnimalRelationTuples(ctx context.Context, c *keto.Client, identityID string, animalID int64) error {
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: []*rts.RelationTupleDelta{
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Animal",
+					Object:    AuthzAnimalID(animalID),
+					Relation:  "owners",
+					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+				},
+			},
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Animal",
+					Object:    AuthzAnimalID(animalID),
+					Relation:  "parents",
+					Subject:   rts.NewSubjectSet("Animals", "animals", ""),
+				},
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to insert animal relation tuples: %w", err)
+	}
+	return nil
+}
+
+func deleteAnimalRelationTuples(ctx context.Context, c *keto.Client, animalID int64) error {
+	ownersResp, err := c.Read.ListRelationTuples(ctx, &rts.ListRelationTuplesRequest{
+		RelationQuery: &rts.RelationQuery{
+			Namespace: ptr.Of("Animal"),
+			Object:    ptr.Of(AuthzAnimalID(animalID)),
+			Relation:  ptr.Of("owners"),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list animal relation tuples: %w", err)
+	}
+
+	tuplesToDelete := []*rts.RelationTupleDelta{
+		{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Animal",
+				Object:    AuthzAnimalID(animalID),
+				Relation:  "parents",
+				Subject:   rts.NewSubjectSet("Animals", "animals", ""),
+			},
+		},
+	}
+	for _, tuple := range ownersResp.RelationTuples {
+		subject := tuple.GetSubject()
+		if subject == nil {
+			continue
+		}
+		tuplesToDelete = append(tuplesToDelete, &rts.RelationTupleDelta{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Animal",
+				Object:    AuthzAnimalID(animalID),
+				Relation:  "owners",
+				Subject:   rts.NewSubjectID(subject.GetId()),
+			},
+		})
+	}
+
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: tuplesToDelete,
+	}); err != nil {
+		return fmt.Errorf("failed to delete animal relation tuples: %w", err)
+	}
+	return nil
 }

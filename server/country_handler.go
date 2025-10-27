@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/dankobg/fluffly/api/gen"
+	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/persistence/postgres"
@@ -52,6 +54,13 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 		return api.CreateCountrydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "country_save", msg, reason)}, nil
 	}
 	resp := api.CreateCountry201JSONResponse(dto.CountryToResponse(country))
+
+	// @TODO: use outbox pattern
+	if err := createCountryRelationTuples(ctx, a.Keto, resp.ID); err != nil {
+		a.Log.Error("failed to insert country relation-tuple", slog.Int64("country_id", resp.ID), slog.Any("error", err))
+		return api.CreateCountrydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "country_permissions", "failed to create permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -121,6 +130,13 @@ func (a *ApiHandler) DeleteCountry(ctx context.Context, request api.DeleteCountr
 		return nil, fmt.Errorf("failed to delete a country by id: %w", err)
 	}
 	resp := api.DeleteCountry204Response{}
+
+	// @TODO: use outbox pattern
+	if err := deleteCountryRelationTuples(ctx, a.Keto, request.ID); err != nil {
+		a.Log.Error("failed to delete country relation-tuple", slog.Int64("country_id", request.ID), slog.Any("error", err))
+		return api.DeleteCountrydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "country_permissions", "failed to delete permissions")}, nil
+	}
+
 	return resp, nil
 }
 
@@ -176,4 +192,42 @@ func (a *ApiHandler) GetCountry(ctx context.Context, request api.GetCountryReque
 	}
 	resp := api.GetCountry200JSONResponse(dto.CountryToResponse(country))
 	return resp, nil
+}
+
+func createCountryRelationTuples(ctx context.Context, c *keto.Client, countryID int64) error {
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: []*rts.RelationTupleDelta{
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Country",
+					Object:    AuthzCountryID(countryID),
+					Relation:  "parents",
+					Subject:   rts.NewSubjectSet("Countries", "countries", ""),
+				},
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to insert country relation tuples: %w", err)
+	}
+	return nil
+}
+
+func deleteCountryRelationTuples(ctx context.Context, c *keto.Client, countryID int64) error {
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: []*rts.RelationTupleDelta{
+			{
+				Action: rts.RelationTupleDelta_ACTION_DELETE,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Country",
+					Object:    AuthzCountryID(countryID),
+					Relation:  "parents",
+					Subject:   rts.NewSubjectSet("Countries", "countries", ""),
+				},
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to delete country relation tuples: %w", err)
+	}
+	return nil
 }

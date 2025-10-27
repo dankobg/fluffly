@@ -2,9 +2,12 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/dankobg/fluffly/api/gen"
+	"github.com/dankobg/fluffly/auth/keto"
 	"github.com/dankobg/fluffly/dto"
 	"github.com/dankobg/fluffly/persistence/dbtype"
 	"github.com/dankobg/fluffly/ptr"
@@ -207,6 +210,13 @@ func (a *ApiHandler) CreateIdentity(ctx context.Context, request api.CreateIdent
 	if _, err := a.persistor.User().CreateUser(ctx, dbtype.UserSetter{ID: nullable.NewNullableWithValue(identityID)}); err != nil {
 		return nil, err
 	}
+
+	// @TODO: use outbox pattern
+	if err := createUserRelationTuples(ctx, a.Keto, identity.Id); err != nil {
+		a.Log.Error("failed to insert identity relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Any("error", err))
+		return api.CreateIdentitydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "identity_permissions", "failed to create permissions")}, nil
+	}
+
 	return api.CreateIdentity201JSONResponse(resp), nil
 }
 
@@ -300,6 +310,13 @@ func (a *ApiHandler) DeleteIdentity(ctx context.Context, request api.DeleteIdent
 
 	}
 	defer deleteIdentityResp.Body.Close()
+
+	// @TODO: use outbox pattern
+	if err := deleteUserRelationTuples(ctx, a.Keto, request.ID); err != nil {
+		a.Log.Error("failed to delete identity relation-tuple", slog.String("identity_id", sess.Identity.Id), slog.Any("error", err))
+		return api.DeleteIdentitydefaultJSONResponse{StatusCode: http.StatusInternalServerError, Body: newGenericErr(http.StatusInternalServerError, "identity_permissions", "failed to delete permissions")}, nil
+	}
+
 	return api.DeleteIdentity204Response{}, nil
 }
 
@@ -339,6 +356,9 @@ func (a *ApiHandler) PatchIdentity(ctx context.Context, request api.PatchIdentit
 	if err != nil {
 		return nil, err
 	}
+
+	// @TODO: delete tuples if patch OP == "remove"
+
 	return api.PatchIdentity200JSONResponse(resp), nil
 }
 
@@ -397,6 +417,9 @@ func (a *ApiHandler) BatchPatchIdentities(ctx context.Context, request api.Batch
 	resp := api.BatchPatchIdentitiesResponse{
 		Identities: &identitiesPatches,
 	}
+
+	// @TODO: delete tuples if patch OP == "remove"
+
 	return api.BatchPatchIdentities200JSONResponse(resp), nil
 }
 
@@ -554,4 +577,106 @@ func (a *ApiHandler) CreateRecoveryLinkForIdentity(ctx context.Context, request 
 		return nil, err
 	}
 	return api.CreateRecoveryLinkForIdentity200JSONResponse(resp), nil
+}
+
+func createUserRelationTuples(ctx context.Context, c *keto.Client, identityID string) error {
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: []*rts.RelationTupleDelta{
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Group",
+					Object:    "customer",
+					Relation:  "members",
+					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+				},
+			},
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Identity",
+					Object:    AuthzIdentityID(identityID),
+					Relation:  "owners",
+					Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+				},
+			},
+			{
+				Action: rts.RelationTupleDelta_ACTION_INSERT,
+				RelationTuple: &rts.RelationTuple{
+					Namespace: "Identity",
+					Object:    AuthzIdentityID(identityID),
+					Relation:  "parents",
+					Subject:   rts.NewSubjectSet("Identities", "identities", ""),
+				},
+			},
+		},
+	}); err != nil {
+		return fmt.Errorf("failed to insert identity relation tuples: %w", err)
+	}
+	return nil
+}
+
+func deleteUserRelationTuples(ctx context.Context, c *keto.Client, identityID string) error {
+	ownersResp, err := c.Read.ListRelationTuples(ctx, &rts.ListRelationTuplesRequest{
+		RelationQuery: &rts.RelationQuery{
+			Namespace: ptr.Of("Identity"),
+			Object:    ptr.Of(AuthzIdentityID(identityID)),
+			Relation:  ptr.Of("owners"),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list identity relation tuples: %w", err)
+	}
+
+	tuplesToDelete := []*rts.RelationTupleDelta{
+		{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Group",
+				Object:    "customer",
+				Relation:  "members",
+				Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+			},
+		},
+		{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Group",
+				Object:    "developer",
+				Relation:  "members",
+				Subject:   rts.NewSubjectID(AuthzIdentityID(identityID)),
+			},
+		},
+		{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Identity",
+				Object:    AuthzIdentityID(identityID),
+				Relation:  "parents",
+				Subject:   rts.NewSubjectSet("Identities", "identities", ""),
+			},
+		},
+	}
+	for _, tuple := range ownersResp.RelationTuples {
+		subject := tuple.GetSubject()
+		if subject == nil {
+			continue
+		}
+		tuplesToDelete = append(tuplesToDelete, &rts.RelationTupleDelta{
+			Action: rts.RelationTupleDelta_ACTION_DELETE,
+			RelationTuple: &rts.RelationTuple{
+				Namespace: "Identity",
+				Object:    AuthzIdentityID(identityID),
+				Relation:  "owners",
+				Subject:   rts.NewSubjectID(subject.GetId()),
+			},
+		})
+	}
+
+	if _, err := c.Write.TransactRelationTuples(ctx, &rts.TransactRelationTuplesRequest{
+		RelationTupleDeltas: tuplesToDelete,
+	}); err != nil {
+		return fmt.Errorf("failed to delete identity relation tuples: %w", err)
+	}
+	return nil
 }
