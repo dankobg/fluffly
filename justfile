@@ -51,7 +51,7 @@ gen-sql:
 # Generate openapi server
 gen-openapi:
 	oapi-codegen --config=api/oapi-codegen.yaml api/schema/fluffly.yaml
-	#cd web && pnpm openapigen
+	cd web && pnpm gen:openapi
 
 # Run code generation
 gen:

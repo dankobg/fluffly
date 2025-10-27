@@ -1,6 +1,9 @@
 import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 import type { operations } from '$lib/gen/fluffly_openapi';
+import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
+import { config } from '$lib/kratos/config';
 
 export const load: PageLoad = async ({ fetch, url, params, depends }) => {
 	depends(`data:identity-sessions-${params.identity_id}`);
@@ -27,6 +30,13 @@ export const load: PageLoad = async ({ fetch, url, params, depends }) => {
 				path: { id: params.identity_id }
 			}
 		});
+
+		if (sessionsResult.error?.status_code === 403 || identityResult.error?.status_code === 403) {
+			if (browser) {
+				goto(config.routes.dashboard.path);
+			}
+		}
+
 		return {
 			identityResult,
 			sessionsResult

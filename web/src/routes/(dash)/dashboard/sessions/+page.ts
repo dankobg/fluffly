@@ -1,6 +1,9 @@
 import { fluffly } from '$lib/fluffly/client';
 import type { PageLoad } from './$types';
 import type { operations, PathsSessionsGetParametersQueryExpand } from '$lib/gen/fluffly_openapi';
+import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
+import { config } from '$lib/kratos/config';
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {
 	depends('data:sessions');
@@ -24,6 +27,13 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
 			fetch,
 			params: listSessionsParams
 		});
+
+		if (sessionsResult.error?.status_code === 403) {
+			if (browser) {
+				goto(config.routes.dashboard.path);
+			}
+		}
+
 		return {
 			sessionsResult
 		};

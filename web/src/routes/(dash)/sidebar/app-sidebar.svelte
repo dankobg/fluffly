@@ -5,7 +5,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import IconChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import IconLogout from '@lucide/svelte/icons/log-out';
-	import { dashboardNavItems } from './dashboard-nav-items';
+	import { customerDashboardNavItems, developerDashboardNavItems } from './dashboard-nav-items';
 	import type { User } from '$lib/kratos/service';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import { page } from '$app/state';
@@ -14,8 +14,11 @@
 		ref = $bindable(null),
 		user,
 		logoutUrl,
+		isDeveloper,
 		...restProps
-	}: ComponentProps<typeof Sidebar.Root> & { user?: User; logoutUrl?: string } = $props();
+	}: ComponentProps<typeof Sidebar.Root> & { user?: User; logoutUrl?: string; isDeveloper: boolean } = $props();
+
+	let dashboardNavItems = $derived(isDeveloper ? developerDashboardNavItems : customerDashboardNavItems);
 
 	const sidebar = Sidebar.useSidebar();
 </script>

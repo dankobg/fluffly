@@ -1460,14 +1460,20 @@ export interface components {
         NullInt64: number | null;
         /** @description NullJSONRawMessage represents a json.RawMessage that works well with JSON, SQL, and Swagger and is NULLable- */
         NullJsonRawMessage: Record<string, never> | null;
-        Error: {
+        APIError: {
+            /** @description Error unique code */
+            code: string;
             /**
              * Format: int32
-             * @description Error code
+             * @description HTTP status code
              */
-            code: number;
+            status_code: number;
             /** @description Error message */
             message: string;
+            /** @description Error reason description */
+            reason?: string;
+            /** @description Other error details */
+            details?: Record<string, never>;
         };
         /** Format: int64 */
         AmountInCent: number;
@@ -3331,34 +3337,51 @@ export interface components {
     };
     responses: {
         /** @description Unexpected error */
-        UnexpectedError: {
+        UnexpectedErrorResponse: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                "application/json": components["schemas"]["Error"];
+                "application/json": components["schemas"]["APIError"];
             };
         };
-        /** @description Unexpected error */
-        GenericError: {
+        /** @description API error */
+        GenericErrorResponse: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                "application/json": components["schemas"]["Error"];
+                "application/json": components["schemas"]["APIError"];
             };
         };
-        /** @description Unexpected error */
-        NotFoundError: {
+        /** @description Not found */
+        NotFoundErrorResponse: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                "application/json": components["schemas"]["Error"];
+                "application/json": components["schemas"]["APIError"];
             };
         };
-        /** @description Empty responses are sent when, for example, resources are deleted. The HTTP status code for empty responses is
-         *     typically 201 or 204 */
+        /** @description Not authenticated */
+        UnauthenticatedErrorResponse: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["APIError"];
+            };
+        };
+        /** @description Not authorized */
+        UnauthorizedErrorResponse: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["APIError"];
+            };
+        };
+        /** @description Empty responses are sent when, for example, resources are deleted.  The HTTP status code for empty responses is typically 201 or 204 */
         EmptyResponse: {
             headers: {
                 [name: string]: unknown;
@@ -3396,7 +3419,7 @@ export interface operations {
                     "application/json": components["schemas"]["Healthy"];
                 };
             };
-            default: components["responses"]["UnexpectedError"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getHealthReady: {
@@ -3417,7 +3440,7 @@ export interface operations {
                     "application/json": components["schemas"]["Ready"];
                 };
             };
-            default: components["responses"]["UnexpectedError"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listCountries: {
@@ -3446,7 +3469,9 @@ export interface operations {
                     };
                 };
             };
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createCountry: {
@@ -3471,10 +3496,10 @@ export interface operations {
                     "application/json": components["schemas"]["Country"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getCountry: {
@@ -3498,9 +3523,11 @@ export interface operations {
                     "application/json": components["schemas"]["Country"];
                 };
             };
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteCountry: {
@@ -3516,10 +3543,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     updateCountry: {
@@ -3547,10 +3574,10 @@ export interface operations {
                     "application/json": components["schemas"]["Country"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listOrganizations: {
@@ -3579,7 +3606,7 @@ export interface operations {
                     };
                 };
             };
-            default: components["responses"]["UnexpectedError"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createOrganization: {
@@ -3604,10 +3631,10 @@ export interface operations {
                     "application/json": components["schemas"]["Organization"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getOrganization: {
@@ -3631,9 +3658,8 @@ export interface operations {
                     "application/json": components["schemas"]["Organization"];
                 };
             };
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteOrganization: {
@@ -3649,10 +3675,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     updateOrganization: {
@@ -3680,10 +3706,10 @@ export interface operations {
                     "application/json": components["schemas"]["Organization"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listAnimals: {
@@ -3712,7 +3738,7 @@ export interface operations {
                     };
                 };
             };
-            default: components["responses"]["UnexpectedError"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createAnimal: {
@@ -3737,10 +3763,10 @@ export interface operations {
                     "application/json": components["schemas"]["Animal"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getAnimal: {
@@ -3764,9 +3790,8 @@ export interface operations {
                     "application/json": components["schemas"]["Animal"];
                 };
             };
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteAnimal: {
@@ -3782,10 +3807,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     updateAnimal: {
@@ -3813,10 +3838,10 @@ export interface operations {
                     "application/json": components["schemas"]["Animal"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     likeAnimal: {
@@ -3832,10 +3857,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     unlikeAnimal: {
@@ -3851,10 +3876,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             201: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listIdentitySchemas: {
@@ -3880,8 +3905,9 @@ export interface operations {
                     "application/json": components["schemas"]["IdentitySchemas"];
                 };
             };
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getIdentitySchema: {
@@ -3905,9 +3931,10 @@ export interface operations {
                     "application/json": components["schemas"]["IdentitySchema"];
                 };
             };
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listCourierMessages: {
@@ -3939,8 +3966,10 @@ export interface operations {
                     "application/json": components["schemas"]["Message"][];
                 };
             };
-            400: components["responses"]["GenericError"];
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getCourierMessage: {
@@ -3964,9 +3993,11 @@ export interface operations {
                     "application/json": components["schemas"]["Message"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listIdentities: {
@@ -4014,8 +4045,9 @@ export interface operations {
                     "application/json": components["schemas"]["Identity"][];
                 };
             };
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createIdentity: {
@@ -4040,10 +4072,11 @@ export interface operations {
                     "application/json": components["schemas"]["Identity"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            409: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            409: components["responses"]["GenericErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     batchPatchIdentities: {
@@ -4068,10 +4101,11 @@ export interface operations {
                     "application/json": components["schemas"]["BatchPatchIdentitiesResponse"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            409: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            409: components["responses"]["GenericErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getIdentity: {
@@ -4100,9 +4134,10 @@ export interface operations {
                     "application/json": components["schemas"]["Identity"];
                 };
             };
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     updateIdentity: {
@@ -4130,11 +4165,12 @@ export interface operations {
                     "application/json": components["schemas"]["Identity"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            409: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            409: components["responses"]["GenericErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteIdentity: {
@@ -4150,9 +4186,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     patchIdentity: {
@@ -4180,11 +4217,12 @@ export interface operations {
                     "application/json": components["schemas"]["Identity"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            409: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            409: components["responses"]["GenericErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteIdentityCredentials: {
@@ -4217,9 +4255,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listIdentitySessions: {
@@ -4254,10 +4293,11 @@ export interface operations {
                     "application/json": components["schemas"]["Session"][];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     deleteIdentitySessions: {
@@ -4273,11 +4313,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["UnexpectedError"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     listSessions: {
@@ -4313,9 +4353,10 @@ export interface operations {
                     "application/json": components["schemas"]["Session"][];
                 };
             };
-            400: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     getSession: {
@@ -4344,9 +4385,10 @@ export interface operations {
                     "application/json": components["schemas"]["Session"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     disableSession: {
@@ -4362,10 +4404,10 @@ export interface operations {
         requestBody?: never;
         responses: {
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            401: components["responses"]["GenericError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     extendSession: {
@@ -4390,10 +4432,11 @@ export interface operations {
                 };
             };
             204: components["responses"]["EmptyResponse"];
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createRecoveryCodeForIdentity: {
@@ -4418,10 +4461,11 @@ export interface operations {
                     "application/json": components["schemas"]["RecoveryCodeForIdentity"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
     createRecoveryLinkForIdentity: {
@@ -4448,10 +4492,11 @@ export interface operations {
                     "application/json": components["schemas"]["RecoveryLinkForIdentity"];
                 };
             };
-            400: components["responses"]["GenericError"];
-            404: components["responses"]["NotFoundError"];
-            /** @description errorGeneric */
-            default: components["responses"]["UnexpectedError"];
+            400: components["responses"]["GenericErrorResponse"];
+            401: components["responses"]["UnauthenticatedErrorResponse"];
+            403: components["responses"]["UnauthorizedErrorResponse"];
+            404: components["responses"]["NotFoundErrorResponse"];
+            default: components["responses"]["UnexpectedErrorResponse"];
         };
     };
 }

@@ -35,7 +35,11 @@
 </script>
 
 <Sidebar.Provider>
-	<AppSidebar user={data.auth.user ?? undefined} logoutUrl={data.logoutUrl} />
+	<AppSidebar
+		user={data.auth.user ?? undefined}
+		logoutUrl={data.logoutUrl}
+		isDeveloper={Boolean(data.auth.user?.isDeveloper)}
+	/>
 	<Sidebar.Inset>
 		<header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
 			<Sidebar.Trigger class="-ml-1" />
@@ -119,7 +123,7 @@
 		</header>
 
 		<div class="flex flex-1 flex-col p-4">
-			<div class="@container/main flex flex-1 flex-col gap-2 rounded-xl bg-muted/50 p-4">
+			<div class="@container/main bg-muted/50 flex flex-1 flex-col gap-2 rounded-xl p-4">
 				{#if data.auth.session?.active}
 					{@render children()}
 				{:else}

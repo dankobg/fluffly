@@ -5,7 +5,32 @@ import IconMail from '@lucide/svelte/icons/mail';
 import IconFingerprint from '@lucide/svelte/icons/fingerprint';
 import IconNewspaper from '@lucide/svelte/icons/newspaper';
 
-export const dashboardNavItems = [
+export const customerDashboardNavItems = [
+	{
+		title: 'App',
+		url: '#',
+		items: [
+			{
+				title: 'Dashboard',
+				url: '/dashboard',
+				icon: IconLayoutDashboard
+			}
+		]
+	},
+	{
+		title: 'User',
+		url: '#',
+		items: [
+			{
+				title: 'Account',
+				url: '/dashboard/account',
+				icon: IconUser
+			}
+		]
+	}
+];
+
+export const developerDashboardNavItems = [
 	{
 		title: 'App',
 		url: '#',
