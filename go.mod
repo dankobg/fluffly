@@ -25,6 +25,7 @@ require (
 	github.com/ory/keto/proto v0.13.0-alpha.0
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/wneessen/go-mail v0.6.2
+	golang.org/x/time v0.5.0
 	google.golang.org/grpc v1.73.0
 )
 

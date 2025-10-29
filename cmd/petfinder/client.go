@@ -174,35 +174,6 @@ func (p *petfinderClient) listOrganizations(ctx context.Context, params listOrga
 	return resp, nil
 }
 
-func (p *petfinderClient) downloadAnimals(ctx context.Context) error {
-	u, _ := url.Parse(p.baseURL)
-	orgsURL := u.JoinPath("animals")
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, orgsURL.String(), nil)
-	if err != nil {
-		return fmt.Errorf("failed to create animals request request: %w", err)
-	}
-	req.Header.Add("Accept", "application/json")
-	req.Header.Add("Authorization", "Bearer "+p.accessToken)
-	req.Header.Add("Content-Type", "application/json")
-	resp, err := p.c.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to get access token result: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("received non ok status code: %d", resp.StatusCode)
-	}
-
-	var result map[string]any
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to decode animals result: %w", err)
-	}
-
-	return nil
-}
-
 // listAnimalsQueryParams defines the query parameters for the list animals endpoint
 type listAnimalsQueryParams struct {
 	// Return results matching animal type.
@@ -320,4 +291,101 @@ type listAnimalsQueryParams struct {
 	//
 	// Default: 20. Max: 100.
 	Limit *int
+}
+
+func (p *petfinderClient) listAnimals(ctx context.Context, params listAnimalsQueryParams) (*http.Response, error) {
+	u, _ := url.Parse(p.baseURL)
+	animalsURL := u.JoinPath("animals")
+	q := animalsURL.Query()
+
+	if params.Type != nil {
+		q.Add("type", *params.Type)
+	}
+	if params.Breed != nil {
+		q.Add("breed", *params.Breed)
+	}
+	if params.Size != nil {
+		q.Add("size", *params.Size)
+	}
+	if params.Gender != nil {
+		q.Add("gender", *params.Gender)
+	}
+	if params.Age != nil {
+		q.Add("age", *params.Age)
+	}
+	if params.Color != nil {
+		q.Add("color", *params.Color)
+	}
+	if params.Coat != nil {
+		q.Add("coat", *params.Coat)
+	}
+	if params.Status != nil {
+		q.Add("status", *params.Status)
+	}
+	if params.Name != nil {
+		q.Add("name", *params.Name)
+	}
+	if params.Organization != nil {
+		q.Add("organization", *params.Organization)
+	}
+	if params.GoodWithChildren != nil {
+		q.Add("good_with_children", strconv.FormatBool(*params.GoodWithChildren))
+	}
+	if params.GoodWithDogs != nil {
+		q.Add("good_with_dogs", strconv.FormatBool(*params.GoodWithDogs))
+	}
+	if params.GoodWithCats != nil {
+		q.Add("good_with_cats", strconv.FormatBool(*params.GoodWithCats))
+	}
+	if params.HouseTrained != nil {
+		q.Add("house_trained", strconv.FormatBool(*params.HouseTrained))
+	}
+	if params.Declawed != nil {
+		q.Add("declawed", strconv.FormatBool(*params.Declawed))
+	}
+	if params.SpecialNeeds != nil {
+		q.Add("special_needs", strconv.FormatBool(*params.SpecialNeeds))
+	}
+	if params.Location != nil {
+		q.Add("location", *params.Location)
+	}
+	if params.Distance != nil {
+		q.Add("distance", strconv.Itoa(*params.Distance))
+	}
+	if params.Before != nil {
+		q.Add("before", *params.Before)
+	}
+	if params.After != nil {
+		q.Add("after", *params.After)
+	}
+	if params.Sort != nil {
+		q.Add("sort", *params.Sort)
+	}
+	if params.Page != nil {
+		q.Add("page", strconv.Itoa(*params.Page))
+	}
+	if params.Limit != nil {
+		q.Add("limit", strconv.Itoa(*params.Limit))
+	}
+
+	animalsURL.RawQuery = q.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, animalsURL.String(), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create animals request request: %w", err)
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Authorization", "Bearer "+p.accessToken)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := p.c.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get access token result: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return resp, fmt.Errorf("received non ok status code: %d", resp.StatusCode)
+	}
+
+	return resp, nil
 }
