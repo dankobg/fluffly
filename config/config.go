@@ -25,7 +25,7 @@ const (
 	sliceDelim = ","
 )
 
-var knownKeys = []string{"server", "cors", "postgres", "redis", "email", "logger", "minio"}
+var knownKeys = []string{"server", "cors", "postgres", "redis", "email", "logger", "minio", "petfinder"}
 
 // Fluffly contains common fluffly app settings
 type Fluffly struct {
@@ -121,16 +121,24 @@ type LoggerConfig struct {
 	Pretty bool   `koanf:"pretty"`
 }
 
+// PetfinderConfig contains petfinder settings
+type PetfinderConfig struct {
+	ApiKey      string `koanf:"api_key"`
+	ApiSecret   string `koanf:"api_secret"`
+	AccessToken string `koanf:"access_token"`
+}
+
 // Config represents the app config
 type Config struct {
-	Fluffly  `koanf:",squash"`
-	Server   ServerConfig   `koanf:"server"`
-	Cors     CorsConfig     `koanf:"cors"`
-	Database DatabaseConfig `koanf:"postgres"`
-	Redis    RedisConfig    `koanf:"redis"`
-	Email    EmailConfig    `koanf:"email"`
-	Logger   LoggerConfig   `koanf:"logger"`
-	Minio    MinioConfig    `koanf:"minio"`
+	Fluffly   `koanf:",squash"`
+	Server    ServerConfig    `koanf:"server"`
+	Cors      CorsConfig      `koanf:"cors"`
+	Database  DatabaseConfig  `koanf:"postgres"`
+	Redis     RedisConfig     `koanf:"redis"`
+	Email     EmailConfig     `koanf:"email"`
+	Logger    LoggerConfig    `koanf:"logger"`
+	Minio     MinioConfig     `koanf:"minio"`
+	Petfinder PetfinderConfig `koanf:"petfinder"`
 }
 
 // loadEnv loads env files by convention: https://github.com/bkeepers/dotenv#what-other-env-files-can-i-use

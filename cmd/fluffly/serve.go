@@ -28,7 +28,7 @@ import (
 
 type ServeCommand struct{}
 
-func (s *ServeCommand) Run() error {
+func (sc *ServeCommand) Run() error {
 	cfg, _, err := config.New()
 	if err != nil {
 		slog.Error("failed to initialize config", slog.Any("error", err))

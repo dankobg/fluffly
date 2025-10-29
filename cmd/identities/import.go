@@ -21,7 +21,7 @@ type RootCmd struct {
 
 type ImportCmd struct{}
 
-func (s *ImportCmd) Run() error {
+func (ic *ImportCmd) Run() error {
 	cfg, _, err := config.New()
 	if err != nil {
 		slog.Error("failed to initialize config", slog.Any("error", err))
