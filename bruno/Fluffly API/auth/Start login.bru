@@ -1,0 +1,32 @@
+meta {
+  name: Start login
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:4433/self-service/login/api
+  body: none
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+script:post-response {
+  const action = res?.body?.ui?.action;
+  console.log('login action:', action);
+  if (action) {
+    bru.setEnvVar("submit_login_action", action);
+  } else {
+    console.log('No login action');
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

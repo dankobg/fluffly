@@ -1,0 +1,26 @@
+meta {
+  name: Patch an Identity
+  type: http
+  seq: 47
+}
+
+patch {
+  url: {{baseUrl}}/identities/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 
+}
+
+body:json {
+  [
+    {
+      "from": "",
+      "op": "",
+      "path": "",
+      "value": ""
+    }
+  ]
+}

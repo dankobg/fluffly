@@ -1,0 +1,113 @@
+env: development
+host: localhost
+port: 6969
+base_url: https://fluffly-dev.xyz
+website_url: https://fluffly-dev.xyz
+file_storage: "rustfs"
+upload_dir: "./uploads"
+openapi_spec_url: https://fluffly-dev.xyz/spec
+kratos_public_url: https://fluffly-dev.xyz/kratos
+kratos_admin_url: http://localhost:4434
+kratos_api_key: v3Ry_s3Cr3t_tExT_kr4t0s
+keto_api_key: v3Ry_s3Cr3t_tExT_k3t0
+
+server:
+  read_header_timeout: 5s
+  read_timeout: 15s
+  write_timeout: 15s
+  idle_timeout: 120s
+  graceful_timeout: 30s
+  use_tls: false
+  cert_file: xxxxx
+  key_file: xxxxx
+
+cors:
+  allow_origins:
+    - http://localhost:3974
+    - https://fluffly-dev.xyz
+    - https://client.scalar.com
+  allow_methods:
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    - HEAD
+    - OPTIONS
+  allow_headers:
+    - Content-Type
+    - Authorization
+    - X-CSRF-Token
+  expose_headers:
+    - Content-Length
+    - Cache-Control
+    - Content-Language
+    - Content-Type
+    - Content-Range
+    - Expires
+    - Last-Modified
+    - Pragma
+    - Authorization
+  allow_credentials: true
+  max_age: 86400
+  debug: true
+
+postgres:
+  host: localhost
+  port: 5432
+  db: test
+  user: test
+  password: test
+  scheme: postgres
+  ssl_mode: disable
+  retries_num: 5
+  retries_delay: 2s
+
+rustfs:
+  host: localhost
+  address: 9000
+  console_address: 9001
+  console_enable: true
+  access_key: test
+  secret_key: test
+  default_bucket: fluffly
+  server_domains:
+    - localhost
+  cors_allowed_origins:
+    - "*"
+  console_cors_allowed_origins:
+    - "*"
+  use_ssl: false
+  token:
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+  password:
+
+email:
+  enabled: false
+  tls: false
+  from_name: fluffly
+  from_address: fluffly-dev.xyz
+  smtp_host: xxxxx
+  smtp_port: 587
+  smtp_username: xxxxx
+  smtp_password: xxxxx
+  dev_smtp_host: mailpit
+  dev_smtp_port: 1025
+  dev_smtp_username: test
+  dev_smtp_password: test
+
+logger:
+  level: debug
+  pretty: true
+
+petfinder:
+  api_key:
+  api_secret:
+  access_token:
+
+geocoding:
+  enabled: false

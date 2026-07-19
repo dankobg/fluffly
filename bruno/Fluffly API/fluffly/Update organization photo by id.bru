@@ -1,0 +1,16 @@
+meta {
+  name: Update organization photo by id
+  type: http
+  seq: 21
+}
+
+put {
+  url: {{baseUrl}}/organizations/:id/photos/:photo_id
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  id: 1
+  photo_id: 1
+}

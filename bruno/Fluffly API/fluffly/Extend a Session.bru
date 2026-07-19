@@ -1,0 +1,15 @@
+meta {
+  name: Extend a Session
+  type: http
+  seq: 55
+}
+
+patch {
+  url: {{baseUrl}}/sessions/:id/extend
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}

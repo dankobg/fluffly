@@ -1,0 +1,39 @@
+meta {
+  name: Create organization socials
+  type: http
+  seq: 58
+}
+
+post {
+  url: {{baseUrl}}/organizations/:id/socials
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "socials": [
+      {
+        "platform": "Bluesky",
+        "url": "https://www.bluesky.com/company/yourcompany"
+      },
+      {
+        "platform": "YouTube",
+        "url": "https://youtube.com/@yourchannel"
+      },
+      {
+        "platform": "TikTok",
+        "url": "https://www.tiktok.com/@yourprofile"
+      },
+      {
+        "platform": "Pinterest",
+        "url": "https://www.pinterest.com/yourprofile"
+      }
+    ]
+  }
+  
+}

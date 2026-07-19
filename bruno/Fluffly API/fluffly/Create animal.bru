@@ -1,0 +1,63 @@
+meta {
+  name: Create animal
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{baseUrl}}/animals
+  body: multipartForm
+  auth: inherit
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "age": "young",
+      "animal_specie_id": 1,
+      "animal_type_id": 1,
+      "properties": {
+        "good_with_cats": true,
+        "good_with_dogs": true,
+        "good_with_children": true,
+        "declawed": false,
+        "spayed_neutered": true,
+        "special_needs": false,
+        "house_trained": true,
+        "shots_taken": 2
+      },
+      "animal_breeds": [
+        {
+          "breed_id": 27,
+          "primary": true
+        },
+        {
+          "breed_id": 5
+        }
+      ],
+      "description": "My crazy cat",
+      "gender": "m",
+      "hemaphrodite": false,
+      "image_url": "https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg",
+      "name": "Micko",
+      "organization_id": 1,
+      "size": "small",
+      "tags": [
+        "funny",
+        "stupid",
+        "crazy"
+      ],
+      "photos": [
+        {
+          "url": "https://images.pexels.com/photos/57416/cat-sweet-kitty-animals-57416.jpeg"
+        }
+      ],
+      "microchip": {
+        "number": "NHG525K",
+        "description": "my chip",
+        "brand": "catchip",
+        "location": "right ear"
+      }
+    }
+  '''
+}

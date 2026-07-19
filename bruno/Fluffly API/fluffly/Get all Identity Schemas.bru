@@ -1,0 +1,16 @@
+meta {
+  name: Get all Identity Schemas
+  type: http
+  seq: 38
+}
+
+get {
+  url: {{baseUrl}}/schemas
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page_size: 500
+  ~page_token: 
+}

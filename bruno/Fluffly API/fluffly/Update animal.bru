@@ -1,0 +1,33 @@
+meta {
+  name: Update animal
+  type: http
+  seq: 34
+}
+
+patch {
+  url: {{baseUrl}}/animals/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id:
+}
+
+body:json {
+  {
+    "user_id": "",
+    "organization_id": 0,
+    "animal_type_id": 0,
+    "animal_specie_id": 0,
+    "breed_ids": [],
+    "name": "",
+    "gender": "",
+    "hermaphrodite": false,
+    "age": "",
+    "size": "",
+    "image_url": "",
+    "description": "",
+    "properties": {}
+  }
+}

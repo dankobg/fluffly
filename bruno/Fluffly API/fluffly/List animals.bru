@@ -1,0 +1,18 @@
+meta {
+  name: List animals
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/animals
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page: 
+  ~page_size: 
+  ~name: 
+  ~sort: 
+}

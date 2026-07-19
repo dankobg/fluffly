@@ -1,0 +1,19 @@
+meta {
+  name: Get an Identity
+  type: http
+  seq: 46
+}
+
+get {
+  url: {{baseUrl}}/identities/:id
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~include_credential: 
+}
+
+params:path {
+  id: 0e185106-3bca-4ae9-a822-b6664d62873d
+}

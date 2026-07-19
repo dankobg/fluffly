@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "Identities",
+    "object": "identities",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Identities",
+    "object": "identities",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

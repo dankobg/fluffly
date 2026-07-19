@@ -1,0 +1,21 @@
+meta {
+  name: Delete organization videos
+  type: http
+  seq: 26
+}
+
+delete {
+  url: {{baseUrl}}/organizations/:id/videos
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "ids": [1,2,3]
+  }
+}

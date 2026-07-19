@@ -1,0 +1,21 @@
+meta {
+  name: Delete organization socials
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{baseUrl}}/organizations/:id/socials
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "platforms": ["facebook", "instagram", "youtube"]
+  }
+}

@@ -1,0 +1,68 @@
+project_name: fluffly
+
+env:
+  - CGO_ENABLED=0
+
+before:
+  hooks:
+    - go mod download
+    - go generate ./...
+    - go mod tidy
+
+builds:
+  - id: build
+    env:
+      - CGO_ENABLED=0
+    binary: fluffly
+    main: main.go serve
+    goos:
+      - linux
+      # - windows
+      # - darwin
+    goarch:
+      - amd64
+      - arm64
+
+dockers:
+  - image_templates:
+      - ghcr.io/dankobg/{{ .ProjectName }}:v{{ .Major }}
+      - ghcr.io/dankobg/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}
+      - ghcr.io/dankobg/{{ .ProjectName }}:v{{ .Major }}.{{ .Minor }}.{{ .Patch }}
+      - ghcr.io/dankobg/{{ .ProjectName }}:{{ .Tag }}
+      - ghcr.io/dankobg/{{ .ProjectName }}:latest
+    dockerfile: docker/goreleaser.dockerfile
+    goos: linux
+    goarch: amd64
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/dankobg/{{ .ProjectName }}
+      - --label=org.opencontainers.image.source=https://github.com/dankobg/{{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=BSD 2
+
+docker_manifests:
+  - name_template: ghcr.io/dankobg/{{ .ProjectName }}:{{ .Tag }}
+    image_templates:
+      - ghcr.io/dankobg/{{ .ProjectName }}:{{ .Tag }}
+
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+
+snapshot:
+  name_template: "{{ .Version }}-SNAPSHOT-{{ .ShortCommit }}"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "README"
+      - Merge pull request
+      - Merge branch

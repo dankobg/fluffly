@@ -1,0 +1,82 @@
+meta {
+  name: Create multiple identities
+  type: http
+  seq: 43
+}
+
+patch {
+  url: {{baseUrl}}/identities
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "identities": [
+      {
+        "create": {
+          "credentials": {
+            "oidc": {
+              "config": {
+                "providers": [
+                  {
+                    "organization": "",
+                    "provider": "",
+                    "subject": "",
+                    "use_auto_link": false
+                  }
+                ]
+              }
+            },
+            "password": {
+              "config": {
+                "hashed_password": "",
+                "password": "",
+                "use_password_migration_hook": false
+              }
+            },
+            "saml": {
+              "config": {
+                "providers": [
+                  {
+                    "organization": "",
+                    "provider": "",
+                    "subject": ""
+                  }
+                ]
+              }
+            }
+          },
+          "metadata_admin": "",
+          "metadata_public": "",
+          "organization_id": "",
+          "recovery_addresses": [
+            {
+              "created_at": "",
+              "id": "",
+              "updated_at": "",
+              "value": "",
+              "via": ""
+            }
+          ],
+          "schema_id": "",
+          "state": "",
+          "traits": {},
+          "verifiable_addresses": [
+            {
+              "created_at": "",
+              "id": "",
+              "status": "",
+              "updated_at": "",
+              "value": "",
+              "verified": false,
+              "verified_at": "",
+              "via": ""
+            }
+          ]
+        },
+        "patch_id": ""
+      }
+    ]
+  }
+}

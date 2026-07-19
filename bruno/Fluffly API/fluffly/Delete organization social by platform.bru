@@ -1,0 +1,16 @@
+meta {
+  name: Delete organization social by platform
+  type: http
+  seq: 18
+}
+
+delete {
+  url: {{baseUrl}}/organizations/:id/socials/:platform
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+  platform: youtube
+}

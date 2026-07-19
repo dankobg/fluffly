@@ -1,0 +1,16 @@
+meta {
+  name: Update organization video by id
+  type: http
+  seq: 28
+}
+
+put {
+  url: {{baseUrl}}/organizations/:id/videos/:video_id
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  video_id: 1
+  id: 1
+}

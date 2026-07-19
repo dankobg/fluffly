@@ -1,0 +1,16 @@
+meta {
+  name: Get organization video by id
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/organizations/:id/videos/:video_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+  video_id: 1
+}

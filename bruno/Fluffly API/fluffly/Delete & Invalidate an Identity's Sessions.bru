@@ -1,0 +1,15 @@
+meta {
+  name: Delete & Invalidate an Identity's Sessions
+  type: http
+  seq: 50
+}
+
+delete {
+  url: {{baseUrl}}/identities/:id/sessions
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 
+}

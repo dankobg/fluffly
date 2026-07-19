@@ -1,0 +1,94 @@
+[
+  {
+    "schema_id": "developer",
+    "traits": {
+      "email": "fluffly@test.com",
+      "first_name": "Fluffly",
+      "last_name": "Flufflyson"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "fluffly@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$b/hDzmgANHeYm8uZYRhB0eF.sZaCciqvV/lC2zhIHxqq5KmpOlBQO"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "developer",
+    "traits": {
+      "email": "dev@test.com",
+      "first_name": "Dev First",
+      "last_name": "Dev Last"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "dev@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$Jw06v.LAfcMf.hG.CEDf3eZFvMN1ZOXlkAYIePsLzCiCsi.lmg4/S"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "developer",
+    "traits": {
+      "email": "admin@test.com",
+      "first_name": "Admin First",
+      "last_name": "Admin Last"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "admin@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$/ZULZBucTRvlv3Gn9PE9WeYE1efrAu6yzYmMSCxa7nHy651Gem.LC"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "developer",
+    "traits": {
+      "email": "danko@test.com",
+      "first_name": "Danko",
+      "last_name": "Petrovic"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "danko@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$kk/mcELNZ3/f08dfchTbpO8M1bFdhjDi9mXeps0Y7fkG063l0XgXG"
+        }
+      }
+    }
+  }
+]

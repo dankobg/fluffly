@@ -1,0 +1,27 @@
+meta {
+  name: Logout
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://localhost:4433/self-service/logout/api
+  body: json
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "session_token": "{{ory_session_token}}"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

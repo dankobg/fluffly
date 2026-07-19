@@ -1,0 +1,24 @@
+meta {
+  name: Update country
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/countries/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "iso_alpha2": "YY",
+    "iso_alpha3": "YYY",
+    "iso_numeric": "998",
+    "name": "Updated My Country"
+  }
+}

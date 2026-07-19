@@ -1,0 +1,23 @@
+meta {
+  name: Update organization social by platform
+  type: http
+  seq: 17
+}
+
+put {
+  url: {{baseUrl}}/organizations/:id/socials/:platform
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+  platform: Instagram
+}
+
+body:json {
+  {
+    "platform": "instagram",
+    "url": "https://instagram-updated.com"
+  }
+}

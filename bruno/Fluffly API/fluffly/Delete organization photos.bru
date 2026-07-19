@@ -1,0 +1,21 @@
+meta {
+  name: Delete organization photos
+  type: http
+  seq: 22
+}
+
+delete {
+  url: {{baseUrl}}/organizations/:id/photos
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "ids": [1,2,3]
+  }
+}

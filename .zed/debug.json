@@ -1,0 +1,39 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "label": "Go package",
+    "adapter": "Delve",
+    "request": "launch",
+    "mode": "debug",
+    "program": "${ZED_WORKTREE_ROOT}",
+    "args": ["serve"],
+    "showLog": true,
+    "trace": "verbose",
+    "env": {
+      "CGO_ENABLED": "0",
+    },
+  },
+  {
+    "label": "Go file",
+    "adapter": "Delve",
+    "program": "$ZED_FILE",
+    "request": "launch",
+    "mode": "debug",
+    "showLog": true,
+    "trace": "verbose",
+    "env": {
+      "CGO_ENABLED": "0",
+    },
+  },
+  {
+    "label": "Web chrome",
+    "adapter": "JavaScript",
+    "request": "launch",
+    "type": "chrome",
+    "url": "https://fluffly-dev.xyz",
+    "webRoot": "${ZED_WORKTREE_ROOT}/web",
+  },
+]

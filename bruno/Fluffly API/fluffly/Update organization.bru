@@ -1,0 +1,57 @@
+meta {
+  name: Update organization
+  type: http
+  seq: 12
+}
+
+patch {
+  url: {{baseUrl}}/organizations/:id
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "adoption_policy": "updated policy",
+      "adoption_url": "https://update-url",
+      "distance": "updated 200 km",
+      "mission_statement": "updated mission",
+      "name": "updated name",
+      "website": "https://update-website",
+      "contact": {
+        "phone": "999899",
+        "email": "updated-email@test.cm",
+        "address": {
+          "unit_number": "unit_number updated",
+          "street_number": "street_number updated",
+          "street_address": "street_address updated",
+          "address_line_1": "address_line_1 updated",
+          "address_line_2": "address_line_2 updated",
+          "city": "city updated",
+          "region": "region updated",
+          "postal_code": "postal_code updated",
+          "note": "note updated"
+        }
+      },
+      "work_hour": {
+        "monday": "9-15",
+        "tueseday": "10-15",
+        "wednesday": "10-15",
+        "thursday": "10-15",
+        "friday": "9-14",
+        "saturday": "14-15",
+        "sunday": "12-14"
+      },      
+      "socials": [
+        { "platform": "a", "url": "https://updated-a.com" },
+        { "platform": "b", "url": null },
+        { "platform": "c", "url": "https://d.com" }
+      ]
+    }
+  '''
+}

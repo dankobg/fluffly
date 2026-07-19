@@ -1,0 +1,132 @@
+type_system: github.com/aarondl/opt
+
+types:
+  types.JSON[dbcustom.Properties]:
+    imports:
+      - '"github.com/dankobg/fluffly/persistence/dbcustom"'
+      - '"github.com/stephenafamo/bob/types"'
+  types.JSON[dbcustom.PropertiesSchema]:
+    imports:
+      - '"github.com/dankobg/fluffly/persistence/dbcustom"'
+      - '"github.com/stephenafamo/bob/types"'
+  "*ewkb.Point":
+    imports:
+      - '"github.com/twpayne/go-geom/encoding/ewkb"'
+    no_scanner_valuer_test: true
+
+replacements:
+  - tables: ["animal"]
+    match:
+      name: "properties"
+      db_type: "jsonb"
+      type: "types.JSON[json.RawMessage]"
+      default: "NULL"
+      comment: ""
+      nullable: true
+      generated: false
+      autoincr: false
+    replace: "types.JSON[dbcustom.Properties]"
+  - tables: ["animal_specie"]
+    match:
+      name: "properties_schema"
+      db_type: "jsonb"
+      type: "types.JSON[json.RawMessage]"
+      default: "NULL"
+      comment: ""
+      nullable: true
+      generated: false
+      autoincr: false
+    replace: "types.JSON[dbcustom.PropertiesSchema]"
+  - tables: ["address"]
+    match:
+      name: "coords"
+      db_type: "geography"
+      type: "string"
+      default: "NULL"
+      comment: ""
+      nullable: true
+      generated: false
+      autoincr: false
+    replace: "*ewkb.Point"
+  - tables: ["geocoding_result"]
+    match:
+      name: "coords"
+      db_type: "geography"
+      type: "string"
+      default: ""
+      comment: ""
+      nullable: false
+      generated: false
+      autoincr: false
+    replace: "*ewkb.Point"
+
+psql:
+  driver: github.com/jackc/pgx/v5/stdlib
+  dsn: postgres://test:test@localhost:5432/test?sslmode=disable
+  schemas: [public]
+  uuid_pkg: google
+  # queries: ./queries
+  except:
+    continuity_containers:
+    courier_message_dispatches:
+    courier_messages:
+    goose_db_version:
+    identities:
+    identity_credential_identifiers:
+    identity_credential_types:
+    identity_credentials:
+    identity_login_codes:
+    identity_recovery_addresses:
+    identity_recovery_codes:
+    identity_recovery_tokens:
+    identity_registration_codes:
+    identity_verifiable_addresses:
+    identity_verification_codes:
+    identity_verification_tokens:
+    keto_relation_tuples:
+    keto_uuid_mappings:
+    networks:
+    schema_migration:
+    selfservice_errors:
+    selfservice_login_flows:
+    selfservice_recovery_flows:
+    selfservice_registration_flows:
+    selfservice_settings_flows:
+    selfservice_verification_flows:
+    session_devices:
+    session_token_exchanges:
+    sessions:
+    geography_columns:
+    geometry_columns:
+    spatial_ref_sys:
+
+plugins_preset: "all"
+plugins:
+  dbinfo:
+    disabled: false
+    pkgname: "dbinfo"
+    destination: "../../db/gen/dbinfo"
+  enums:
+    disabled: false
+    pkgname: "enums"
+    destination: "../../db/gen/enums"
+  models:
+    disabled: false
+    pkgname: "models"
+    destination: "../../db/gen/models"
+  factory:
+    disabled: true
+    pkgname: "factory"
+    destination: "../../db/gen/factory"
+  dberrors:
+    disabled: true
+    pkgname: "dberrors"
+    destination: "../../db/gen/dberrors"
+  where:
+    disabled: true
+  loaders:
+    disabled: true
+  joins:
+    disabled: true
+  counts:
+    disabled: true

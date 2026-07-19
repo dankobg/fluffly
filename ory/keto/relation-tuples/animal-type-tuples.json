@@ -1,0 +1,119 @@
+[
+  {
+    "namespace": "AnimalTypes",
+    "object": "animal_types",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "AnimalTypes",
+    "object": "animal_types",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalTypes",
+    "object": "animal_types",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalTypes",
+    "object": "animal_types",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:1",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:2",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:3",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:4",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:5",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:6",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:7",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:8",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  },
+  {
+    "namespace": "AnimalType",
+    "object": "animal_type:9",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalTypes",
+      "object": "animal_types"
+    }
+  }
+]

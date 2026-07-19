@@ -1,0 +1,21 @@
+meta {
+  name: List an Identity's Sessions
+  type: http
+  seq: 51
+}
+
+get {
+  url: {{baseUrl}}/identities/:id/sessions
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page_size: 500
+  ~page_token: 
+  ~active: 
+}
+
+params:path {
+  id: 0e185106-3bca-4ae9-a822-b6664d62873d
+}

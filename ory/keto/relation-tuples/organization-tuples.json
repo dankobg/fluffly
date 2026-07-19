@@ -1,0 +1,38 @@
+[
+  {
+    "namespace": "Organizations",
+    "object": "organizations",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "Organizations",
+    "object": "organizations",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Organizations",
+    "object": "organizations",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Organizations",
+    "object": "organizations",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

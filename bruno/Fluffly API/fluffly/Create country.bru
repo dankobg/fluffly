@@ -1,0 +1,21 @@
+meta {
+  name: Create country
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/countries
+  body: json
+  auth: inherit
+}
+
+
+body:json {
+  {
+    "iso_alpha2": "ZZ",
+    "iso_alpha3": "ZZZ",
+    "iso_numeric": "999",
+    "name": "My Country"
+  }
+}

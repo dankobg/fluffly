@@ -1,0 +1,524 @@
+[
+  {
+    "namespace": "AnimalSpecies",
+    "object": "animal_species",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "AnimalSpecies",
+    "object": "animal_species",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalSpecies",
+    "object": "animal_species",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalSpecies",
+    "object": "animal_species",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:1",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:2",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:3",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:4",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:5",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:6",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:7",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:8",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:9",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:10",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:11",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:12",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:13",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:14",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:15",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:16",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:17",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:18",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:19",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:20",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:21",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:22",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:23",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:24",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:25",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:26",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:27",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:28",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:29",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:30",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:31",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:32",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:33",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:34",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:35",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:36",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:37",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:38",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:39",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:40",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:41",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:42",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:43",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:44",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:45",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:46",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:47",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:48",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:49",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:50",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:51",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:52",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:53",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  },
+  {
+    "namespace": "AnimalSpecie",
+    "object": "animal_specie:54",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "AnimalSpecies",
+      "object": "animal_species"
+    }
+  }
+]

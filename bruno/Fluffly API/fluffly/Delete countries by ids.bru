@@ -1,0 +1,18 @@
+meta {
+  name: Delete countries by ids
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/countries
+  body: json
+  auth: inherit
+}
+
+
+body:json {
+  {
+    "ids": [1,2,3,4,5]
+  }
+}

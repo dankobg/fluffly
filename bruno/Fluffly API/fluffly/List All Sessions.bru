@@ -1,0 +1,18 @@
+meta {
+  name: List All Sessions
+  type: http
+  seq: 52
+}
+
+get {
+  url: {{baseUrl}}/sessions
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page_size: 500
+  ~page_token: 
+  ~active: 
+  ~expand: 
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Delete organization by id
+  type: http
+  seq: 13
+}
+
+delete {
+  url: {{baseUrl}}/organizations/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}

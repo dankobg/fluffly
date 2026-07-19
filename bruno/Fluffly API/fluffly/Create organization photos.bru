@@ -1,0 +1,27 @@
+meta {
+  name: Create organization photos
+  type: http
+  seq: 59
+}
+
+post {
+  url: {{baseUrl}}/organizations/:id/photos
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "photos": [
+        {
+          "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg"
+        }
+      ]
+    }
+  '''
+}

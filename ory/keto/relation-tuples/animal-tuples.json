@@ -1,0 +1,38 @@
+[
+  {
+    "namespace": "Animals",
+    "object": "animals",
+    "relation": "viewers",
+    "subject_id": "*"
+  },
+  {
+    "namespace": "Animals",
+    "object": "animals",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Animals",
+    "object": "animals",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Animals",
+    "object": "animals",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

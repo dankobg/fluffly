@@ -1,0 +1,2273 @@
+[
+  {
+    "namespace": "Countries",
+    "object": "countries",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "customer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Countries",
+    "object": "countries",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Countries",
+    "object": "countries",
+    "relation": "managers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:1",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:2",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:3",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:4",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:5",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:6",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:7",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:8",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:9",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:10",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:11",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:12",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:13",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:14",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:15",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:16",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:17",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:18",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:19",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:20",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:21",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:22",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:23",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:24",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:25",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:26",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:27",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:28",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:29",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:30",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:31",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:32",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:33",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:34",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:35",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:36",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:37",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:38",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:39",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:40",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:41",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:42",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:43",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:44",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:45",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:46",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:47",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:48",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:49",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:50",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:51",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:52",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:53",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:54",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:55",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:56",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:57",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:58",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:59",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:60",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:61",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:62",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:63",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:64",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:65",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:66",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:67",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:68",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:69",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:70",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:71",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:72",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:73",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:74",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:75",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:76",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:77",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:78",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:79",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:80",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:81",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:82",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:83",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:84",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:85",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:86",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:87",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:88",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:89",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:90",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:91",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:92",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:93",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:94",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:95",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:96",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:97",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:98",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:99",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:100",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:101",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:102",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:103",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:104",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:105",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:106",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:107",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:108",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:109",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:110",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:111",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:112",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:113",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:114",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:115",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:116",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:117",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:118",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:119",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:120",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:121",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:122",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:123",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:124",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:125",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:126",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:127",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:128",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:129",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:130",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:131",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:132",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:133",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:134",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:135",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:136",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:137",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:138",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:139",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:140",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:141",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:142",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:143",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:144",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:145",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:146",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:147",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:148",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:149",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:150",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:151",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:152",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:153",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:154",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:155",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:156",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:157",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:158",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:159",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:160",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:161",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:162",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:163",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:164",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:165",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:166",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:167",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:168",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:169",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:170",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:171",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:172",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:173",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:174",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:175",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:176",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:177",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:178",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:179",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:180",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:181",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:182",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:183",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:184",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:185",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:186",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:187",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:188",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:189",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:190",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:191",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:192",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:193",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:194",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:195",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:196",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:197",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:198",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:199",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:200",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:201",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:202",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:203",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:204",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:205",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:206",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:207",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:208",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:209",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:210",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:211",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:212",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:213",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:214",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:215",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:216",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:217",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:218",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:219",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:220",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:221",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:222",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:223",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:224",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:225",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:226",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:227",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:228",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:229",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:230",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:231",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:232",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:233",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:234",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:235",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:236",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:237",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:238",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:239",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:240",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:241",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:242",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:243",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:244",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:245",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:246",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:247",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:248",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  },
+  {
+    "namespace": "Country",
+    "object": "country:249",
+    "relation": "parents",
+    "subject_set": {
+      "namespace": "Countries",
+      "object": "countries"
+    }
+  }
+]

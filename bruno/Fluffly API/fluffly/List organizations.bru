@@ -1,0 +1,19 @@
+meta {
+  name: List organizations
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/organizations
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~page: 
+  ~page_size: 
+  ~name: 
+  ~sort: 
+  ~id: 
+}

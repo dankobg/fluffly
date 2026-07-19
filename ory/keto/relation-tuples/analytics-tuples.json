@@ -1,0 +1,12 @@
+[
+  {
+    "namespace": "Analytics",
+    "object": "analytics",
+    "relation": "viewers",
+    "subject_set": {
+      "namespace": "Group",
+      "object": "developer",
+      "relation": "members"
+    }
+  }
+]

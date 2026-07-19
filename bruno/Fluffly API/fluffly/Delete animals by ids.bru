@@ -1,0 +1,17 @@
+meta {
+  name: Delete animals by ids
+  type: http
+  seq: 32
+}
+
+delete {
+  url: {{baseUrl}}/animals
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "ids": []
+  }
+}

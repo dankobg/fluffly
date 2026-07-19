@@ -1,0 +1,15 @@
+meta {
+  name: Get organization by id
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/organizations/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}

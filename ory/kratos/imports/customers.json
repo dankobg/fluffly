@@ -1,0 +1,94 @@
+[
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "test@test.com",
+      "first_name": "Test First",
+      "last_name": "Test Last"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "test@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$BNFUPvN8T4SRdhcyBuhDd.sV/P.Fq0v/jVPGch9GBLIhowVCSuA0O"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "customer@test.com",
+      "first_name": "Customer First",
+      "last_name": "Customer Last"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "customer@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$xd7iRI2uO.N4Ph2vYWfupeFCKI16C8E/U7T.SdmXJ.krgdNIjyQ16"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "bob@test.com",
+      "first_name": "Bob",
+      "last_name": "Bobson"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "bob@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$5yctS0oEUwRHItEXD43z8eOlUergOAGhZTOTwJqkoDyOlFdOo1MMG"
+        }
+      }
+    }
+  },
+  {
+    "schema_id": "customer",
+    "traits": {
+      "email": "ana@test.com",
+      "first_name": "Ana",
+      "last_name": "Smith"
+    },
+    "verifiable_addresses": [
+      {
+        "value": "ana@test.com",
+        "verified": true,
+        "via": "email",
+        "status": "completed"
+      }
+    ],
+    "credentials": {
+      "password": {
+        "config": {
+          "hashed_password": "$2a$12$C3HF5eHz2n11pljBz6201usxv6bj794r0sgYFCwzw4zS9mf9J27BG"
+        }
+      }
+    }
+  }
+]

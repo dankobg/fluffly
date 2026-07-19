@@ -1,0 +1,27 @@
+# ARG NODE_VERSION=24.9-alpine
+# FROM node:${NODE_VERSION} AS base
+# ENV NODE_ENV=production
+# USER node
+# WORKDIR /app
+# COPY --chown=node:node package*.json ./
+# RUN npm ci --omit=dev --force && npm cache clean --force
+
+# FROM base AS dev
+# ENV NODE_ENV=development
+# RUN npm i --force
+# COPY --chown=node:node . .
+# CMD ["npm", "run", "dev"]
+
+# FROM base AS prod
+# COPY --chown=node:node . .
+# CMD ["npm", "run", "build"]
+
+
+ARG NODE_VERSION=24.9-alpine
+FROM node:${NODE_VERSION} AS dev
+ENV NODE_ENV=development
+WORKDIR /app
+COPY package*.json ./
+RUN npm i --force
+COPY . .
+CMD ["npm", "run", "dev"]

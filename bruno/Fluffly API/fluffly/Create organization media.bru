@@ -1,0 +1,42 @@
+meta {
+  name: Create organization media
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/organizations/:id/media
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "photos": [
+        {
+          "url": "https://images.pexels.com/photos/1805164/pexels-photo-1805164.jpeg"
+        }
+      ],
+      "videos": [
+        {
+          "url": "https://cdn.pixabay.com/video/2022/09/06/130424-746934892_large.mp4"
+        }
+      ],
+      "socials": [
+        {
+          "platform": "Facebook",
+          "url": "https://facebook.com/pawshelterbg"
+        },
+        {
+          "platform": "Instagram",
+          "url": "https://instagram.com/pawshelterbg"
+        }
+      ],
+    }
+  '''
+}

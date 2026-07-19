@@ -1,0 +1,27 @@
+meta {
+  name: Create organization videos
+  type: http
+  seq: 60
+}
+
+post {
+  url: {{baseUrl}}/organizations/:id/videos
+  body: multipartForm
+  auth: inherit
+}
+
+params:path {
+  id: 1
+}
+
+body:multipart-form {
+  data: '''
+    {
+      "videos": [
+        {
+          "url": "https://cdn.pixabay.com/video/2022/09/06/130424-746934892_large.mp4"
+        }
+      ] 
+    }
+  '''
+}

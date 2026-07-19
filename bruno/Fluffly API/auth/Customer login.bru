@@ -1,0 +1,40 @@
+meta {
+  name: Customer login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{submit_login_action}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Accept: application/json
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "method": "password",
+    "identifier": "test@test.com",
+    "password": "{{login_password}}"
+  }
+}
+
+script:post-response {
+  const token = res?.body?.session_token;
+  console.log('login token:', token);
+  if (token) {
+    bru.setEnvVar("ory_session_token", token);
+  } else {
+    console.log('No login token');
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
