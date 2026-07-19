@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.1.0
 servers:
   - url: "/api/v1"
     description: Fluffly development server
@@ -5680,19 +5680,22 @@ components:
           type: integer
           description: Country id
     UpdateAddressBody:
-      type: object
-      nullable: true
+      type:
+        - object
+        - "null"
       properties:
         unit_number:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Unit number
-          nullable: true
         street_number:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Street number
-          nullable: true
         street_address:
           type: string
           description: Street address
@@ -5701,44 +5704,50 @@ components:
           minLength: 1
           description: Address line 1
         address_line_2:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Address line 2 (more details)
-          nullable: true
         city:
           type: string
           minLength: 1
           description: City
         region:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Region
-          nullable: true
         postal_code:
-          type: string
+          type:
+            - string
+            - "null"
           description: Postal code
-          nullable: true
         lat:
-          type: number
+          type:
+            - string
+            - "null"
           format: double
           minimum: -90
           maximum: 90
           multipleOf: 0.000001
           description: Latitude
-          nullable: true
         lon:
-          type: number
+          type:
+            - string
+            - "null"
           format: double
           minimum: -180
           maximum: 180
           multipleOf: 0.000001
           description: Longitude
-          nullable: true
         note:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Some info about address if needed
-          nullable: true
         country:
           $ref: "#/components/schemas/UpdateCountryBody"
     Contact:
@@ -5786,80 +5795,95 @@ components:
       type: object
       properties:
         phone:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Contact phone
-          nullable: true
         email:
-          type: string
+          type:
+            - string
+            - "null"
           format: email
           description: Contact E-Mail
-          nullable: true
         address:
-          $ref: "#/components/schemas/UpdateAddressBody"
-          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/UpdateAddressBody"
+            - type: "null"
     UpdateOrganizationWorkHourBody:
-      type: object
-      nullable: true
+      type:
+        - object
+        - "null"
       properties:
         monday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Monday work hours
-          nullable: true
         tuesday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Tuesday work hours
-          nullable: true
         wednesday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Wednesday work hours
-          nullable: true
         thursday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Thursday work hours
-          nullable: true
         friday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Friday work hours
-          nullable: true
         saturday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Saturday work hours
-          nullable: true
         sunday:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Sunday work hours
-          nullable: true
     UpdateContactBody:
       type: object
       properties:
         user_id:
           format: uuid
-          type: string
+          type:
+            - string
+            - "null"
           description: User id
-          nullable: true
         organization_id:
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
           description: Organization id
-          nullable: true
         phone:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Contact phone
-          nullable: true
         email:
-          type: string
+          type:
+            - string
+            - "null"
           format: email
           description: Contact E-Mail
-          nullable: true
         address:
           $ref: "#/components/schemas/UpdateAddressBody"
     AnimalType:
@@ -6097,9 +6121,10 @@ components:
           format: int64
           description: Breed id
         primary:
-          type: boolean
+          type:
+            - boolean
+            - "null"
           description: Whether breed is primary
-          nullable: true
     CreateAnimalBreedsBody:
       type: object
       required:
@@ -6461,35 +6486,41 @@ components:
       type: object
       properties:
         name:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Organization name
-          nullable: true
         website:
-          type: string
+          type:
+            - string
+            - "null"
           format: uri
           description: Organization website
-          nullable: true
         mission_statement:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Organization mission statement
-          nullable: true
         adoption_policy:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Organization adoption policy
-          nullable: true
         adoption_url:
-          type: string
+          type:
+            - string
+            - "null"
           format: uri
           description: Organization adoption url
-          nullable: true
         distance:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Organization distance
-          nullable: true
         status:
           $ref: "#/components/schemas/OrganizationStatus"
         contact:
@@ -6497,20 +6528,23 @@ components:
         work_hour:
           $ref: "#/components/schemas/UpdateOrganizationWorkHourBody"
         photos:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/CreateOrganizationPhotoBody"
-          nullable: true
         videos:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/CreateOrganizationVideoBody"
-          nullable: true
         socials:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/UpdateOrganizationSocialBody"
-          nullable: true
     DeleteOrganizationsBody:
       type: object
       required:
@@ -7007,28 +7041,32 @@ components:
           minLength: 1
           description: Microchip location
     UpdateMicrochipBody:
-      type: object
-      nullable: true
+      type:
+        - object
+        - "null"
       properties:
         number:
           type: string
           minLength: 1
           description: Microchip id
         brand:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Microchip brand
-          nullable: true
         description:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Microchip description
-          nullable: true
         location:
-          type: string
+          type:
+            - string
+            - "null"
           minLength: 1
           description: Microchip location
-          nullable: true
     AnimalGender:
       type: string
       description: Animal gender
@@ -7409,14 +7447,16 @@ components:
       properties:
         user_id:
           format: uuid
-          type: string
+          type:
+            - string
+            - "null"
           description: User id
-          nullable: true
         organization_id:
           format: int64
-          type: integer
+          type:
+            - integer
+            - "null"
           description: Organization id
-          nullable: true
         animal_type_id:
           format: int64
           type: integer
@@ -7426,62 +7466,69 @@ components:
           type: integer
           description: Animal specie id
         animal_breeds:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/UpdateAnimalBreedBody"
-          nullable: true
         name:
           type: string
           description: Animal name
         gender:
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/AnimalGender"
-          nullable: true
+            - type: "null"
         hermaphrodite:
-          type: boolean
+          type:
+            - boolean
+            - "null"
           description: Animal is hermaphrodite
-          nullable: true
         age:
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/AnimalAge"
-          nullable: true
+            - type: "null"
         size:
-          allOf:
+          oneOf:
             - $ref: "#/components/schemas/AnimalSize"
-          nullable: true
+            - type: "null"
         image_url:
           type: string
           description: Animal image url
         description:
-          type: string
+          type:
+            - string
+            - "null"
           description: Animal description
-          nullable: true
         properties:
-          type: object
+          type:
+            - object
+            - "null"
           additionalProperties: true
           description: Animal properties
           x-go-type: dbcustom.Properties
           x-go-type-import:
             path: github.com/dankobg/fluffly/persistence/dbcustom
             name: dbcustom
-          nullable: true
         microchip:
           $ref: "#/components/schemas/UpdateMicrochipBody"
         photos:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/CreateAnimalPhotoBody"
-          nullable: true
         videos:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/CreateAnimalVideoBody"
-          nullable: true
         tags:
-          type: array
+          type:
+            - array
+            - "null"
           items:
             $ref: "#/components/schemas/UpdateAnimalTagBody"
-          nullable: true
     DeleteAnimalsBody:
       type: object
       required:
@@ -7834,35 +7881,43 @@ components:
       type: string
       format: uuid
     NullBool:
-      nullable: true
-      type: boolean
+      type:
+        - boolean
+        - "null"
     NullDuration:
-      nullable: true
+      type:
+        - string
+        - "null"
       pattern: "^[0-9]+(ns|us|ms|s|m|h)$"
-      type: string
     NullInt:
-      nullable: true
-      type: integer
+      type:
+        - integer
+        - "null"
     NullString:
-      nullable: true
-      type: string
+      type:
+        - string
+        - "null"
     NullTime:
       format: date-time
-      nullable: true
-      type: string
+      type:
+        - string
+        - "null"
     NullUUID:
       format: uuid4
-      nullable: true
-      type: string
+      type:
+        - string
+        - "null"
     NullInt64:
-      nullable: true
-      type: integer
+      type:
+        - integer
+        - "null"
     NullJsonRawMessage:
       description: >-
         NullJSONRawMessage represents a json.RawMessage that works well with
         JSON, SQL, and Swagger and is NULLable-
-      nullable: true
-      type: object
+      type:
+        - object
+        - "null"
     APIError:
       type: object
       required:
@@ -8512,7 +8567,8 @@ components:
 
             Learn more [about JSON
             Pointers](https://datatracker.ietf.org/doc/html/rfc6901#section-5).
-          example: /name
+          examples:
+            - /name
           type: string
         op:
           description: >-
@@ -8525,7 +8581,8 @@ components:
             - move
             - copy
             - test
-          example: replace
+          examples:
+            - replace
           type: string
         path:
           description: >-
@@ -8534,7 +8591,8 @@ components:
 
             Learn more [about JSON
             Pointers](https://datatracker.ietf.org/doc/html/rfc6901#section-5).
-          example: /name
+          examples:
+            - /name
           type: string
         value:
           description: >-
@@ -8543,7 +8601,8 @@ components:
 
             Learn more [about JSON
             Pointers](https://datatracker.ietf.org/doc/html/rfc6901#section-5).
-          example: foobar
+          examples:
+            - foobar
       required:
         - op
         - path
@@ -8568,28 +8627,35 @@ components:
             established by [JWA] or be a value that contains a Collision-
 
             Resistant Name.
-          example: RS256
+          examples:
+            - RS256
           type: string
         crv:
-          example: P-256
+          examples:
+            - P-256
           type: string
         d:
-          example: >-
-            T_N8I-6He3M8a7X1vWt6TGIx4xB_GP3Mb4SsZSA4v-orvJzzRiQhLlRR81naWYxfQAYt5isDI6_C2L9bdWo4FFPjGQFvNoRX-_sBJyBI_rl-TBgsZYoUlAj3J92WmY2inbA-PwyJfsaIIDceYBC-eX-xiCu6qMqkZi3MwQAFL6bMdPEM0z4JBcwFT3VdiWAIRUuACWQwrXMq672x7fMuaIaHi7XDGgt1ith23CLfaREmJku9PQcchbt_uEY-hqrFY6ntTtS4paWWQj86xLL94S-Tf6v6xkL918PfLSOTq6XCzxvlFwzBJqApnAhbwqLjpPhgUG04EDRrqrSBc5Y1BLevn6Ip5h1AhessBp3wLkQgz_roeckt-ybvzKTjESMuagnpqLvOT7Y9veIug2MwPJZI2VjczRc1vzMs25XrFQ8DpUy-bNdp89TmvAXwctUMiJdgHloJw23Cv03gIUAkDnsTqZmkpbIf-crpgNKFmQP_EDKoe8p_PXZZgfbRri3NoEVGP7Mk6yEu8LjJhClhZaBNjuWw2-KlBfOA3g79mhfBnkInee5KO9mGR50qPk1V-MorUYNTFMZIm0kFE6eYVWFBwJHLKYhHU34DoiK1VP-svZpC2uAMFNA_UJEwM9CQ2b8qe4-5e9aywMvwcuArRkAB5mBIfOaOJao3mfukKAE
+          examples:
+            - >-
+              T_N8I-6He3M8a7X1vWt6TGIx4xB_GP3Mb4SsZSA4v-orvJzzRiQhLlRR81naWYxfQAYt5isDI6_C2L9bdWo4FFPjGQFvNoRX-_sBJyBI_rl-TBgsZYoUlAj3J92WmY2inbA-PwyJfsaIIDceYBC-eX-xiCu6qMqkZi3MwQAFL6bMdPEM0z4JBcwFT3VdiWAIRUuACWQwrXMq672x7fMuaIaHi7XDGgt1ith23CLfaREmJku9PQcchbt_uEY-hqrFY6ntTtS4paWWQj86xLL94S-Tf6v6xkL918PfLSOTq6XCzxvlFwzBJqApnAhbwqLjpPhgUG04EDRrqrSBc5Y1BLevn6Ip5h1AhessBp3wLkQgz_roeckt-ybvzKTjESMuagnpqLvOT7Y9veIug2MwPJZI2VjczRc1vzMs25XrFQ8DpUy-bNdp89TmvAXwctUMiJdgHloJw23Cv03gIUAkDnsTqZmkpbIf-crpgNKFmQP_EDKoe8p_PXZZgfbRri3NoEVGP7Mk6yEu8LjJhClhZaBNjuWw2-KlBfOA3g79mhfBnkInee5KO9mGR50qPk1V-MorUYNTFMZIm0kFE6eYVWFBwJHLKYhHU34DoiK1VP-svZpC2uAMFNA_UJEwM9CQ2b8qe4-5e9aywMvwcuArRkAB5mBIfOaOJao3mfukKAE
           type: string
         dp:
-          example: >-
-            G4sPXkc6Ya9y8oJW9_ILj4xuppu0lzi_H7VTkS8xj5SdX3coE0oimYwxIi2emTAue0UOa5dpgFGyBJ4c8tQ2VF402XRugKDTP8akYhFo5tAA77Qe_NmtuYZc3C3m3I24G2GvR5sSDxUyAN2zq8Lfn9EUms6rY3Ob8YeiKkTiBj0
+          examples:
+            - >-
+              G4sPXkc6Ya9y8oJW9_ILj4xuppu0lzi_H7VTkS8xj5SdX3coE0oimYwxIi2emTAue0UOa5dpgFGyBJ4c8tQ2VF402XRugKDTP8akYhFo5tAA77Qe_NmtuYZc3C3m3I24G2GvR5sSDxUyAN2zq8Lfn9EUms6rY3Ob8YeiKkTiBj0
           type: string
         dq:
-          example: >-
-            s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUUvMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk
+          examples:
+            - >-
+              s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUUvMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk
           type: string
         e:
-          example: AQAB
+          examples:
+            - AQAB
           type: string
         k:
-          example: GawgguFyGrWKav7AX4VKUg
+          examples:
+            - GawgguFyGrWKav7AX4VKUg
           type: string
         kid:
           description: >-
@@ -8611,7 +8677,8 @@ components:
             equivalent alternatives by the application using them.)  The "kid"
 
             value is a case-sensitive string.
-          example: 1603dfe0af8f4596
+          examples:
+            - 1603dfe0af8f4596
           type: string
         kty:
           description: >-
@@ -8625,23 +8692,28 @@ components:
             established by [JWA] or be a value that contains a Collision-
 
             Resistant Name.  The "kty" value is a case-sensitive string.
-          example: RSA
+          examples:
+            - RSA
           type: string
         "n":
-          example: >-
-            vTqrxUyQPl_20aqf5kXHwDZrel-KovIp8s7ewJod2EXHl8tWlRB3_Rem34KwBfqlKQGp1nqah-51H4Jzruqe0cFP58hPEIt6WqrvnmJCXxnNuIB53iX_uUUXXHDHBeaPCSRoNJzNysjoJ30TIUsKBiirhBa7f235PXbKiHducLevV6PcKxJ5cY8zO286qJLBWSPm-OIevwqsIsSIH44Qtm9sioFikhkbLwoqwWORGAY0nl6XvVOlhADdLjBSqSAeT1FPuCDCnXwzCDR8N9IFB_IjdStFkC-rVt2K5BYfPd0c3yFp_vHR15eRd0zJ8XQ7woBC8Vnsac6Et1pKS59pX6256DPWu8UDdEOolKAPgcd_g2NpA76cAaF_jcT80j9KrEzw8Tv0nJBGesuCjPNjGs_KzdkWTUXt23Hn9QJsdc1MZuaW0iqXBepHYfYoqNelzVte117t4BwVp0kUM6we0IqyXClaZgOI8S-WDBw2_Ovdm8e5NmhYAblEVoygcX8Y46oH6bKiaCQfKCFDMcRgChme7AoE1yZZYsPbaG_3IjPrC4LBMHQw8rM9dWjJ8ImjicvZ1pAm0dx-KHCP3y5PVKrxBDf1zSOsBRkOSjB8TPODnJMz6-jd5hTtZxpZPwPoIdCanTZ3ZD6uRBpTmDwtpRGm63UQs1m5FWPwb0T2IF0
+          examples:
+            - >-
+              vTqrxUyQPl_20aqf5kXHwDZrel-KovIp8s7ewJod2EXHl8tWlRB3_Rem34KwBfqlKQGp1nqah-51H4Jzruqe0cFP58hPEIt6WqrvnmJCXxnNuIB53iX_uUUXXHDHBeaPCSRoNJzNysjoJ30TIUsKBiirhBa7f235PXbKiHducLevV6PcKxJ5cY8zO286qJLBWSPm-OIevwqsIsSIH44Qtm9sioFikhkbLwoqwWORGAY0nl6XvVOlhADdLjBSqSAeT1FPuCDCnXwzCDR8N9IFB_IjdStFkC-rVt2K5BYfPd0c3yFp_vHR15eRd0zJ8XQ7woBC8Vnsac6Et1pKS59pX6256DPWu8UDdEOolKAPgcd_g2NpA76cAaF_jcT80j9KrEzw8Tv0nJBGesuCjPNjGs_KzdkWTUXt23Hn9QJsdc1MZuaW0iqXBepHYfYoqNelzVte117t4BwVp0kUM6we0IqyXClaZgOI8S-WDBw2_Ovdm8e5NmhYAblEVoygcX8Y46oH6bKiaCQfKCFDMcRgChme7AoE1yZZYsPbaG_3IjPrC4LBMHQw8rM9dWjJ8ImjicvZ1pAm0dx-KHCP3y5PVKrxBDf1zSOsBRkOSjB8TPODnJMz6-jd5hTtZxpZPwPoIdCanTZ3ZD6uRBpTmDwtpRGm63UQs1m5FWPwb0T2IF0
           type: string
         p:
-          example: >-
-            6NbkXwDWUhi-eR55Cgbf27FkQDDWIamOaDr0rj1q0f1fFEz1W5A_09YvG09Fiv1AO2-D8Rl8gS1Vkz2i0zCSqnyy8A025XOcRviOMK7nIxE4OH_PEsko8dtIrb3TmE2hUXvCkmzw9EsTF1LQBOGC6iusLTXepIC1x9ukCKFZQvdgtEObQ5kzd9Nhq-cdqmSeMVLoxPLd1blviVT9Vm8-y12CtYpeJHOaIDtVPLlBhJiBoPKWg3vxSm4XxIliNOefqegIlsmTIa3MpS6WWlCK3yHhat0Q-rRxDxdyiVdG_wzJvp0Iw_2wms7pe-PgNPYvUWH9JphWP5K38YqEBiJFXQ
+          examples:
+            - >-
+              6NbkXwDWUhi-eR55Cgbf27FkQDDWIamOaDr0rj1q0f1fFEz1W5A_09YvG09Fiv1AO2-D8Rl8gS1Vkz2i0zCSqnyy8A025XOcRviOMK7nIxE4OH_PEsko8dtIrb3TmE2hUXvCkmzw9EsTF1LQBOGC6iusLTXepIC1x9ukCKFZQvdgtEObQ5kzd9Nhq-cdqmSeMVLoxPLd1blviVT9Vm8-y12CtYpeJHOaIDtVPLlBhJiBoPKWg3vxSm4XxIliNOefqegIlsmTIa3MpS6WWlCK3yHhat0Q-rRxDxdyiVdG_wzJvp0Iw_2wms7pe-PgNPYvUWH9JphWP5K38YqEBiJFXQ
           type: string
         q:
-          example: >-
-            0A1FmpOWR91_RAWpqreWSavNaZb9nXeKiBo0DQGBz32DbqKqQ8S4aBJmbRhJcctjCLjain-ivut477tAUMmzJwVJDDq2MZFwC9Q-4VYZmFU4HJityQuSzHYe64RjN-E_NQ02TWhG3QGW6roq6c57c99rrUsETwJJiwS8M5p15Miuz53DaOjv-uqqFAFfywN5WkxHbraBcjHtMiQuyQbQqkCFh-oanHkwYNeytsNhTu2mQmwR5DR2roZ2nPiFjC6nsdk-A7E3S3wMzYYFw7jvbWWoYWo9vB40_MY2Y0FYQSqcDzcBIcq_0tnnasf3VW4Fdx6m80RzOb2Fsnln7vKXAQ
+          examples:
+            - >-
+              0A1FmpOWR91_RAWpqreWSavNaZb9nXeKiBo0DQGBz32DbqKqQ8S4aBJmbRhJcctjCLjain-ivut477tAUMmzJwVJDDq2MZFwC9Q-4VYZmFU4HJityQuSzHYe64RjN-E_NQ02TWhG3QGW6roq6c57c99rrUsETwJJiwS8M5p15Miuz53DaOjv-uqqFAFfywN5WkxHbraBcjHtMiQuyQbQqkCFh-oanHkwYNeytsNhTu2mQmwR5DR2roZ2nPiFjC6nsdk-A7E3S3wMzYYFw7jvbWWoYWo9vB40_MY2Y0FYQSqcDzcBIcq_0tnnasf3VW4Fdx6m80RzOb2Fsnln7vKXAQ
           type: string
         qi:
-          example: >-
-            GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzgUIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rxyR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU
+          examples:
+            - >-
+              GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzgUIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rxyR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU
           type: string
         use:
           description: >-
@@ -8653,10 +8725,12 @@ components:
 
             on data. Values are commonly "sig" (signature) or "enc"
             (encryption).
-          example: sig
+          examples:
+            - sig
           type: string
         x:
-          example: f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
+          examples:
+            - f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU
           type: string
         x5c:
           description: >-
@@ -8678,7 +8752,8 @@ components:
             type: string
           type: array
         "y":
-          example: x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
+          examples:
+            - x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0
           type: string
       required:
         - use
@@ -9080,7 +9155,8 @@ components:
       properties:
         created_at:
           description: When this entry was created
-          example: "2014-01-01T23:28:56.782Z"
+          examples:
+            - "2014-01-01T23:28:56.782Z"
           format: date-time
           type: string
         id:
@@ -9091,7 +9167,8 @@ components:
           $ref: "#/components/schemas/IdentityVerifiableAddressStatus"
         updated_at:
           description: When this entry was last updated
-          example: "2014-01-01T23:28:56.782Z"
+          examples:
+            - "2014-01-01T23:28:56.782Z"
           format: date-time
           type: string
         value:
@@ -9102,7 +9179,8 @@ components:
           type: string
         verified:
           description: Indicates if the address has already been verified
-          example: true
+          examples:
+            - true
           type: boolean
         verified_at:
           $ref: "#/components/schemas/NullTime"
@@ -9111,7 +9189,8 @@ components:
           enum:
             - email
             - sms
-          example: email
+          examples:
+            - email
           type: string
       required:
         - value

@@ -144,6 +144,7 @@ services:
       - RUSTFS_SERVER_DOMAINS=${RUSTFS_SERVER_DOMAINS:-localhost}
       - RUSTFS_ACCESS_KEY=${RUSTFS_ACCESS_KEY:-test}
       - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY:-test}
+      - RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true
     env_file:
       - .env
     logging: *dev-logging
