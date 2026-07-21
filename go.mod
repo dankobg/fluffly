@@ -25,7 +25,7 @@ require (
 	github.com/redis/go-redis/v9 v9.21.0
 	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/stephenafamo/bob v0.48.0
-	github.com/stephenafamo/scan v0.8.0
+	github.com/stephenafamo/scan v0.9.0
 	github.com/twpayne/go-geom v1.6.1
 	github.com/twpayne/pgx-geom v1.0.0
 	github.com/wneessen/go-mail v0.8.1
