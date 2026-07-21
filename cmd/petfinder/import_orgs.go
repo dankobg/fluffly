@@ -106,7 +106,7 @@ func (ic *ImportOrgsCmd) Run() error {
 		return err
 	}
 
-	ketoClient, err := keto.NewClient()
+	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
 	if err != nil {
 		return err
 	}

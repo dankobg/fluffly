@@ -8,14 +8,10 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
-	"github.com/knadh/koanf/providers/rawbytes"
+	"github.com/knadh/koanf/providers/structs"
 	"github.com/knadh/koanf/v2"
 )
-
-//go:embed config_defaults.yaml
-var configDefaults []byte
 
 const (
 	prefix     = "FLUFFLY"
@@ -24,10 +20,10 @@ const (
 	sliceDelim = ","
 )
 
-var knownKeys = []string{"server", "cors", "postgres", "redis", "email", "logger", "rustfs", "petfinder"}
+var knownKeys = []string{"app", "server", "cors", "postgres", "redis", "email", "logger", "rustfs", "petfinder", "rustfs"}
 
-// Fluffly contains common fluffly app settings
-type Fluffly struct {
+// AppConfig contains fluffly app settings
+type AppConfig struct {
 	ENV             string `koanf:"env"`
 	Host            string `koanf:"host"`
 	Port            int    `koanf:"port"`
@@ -39,6 +35,8 @@ type Fluffly struct {
 	KratosPublicURL string `koanf:"kratos_public_url"`
 	KratosAdminURL  string `koanf:"kratos_admin_url"`
 	KratosAPIKey    string `koanf:"kratos_api_key"`
+	KetoReadURL     string `koanf:"keto_read_url"`
+	KetoWriteURL    string `koanf:"keto_write_url"`
 	KetoAPIKey      string `koanf:"keto_api_key"`
 }
 
@@ -138,7 +136,7 @@ type GeocodingConfig struct {
 
 // Config represents the app config
 type Config struct {
-	Fluffly   `koanf:",squash"`
+	App       AppConfig       `koanf:"app"`
 	Server    ServerConfig    `koanf:"server"`
 	Cors      CorsConfig      `koanf:"cors"`
 	Database  DatabaseConfig  `koanf:"postgres"`
@@ -189,7 +187,12 @@ func loadFromEnv(k *koanf.Koanf) error {
 }
 
 func loadDefaults(k *koanf.Koanf) error {
-	return k.Load(rawbytes.Provider(configDefaults), yaml.Parser())
+	defaultConfig, err := getDefaultConfig()
+	if err != nil {
+		return err
+	}
+
+	return k.Load(structs.Provider(defaultConfig, "koanf"), nil)
 }
 
 func getConfig(k *koanf.Koanf) (*Config, error) {

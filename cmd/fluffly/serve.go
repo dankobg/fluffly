@@ -39,12 +39,12 @@ func (sc *ServeCommand) Run() error {
 	}
 
 	logger := logging.New(
-		logging.WithConsolePretty(cfg.ENV != "production" && cfg.Logger.Pretty),
+		logging.WithConsolePretty(cfg.App.ENV != "production" && cfg.Logger.Pretty),
 		logging.WithLevel(slog.LevelDebug),
 	)
 
 	smtpClient := mailer.NewSmtpClient(
-		mailer.WithEnabled(cfg.ENV == "production"),
+		mailer.WithEnabled(cfg.App.ENV == "production"),
 		mailer.WithDevHost(cfg.Email.DevSMTPHost),
 		mailer.WithDevPort(cfg.Email.DevSMTPPort),
 		mailer.WithDevUsername(cfg.Email.DevSMTPUsername),
@@ -64,9 +64,9 @@ func (sc *ServeCommand) Run() error {
 	// 	return fmt.Errorf("failed to connect to redis: %w", err)
 	// }
 
-	kratosClient := kratos.NewClient(cfg.KratosPublicURL, cfg.KratosAdminURL)
+	kratosClient := kratos.NewClient(cfg.App.KratosPublicURL, cfg.App.KratosAdminURL)
 
-	ketoClient, err := keto.NewClient()
+	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
 	if err != nil {
 		return err
 	}
@@ -81,9 +81,9 @@ func (sc *ServeCommand) Run() error {
 
 	var upl media.Uploader
 
-	switch cfg.FileStorage {
+	switch cfg.App.FileStorage {
 	case local.StorageKind:
-		upl, err = local.NewLocalUploader(cfg.BaseURL+"/uploads", cfg.UploadDir)
+		upl, err = local.NewLocalUploader(cfg.App.BaseURL+"/uploads", cfg.App.UploadDir)
 		if err != nil {
 			return fmt.Errorf("failed to init local uploader: %w", err)
 		}
@@ -93,7 +93,7 @@ func (sc *ServeCommand) Run() error {
 			return fmt.Errorf("failed to init rustfs uploader: %w", err)
 		}
 	default:
-		panic("unknown file storage: " + cfg.FileStorage)
+		panic("unknown file storage: " + cfg.App.FileStorage)
 	}
 
 	httpc := httpserver.NewHttpClient()
@@ -114,10 +114,10 @@ func (sc *ServeCommand) Run() error {
 	rootCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
 	defer stop()
 
-	h := apiHandler.SetupRoutes(cfg.ENV, cfg.UploadDir)
+	h := apiHandler.SetupRoutes(cfg.App.ENV, cfg.App.UploadDir)
 
 	srv := httpserver.New(
-		httpserver.WithHostPort("", cfg.Port),
+		httpserver.WithHostPort("", cfg.App.Port),
 		httpserver.WithHandler(h),
 		httpserver.WithReadTimeout(cfg.Server.ReadTimeout),
 		httpserver.WithReadHeaderTimeout(cfg.Server.ReadHeaderTimeout),
@@ -127,7 +127,7 @@ func (sc *ServeCommand) Run() error {
 		httpserver.WithBaseContext(func(l net.Listener) context.Context { return rootCtx }),
 	)
 
-	logger.Info("fluffly info", slog.String("env", cfg.ENV), slog.String("website_url", cfg.WebsiteURL), slog.String("logger_level", cfg.Logger.Level), slog.Bool("mailer_enabled", cfg.Email.Enabled), slog.Bool("geocoding_enabled", cfg.Geocoding.Enabled))
+	logger.Info("fluffly info", slog.String("env", cfg.App.ENV), slog.String("website_url", cfg.App.WebsiteURL), slog.String("logger_level", cfg.Logger.Level), slog.Bool("mailer_enabled", cfg.Email.Enabled), slog.Bool("geocoding_enabled", cfg.Geocoding.Enabled))
 
 	srvErr := make(chan error, 1)
 

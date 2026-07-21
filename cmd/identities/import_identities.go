@@ -29,9 +29,9 @@ func (ic *ImportIdentitiesCmd) Run() error {
 		return err
 	}
 
-	kratosClient := kratos.NewClient(cfg.KratosPublicURL, cfg.KratosAdminURL)
+	kratosClient := kratos.NewClient(cfg.App.KratosPublicURL, cfg.App.KratosAdminURL)
 
-	ketoClient, err := keto.NewClient()
+	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
 	if err != nil {
 		return err
 	}

@@ -40,7 +40,7 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 	// static files
 	mux.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.FS(data.MustPublicFS()))))
 
-	if a.Cfg.FileStorage == "local" {
+	if a.Cfg.App.FileStorage == "local" {
 		mux.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir))))
 	}
 

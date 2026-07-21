@@ -17,13 +17,13 @@ type Client struct {
 	Syntax opl.SyntaxServiceClient
 }
 
-func NewClient() (*Client, error) {
-	rConn, err := grpc.NewClient("localhost:4466", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func NewClient(readURL, writeURL string) (*Client, error) {
+	rConn, err := grpc.NewClient(readURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to keto grpc read server: %w", err)
 	}
 
-	wConn, err := grpc.NewClient("localhost:4467", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	wConn, err := grpc.NewClient(writeURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to keto grpc write server: %w", err)
 	}

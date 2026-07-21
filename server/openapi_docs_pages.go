@@ -8,7 +8,7 @@ import (
 func (a *ApiHandler) renderOpenapiDocsPage(w http.ResponseWriter, tplName string) {
 	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 
-	tplData := map[string]string{"SpecURL": a.Cfg.OpenapiSpecURL}
+	tplData := map[string]string{"SpecURL": a.Cfg.App.OpenapiSpecURL}
 	if err := a.openapiTpl.ExecuteTemplate(w, tplName, tplData); err != nil {
 		a.Log.Error("failed to execute openapi docs page", slog.String("name", tplName), slog.Any("error", err))
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

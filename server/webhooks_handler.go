@@ -25,7 +25,7 @@ func (a *ApiHandler) registrationAfterPassword(w http.ResponseWriter, r *http.Re
 	a.Log.Debug("kratos webhook registration_after_password", slog.String("identity_id", payload.Identity.Id))
 
 	v := r.Header.Get("Authorization")
-	if v != a.Cfg.KratosAPIKey {
+	if v != a.Cfg.App.KratosAPIKey {
 		a.Log.Error("webhook auth failed", slog.String("webhook", "registration_after_password"), slog.String("authorization", v))
 		http.Error(w, "unauthorized", http.StatusBadRequest)
 
@@ -75,7 +75,7 @@ func (a *ApiHandler) registrationAfterOidc(w http.ResponseWriter, r *http.Reques
 	a.Log.Debug("kratos webhook registration_after_oidc", slog.String("identity_id", payload.Identity.Id))
 
 	v := r.Header.Get("Authorization")
-	if v != a.Cfg.KratosAPIKey {
+	if v != a.Cfg.App.KratosAPIKey {
 		a.Log.Error("webhook auth failed", slog.String("webhook", "registration_after_oidc"), slog.String("authorization", v))
 		http.Error(w, "unauthorized", http.StatusBadRequest)
 
