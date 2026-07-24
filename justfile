@@ -23,6 +23,10 @@ migrations_dir := "db/migrations"
 default:
 	@just -l
 
+# Start server with live reload
+dev:
+  go tool -modfile=tools.mod air
+
 # generate sql bob db models, enums, tables etc.
 gen-sql:
 	PSQL_DSN={{db_uri}} go tool -modfile=tools.mod bobgen-psql -c bobgen.yaml
