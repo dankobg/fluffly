@@ -62,7 +62,7 @@ replacements:
 
 psql:
   driver: github.com/jackc/pgx/v5/stdlib
-  dsn: postgres://test:test@localhost:33150/test?sslmode=disable # @TODO: CHANGE LATER
+  dsn: postgres://test:test@localhost:5432/test?sslmode=disable
   schemas: [public]
   uuid_pkg: google
   # queries: ./queries
@@ -105,23 +105,23 @@ plugins:
   dbinfo:
     disabled: false
     pkgname: "dbinfo"
-    destination: "../../db/gen/dbinfo"
+    destination: "./db/gen/dbinfo"
   enums:
     disabled: false
     pkgname: "enums"
-    destination: "../../db/gen/enums"
+    destination: "./db/gen/enums"
   models:
     disabled: false
     pkgname: "models"
-    destination: "../../db/gen/models"
+    destination: "./db/gen/models"
   factory:
     disabled: true
     pkgname: "factory"
-    destination: "../../db/gen/factory"
+    destination: "./db/gen/factory"
   dberrors:
     disabled: true
     pkgname: "dberrors"
-    destination: "../../db/gen/dberrors"
+    destination: "./db/gen/dberrors"
   where:
     disabled: true
   loaders:

@@ -23,13 +23,9 @@ migrations_dir := "db/migrations"
 default:
 	@just -l
 
-# Start server with live reload
-dev:
-  go tool -modfile=tools.mod air
-
-# generate sql
+# generate sql bob db models, enums, tables etc.
 gen-sql:
-	@go generate ./...
+	PSQL_DSN={{db_uri}} go tool -modfile=tools.mod bobgen-psql -c bobgen.yaml
 
 # Generate openapi server
 gen-openapi:
@@ -38,9 +34,9 @@ gen-openapi:
 
 # Run code generation
 gen:
-	go generate ./...
+	#go generate ./...
 	just gen-openapi
-	# just gen-sql
+	just gen-sql
 
 # Run go vet
 vet:
