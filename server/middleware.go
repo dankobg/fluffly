@@ -8,7 +8,7 @@ import (
 
 	"github.com/dankobg/fluffly/config"
 	"github.com/google/uuid"
-	"github.com/jub0bs/cors"
+	"github.com/rs/cors"
 )
 
 type Middleware func(http.Handler) http.Handler
@@ -73,24 +73,18 @@ func BodyLimit(limit int64) func(http.Handler) http.Handler {
 	}
 }
 
-func NewCORS(cfg config.CorsConfig) (func(http.Handler) http.Handler, error) {
-	corsCfg := cors.Config{
-		Origins:         cfg.AllowOrigins,
-		Credentialed:    cfg.AllowCredentials,
-		Methods:         cfg.AllowMethods,
-		RequestHeaders:  cfg.AllowHeaders,
-		MaxAgeInSeconds: cfg.MaxAge,
-		ResponseHeaders: cfg.ExposeHeaders,
-	}
-
-	corsMw, err := cors.NewMiddleware(corsCfg)
-	if err != nil {
-		return nil, err
-	}
-
-	mw := func(next http.Handler) http.Handler {
-		return corsMw.Wrap(next)
-	}
-
-	return mw, nil
+func newCORS(cfg config.CorsConfig) *cors.Cors {
+	return cors.New(cors.Options{
+		AllowedOrigins:   cfg.AllowOrigins,
+		AllowedMethods:   cfg.AllowMethods,
+		AllowedHeaders:   cfg.AllowHeaders,
+		ExposedHeaders:   cfg.ExposeHeaders,
+		MaxAge:           cfg.MaxAge,
+		AllowCredentials: cfg.AllowCredentials,
+		// AllowPrivateNetwork:  false,
+		OptionsPassthrough: true,
+		// OptionsSuccessStatus: 0,
+		Debug:  cfg.Debug,
+		Logger: nil,
+	})
 }

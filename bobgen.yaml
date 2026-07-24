@@ -62,7 +62,7 @@ replacements:
 
 psql:
   driver: github.com/jackc/pgx/v5/stdlib
-  dsn: postgres://test:test@localhost:5432/test?sslmode=disable
+  dsn: postgres://test:test@localhost:33150/test?sslmode=disable # @TODO: CHANGE LATER
   schemas: [public]
   uuid_pkg: google
   # queries: ./queries

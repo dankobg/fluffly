@@ -1,0 +1,7 @@
+:80 {
+        handle /health-check-caddy {
+                respond "OK" 200
+        }
+}
+
+import /etc/caddy/sites/*

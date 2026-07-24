@@ -1,12 +1,10 @@
 const baseUrl = import.meta.env['VITE_PUBLIC_SITE_URL'] as string;
 const publicUrl = import.meta.env['VITE_PUBLIC_KRATOS_PUBLIC_URL'] as string;
-const adminUrl = import.meta.env['VITE_PUBLIC_KRATOS_ADMIN_URL'] as string;
 
 export const config = {
 	kratos: {
 		baseUrl,
-		publicUrl,
-		adminUrl
+		publicUrl
 	},
 
 	routes: {

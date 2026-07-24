@@ -44,16 +44,11 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 		mux.Handle("/uploads/", http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir))))
 	}
 
-	cors, err := NewCORS(a.Cfg.Cors)
-	if err != nil {
-		panic("could not create cors middleware: " + err.Error())
-	}
-
 	// webhooks
 	mux.HandleFunc("POST /webhooks/kratos/registration_after_password", a.registrationAfterPassword)
 	mux.HandleFunc("POST /webhooks/kratos/registration_after_oidc", a.registrationAfterOidc)
 
-	openapi, err := api.GetSwagger()
+	openapi, err := api.GetSpec()
 	if err != nil {
 		panic("error loading openapi spec: " + err.Error())
 	}
@@ -85,7 +80,7 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 		PanicRecovery,
 		RequestID,
 		BodyLimit(defaultBodyLimit),
-		cors,
+		newCORS(a.Cfg.Cors).Handler,
 		a.AttachSessionData,
 	)
 

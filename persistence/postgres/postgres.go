@@ -23,7 +23,7 @@ type PgPersistor struct {
 	exec bobpgx.Pool
 }
 
-func NewPool(ctx context.Context, dbSettings config.DatabaseConfig) (*pgxpool.Pool, error) {
+func NewPool(ctx context.Context, dbSettings config.PostgresConfig) (*pgxpool.Pool, error) {
 	dsn := url.URL{
 		Scheme:   "postgresql",
 		User:     url.UserPassword(dbSettings.User, dbSettings.Password),

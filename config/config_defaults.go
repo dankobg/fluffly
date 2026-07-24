@@ -4,20 +4,14 @@ import "time"
 
 func getDefaultConfig() (Config, error) {
 	defaultApp := AppConfig{
-		ENV:             "development",
-		Host:            "localhost",
-		Port:            6969,
-		BaseURL:         "https://fluffly-dev.xyz",
-		WebsiteURL:      "https://fluffly-dev.xyz",
-		FileStorage:     "rustfs",
-		UploadDir:       "./uploads",
-		OpenapiSpecURL:  "https://fluffly-dev.xyz/spec",
-		KratosPublicURL: "http://localhost:4433",
-		KratosAdminURL:  "http://localhost:4434",
-		KratosAPIKey:    "v3Ry_s3Cr3t_tExT_kr4t0s",
-		KetoReadURL:     "localhost:4466",
-		KetoWriteURL:    "localhost:4467",
-		KetoAPIKey:      "v3Ry_s3Cr3t_tExT_k3t0",
+		ENV:            "development",
+		Host:           "localhost",
+		Port:           6969,
+		BaseURL:        "https://fluffly-dev.xyz",
+		WebsiteURL:     "https://fluffly-dev.xyz",
+		FileStorage:    "rustfs",
+		UploadDir:      "./uploads",
+		OpenapiSpecURL: "https://fluffly-dev.xyz/spec",
 	}
 
 	defaultServer := ServerConfig{
@@ -29,6 +23,18 @@ func getDefaultConfig() (Config, error) {
 		UseTLS:            false,
 		CERT_FILE:         "",
 		KEY_FILE:          "",
+	}
+
+	kratosDefault := KratosConfig{
+		ServePublicBaseURL: "https://fluffly-dev.xyz/kratos",
+		ServeAdminBaseURL:  "http://localhost:4434",
+		ApiKey:             "v3Ry_s3Cr3t_tExT_kr4t0s",
+	}
+
+	ketoDefault := KetoConfig{
+		ServeReadURL:  "localhost:4466",
+		ServeWriteURL: "localhost:4467",
+		ApiKey:        "v3Ry_s3Cr3t_tExT_k3t0",
 	}
 
 	defaultCors := CorsConfig{
@@ -68,7 +74,7 @@ func getDefaultConfig() (Config, error) {
 		Debug:            false,
 	}
 
-	defaultDatabase := DatabaseConfig{
+	defaultPostgres := PostgresConfig{
 		Host:         "localhost",
 		Port:         5432,
 		DB:           "test",
@@ -109,13 +115,13 @@ func getDefaultConfig() (Config, error) {
 
 	defaultRustfs := RustfsConfig{
 		Host:                      "localhost",
-		Address:                   9000,
-		ConsoleAddress:            9001,
+		Port:                      9000,
+		ConsolePort:               9001,
 		ConsoleEnable:             true,
 		AccessKey:                 "test",
 		SecretKey:                 "test",
 		DefaultBucket:             "fluffly",
-		ServerDomains:             []string{"localhost"},
+		ServerDomains:             []string{"localhost", "fluffly-dev.xyz"},
 		CorsAllowedOrigins:        []string{"*"},
 		ConsoleCorsAllowedOrigins: []string{"*"},
 		UseSSL:                    false,
@@ -125,8 +131,10 @@ func getDefaultConfig() (Config, error) {
 	defaultConfig := Config{
 		App:      defaultApp,
 		Server:   defaultServer,
+		Kratos:   kratosDefault,
+		Keto:     ketoDefault,
 		Cors:     defaultCors,
-		Database: defaultDatabase,
+		Postgres: defaultPostgres,
 		Redis:    defaultRedis,
 		Email:    defaultEmail,
 		Logger:   defaultLogger,

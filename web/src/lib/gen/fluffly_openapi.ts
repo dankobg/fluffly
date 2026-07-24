@@ -1625,12 +1625,12 @@ export interface components {
              * Format: double
              * @description Latitude
              */
-            lat?: number | null;
+            lat?: string | null;
             /**
              * Format: double
              * @description Longitude
              */
-            lon?: number | null;
+            lon?: string | null;
             /** @description Some info about address if needed */
             note?: string | null;
             country?: components["schemas"]["UpdateCountryBody"];
@@ -1670,7 +1670,7 @@ export interface components {
              * @description Contact E-Mail
              */
             email?: string | null;
-            address?: components["schemas"]["UpdateAddressBody"];
+            address?: components["schemas"]["UpdateAddressBody"] | null;
         };
         UpdateOrganizationWorkHourBody: {
             /** @description Monday work hours */

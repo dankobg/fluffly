@@ -48,6 +48,8 @@
                 echo "-----------------------------------"
                 echo "You are in fluffly DEV environment"
                 echo "-----------------------------------"
+
+                docker network inspect devproxy >/dev/null || docker network create --driver bridge devproxy
               '';
             };
           };

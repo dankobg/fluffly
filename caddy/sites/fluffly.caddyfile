@@ -1,9 +1,3 @@
-:80 {
-        handle /health-check-caddy {
-                respond "OK" 200
-        }
-}
-
 fluffly-dev.xyz {
         tls internal
 
@@ -28,7 +22,7 @@ mail.fluffly-dev.xyz {
         tls internal
 
         # test mailserver (mailpit)
-        reverse_proxy host.docker.internal:8025
+        reverse_proxy mailpit:8025
 }
 
 s3.fluffly-dev.xyz {

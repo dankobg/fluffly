@@ -3,19 +3,20 @@ set dotenv-load
 
 cwd := justfile_directory()
 
-dev_mode := "nix" # nix or docker
-domain := if env('DOMAIN', "") == "" { "fluffly-dev.xyz" } else { '-a "${DOMAIN}"' }
-redis_host := if env('REDIS_HOST', "") == "" { "localhost" } else { '-a "${REDIS_HOST}"' }
-redis_port := if env('REDIS_PORT', "") == "" { "6379" } else { '-a "${REDIS_PORT}"' }
-redis_pwd := if env('REDIS_PASSWORD', "") == "" { "" } else { '-a "${REDIS_PASSWORD}"' }
-db_uri := if env('DB_URI', "") == "" { "postgres://test:test@localhost:5432/test?sslmode=disable" } else { '-a "${DB_URI}"' }
-migrations_dir := "db/migrations"
+# ----------------------------------------------------------------------------
 
-# db_host := if env('POSTGRES_HOST', "") == "" { "localhost" } else { '-a "${POSTGRES_HOST}"' }
-# db_user := if env('POSTGRES_USER', "") == "" { "test" } else { '-a "${POSTGRES_USER}"' }
-# db_password := if env('POSTGRES_PASSWORD', "") == "" { "test" } else { '-a "${POSTGRES_PASSWORD}"' }
-# db_name := if env('POSTGRES_DB', "") == "" { "test" } else { '-a "${POSTGRES_DB}"' }
-# db_sslmode := "disable"
+redis_host := env('REDIS_HOST', "localhost")
+redis_port := env('REDIS_PORT', "6379")
+redis_pwd := env('REDIS_PASSWORD', "")
+
+db_host := env('POSTGRES_HOST', "localhost")
+db_port := env('POSTGRES_PORT', "5432")
+db_user := env('POSTGRES_USER', "test")
+db_pwd := env('POSTGRES_PASSWORD', "test")
+db_name := env('POSTGRES_DB', "test")
+
+db_uri := "postgres://" + db_user + ":" + db_pwd + "@" + db_host + ":" + db_port + "/" + db_name + "?sslmode=disable"
+migrations_dir := "db/migrations"
 
 # ----------------------------------------------------------------------------
 
@@ -163,7 +164,7 @@ sh name:
 # connect to redis via redis-cli
 [group('docker')]
 rediscli:
-	docker compose exec -it redis redis-cli -h "{{redis_host}}" -p "{{redis_port}}" {{ if redis_pwd == "" { "" } else { redis_pwd } }}
+	docker compose exec -it redis redis-cli -h "{{redis_host}}" -p "{{redis_port}}" {{ if redis_pwd != "" { "-a " + redis_pwd } else { "" } }}
 
 # connect to postgres via psql
 [group('docker')]
@@ -287,8 +288,13 @@ pg-create-schema:
 # trust certs (too lazy to make it work on more distros, path is different)
 certs-trust:
   #!/usr/bin/env sh
-  sudo docker compose cp caddy:/data/caddy/pki/authorities/local/root.crt /etc/ca-certificates/trust-source/anchors/root.crt && \
+  sudo docker cp caddy:/data/caddy/pki/authorities/local/root.crt /etc/ca-certificates/trust-source/anchors/root.crt && \
   sudo chmod 644 /etc/ca-certificates/trust-source/anchors/root.crt && \
   sudo update-ca-trust
+
+# setup site caddyfile and reload caddy
+devproxy-setup:
+  docker run --rm -v caddy-sites:/dst -v "$PWD/caddy/sites:/src:ro" busybox sh -c 'cp -a /src/. /dst/'
+  docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 
 # ----------------------------------------------------------------------------

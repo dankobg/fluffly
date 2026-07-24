@@ -1,6 +1,10 @@
 # Fluffly (petfinder app)
 
-Project local setup:
+Run caddy devproxy
+
+1. `dc -p devproxy -f compose.devproxy.yaml up -d`
+
+Fluffly local setup:
 
 1. `docker compose up -d`
 
@@ -14,9 +18,11 @@ Project local setup:
 
 6. `go run main.go petfinder import-animals --dir=~/Documents/petfinder_data --workers=32`
 
-7. `just certs-trust`
+7. `just devproxy-setup`
 
-Run project:
+8. `just certs-trust`
+
+Run fluffly:
 
 1. `just dev`
 

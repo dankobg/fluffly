@@ -16,7 +16,7 @@ services:
   # ----------------------------------------------------------------------------
   # web:
   #   environment:
-  #     - ENV=development
+  #     - ENV=production
   #     - WEB_PORT=${WEB_PORT:-3974}
   #   develop:
   #     watch:
@@ -53,7 +53,7 @@ services:
   # fluffly:
   #   # command: /go/bin/dlv --api-version=2 --listen=:2345 --headless --accept-multiclient --log debug "./main.go" # UNCOMMENT WHEN DEBUGGING
   #   environment:
-  #     - ENV=development
+  #     - ENV=production
   #   env_file:
   #     - .env
   #   security_opt:
@@ -148,7 +148,6 @@ services:
   # ----------------------------------------------------------------------------
   # redis:
   #   environment:
-  #     - ENV=development
   #     - REDIS_HOST=${REDIS_HOST:-redis}
   #     - REDIS_PORT=${REDIS_PORT:-6379}
   #     - REDIS_PASSWORD=${REDIS_PASSWORD:-}
@@ -158,8 +157,6 @@ services:
   #     test: ["CMD", "redis-cli", "ping"]
   # ----------------------------------------------------------------------------
   kratos:
-    environment:
-      - ENV=development
     env_file:
       - .env
     command: "serve --watch-courier --config /etc/config/kratos/kratos.yaml --dev"
@@ -188,15 +185,11 @@ services:
       - "host.docker.internal:host-gateway"
   # ----------------------------------------------------------------------------
   kratos-migrate:
-    environment:
-      - ENV=development
     env_file:
       - .env
     logging: *prod-logging
   # ----------------------------------------------------------------------------
   keto:
-    environment:
-      - ENV=development
     env_file:
       - .env
     logging: *prod-logging
@@ -213,8 +206,6 @@ services:
         ]
   # ----------------------------------------------------------------------------
   keto-migrate:
-    environment:
-      - ENV=development
     env_file:
       - .env
     logging: *prod-logging

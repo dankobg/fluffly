@@ -20,6 +20,8 @@ services:
   #     - WEB_PORT=${WEB_PORT:-3974}
   #   ports:
   #     - "${WEB_PORT:-3974}:3974"
+  #   networks:
+  #     - devproxy
   #   develop:
   #     watch:
   #       - action: sync
@@ -61,6 +63,8 @@ services:
   #   ports:
   #     - "${PORT:-6969}:6969"
   #     - "${DELVE_PORT:-2345}:2345"
+  #   networks:
+  #     - devproxy
   #   security_opt:
   #     - "seccomp:unconfined"
   #     - "apparmor:unconfined"
@@ -132,19 +136,20 @@ services:
   # ----------------------------------------------------------------------------
   rustfs:
     ports:
-      - "${RUSTFS_ADDRESS:-9000}:9000"
-      - "${RUSTFS_CONSOLE_ADDRESS:-9001}:9001"
+      - "${RUSTFS_PORT:-9000}:9000"
+      - "${RUSTFS_CONSOLE_PORT:-9001}:9001"
+    networks:
+      - devproxy
     environment:
-      - RUSTFS_VOLUMES=/data/rustfs{0..3}
-      - RUSTFS_ADDRESS=0.0.0.0:${RUSTFS_ADDRESS:-9000}
-      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:${RUSTFS_CONSOLE_ADDRESS:-9001}
+      - RUSTFS_VOLUMES=/data/rustfs0
+      - RUSTFS_ADDRESS=0.0.0.0:9000
+      - RUSTFS_CONSOLE_ADDRESS=0.0.0.0:9001
       - RUSTFS_CONSOLE_ENABLE=${RUSTFS_CONSOLE_ENABLE:-true}
       - RUSTFS_CORS_ALLOWED_ORIGINS=*
       - RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS=*
-      - RUSTFS_SERVER_DOMAINS=${RUSTFS_SERVER_DOMAINS:-localhost}
+      # - RUSTFS_SERVER_DOMAINS=${RUSTFS_SERVER_DOMAINS:-localhost,fluffly-dev.xyz}
       - RUSTFS_ACCESS_KEY=${RUSTFS_ACCESS_KEY:-test}
       - RUSTFS_SECRET_KEY=${RUSTFS_SECRET_KEY:-test}
-      - RUSTFS_UNSAFE_BYPASS_DISK_CHECK=true
     env_file:
       - .env
     logging: *dev-logging
@@ -156,11 +161,9 @@ services:
           "-c",
           "curl -f http://localhost:9000/health && curl -f http://localhost:9001/rustfs/console/health",
         ]
-
   # ----------------------------------------------------------------------------
   # redis:
   #   environment:
-  #     - ENV=development
   #     - REDIS_HOST=${REDIS_HOST:-redis}
   #     - REDIS_PORT=${REDIS_PORT:-6379}
   #     - REDIS_PASSWORD=${REDIS_PASSWORD:-}
@@ -172,14 +175,14 @@ services:
   #     test: ["CMD", "redis-cli", "ping"]
   # ----------------------------------------------------------------------------
   kratos:
-    environment:
-      - ENV=development
     env_file:
       - .env
     command: "serve --watch-courier --config /etc/config/kratos/kratos.yaml --dev"
     ports:
       - "${KRATOS_PUBLIC_PORT:-4433}:4433"
       - "${KRATOS_ADMIN_PORT:-4434}:4434"
+    networks:
+      - devproxy
     logging: *dev-logging
     healthcheck:
       <<: *dev-healthcheck
@@ -205,20 +208,20 @@ services:
       - "host.docker.internal:host-gateway"
   # ----------------------------------------------------------------------------
   kratos-migrate:
-    environment:
-      - ENV=development
     env_file:
       - .env
+    networks:
+      - devproxy
     logging: *dev-logging
   # ----------------------------------------------------------------------------
   keto:
-    environment:
-      - ENV=development
     env_file:
       - .env
     ports:
-      - "${SERVE_READ_PORT:-4466}:4466"
-      - "${SERVE_WRITE_PORT:-4467}:4467"
+      - "${KETO_SERVE_READ_PORT:-4466}:4466"
+      - "${KETO_SERVE_WRITE_PORT:-4467}:4467"
+    networks:
+      - devproxy
     logging: *dev-logging
     healthcheck:
       <<: *dev-healthcheck
@@ -233,17 +236,16 @@ services:
         ]
   # ----------------------------------------------------------------------------
   keto-migrate:
-    environment:
-      - ENV=development
     env_file:
       - .env
+    networks:
+      - devproxy
     logging: *dev-logging
   # ----------------------------------------------------------------------------
   mailpit:
     image: axllent/mailpit:latest
     restart: unless-stopped
     environment:
-      - ENV=development
       - MP_MAX_MESSAGES=5000
       - MP_DATA_FILE=/data/mailpit.db
       - MP_SMTP_AUTH_ACCEPT_ANY=1
@@ -255,6 +257,7 @@ services:
       - "${MAILPIT_PORT:-1025}:1025"
     networks:
       - intranet
+      - devproxy
     logging: *dev-logging
     healthcheck:
       <<: *dev-healthcheck
@@ -273,67 +276,11 @@ services:
       - traefik.http.routers.mailpit.tls=true
       - traefik.http.routers.mailpit.service=mailpit@docker
       - traefik.http.services.mailpit.loadbalancer.server.port=8025
-
-  # ----------------------------------------------------------------------------
-  caddy:
-    image: caddy:alpine
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    networks:
-      - intranet
-    env_file:
-      - .env
-    environment:
-      - VITE_PUBLIC_VITE_NETWORK=${VITE_PUBLIC_VITE_NETWORK:-host.docker.internal}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy-data:/data
-      - caddy-config:/config
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    healthcheck:
-      <<: *dev-healthcheck
-      test:
-        [
-          "CMD",
-          "wget",
-          "--no-verbose",
-          "--tries=1",
-          "--spider",
-          "http://host.docker.internal:80/health-check-caddy",
-        ]
-  # ----------------------------------------------------------------------------
-  # traefik:
-  #   image: traefik:v3.2
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #     - "8080:8080"
-  #   restart: unless-stopped
-  #   security_opt:
-  #     - no-new-privileges:true
-  #   networks:
-  #     - intranet
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - ./traefik/static.yaml:/etc/traefik/traefik.yaml:ro
-  #     - ./traefik/dynamic.yaml:/etc/traefik/dynamic.yaml:ro
-  #     - ./certs:/etc/certs:ro
-  #   logging: *dev-logging
-  #   healthcheck:
-  #     <<: *dev-healthcheck
-  #     test: ["CMD", "traefik", "healthcheck", "--ping"]
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.traefik=true"
-  #     - "traefik.http.routers.traefik.tls=true"
-  #     - "traefik.http.services.traefik.loadbalancer.server.port=8080"
   # ----------------------------------------------------------------------------
 
 volumes:
   mailpit-data:
-  caddy-data:
-  caddy-config:
+
+networks:
+  devproxy:
+    external: true

@@ -14,33 +14,40 @@ import (
 )
 
 const (
-	prefix     = "FLUFFLY"
+	prefix     = ""
 	oldDelim   = "_"
 	newDelim   = "."
 	sliceDelim = ","
 )
 
-var knownKeys = []string{"app", "server", "cors", "postgres", "redis", "email", "logger", "rustfs", "petfinder", "rustfs"}
+var knownKeys = []string{
+	"app",
+	"kratos",
+	"keto",
+	"server",
+	"cors",
+	"postgres",
+	"redis",
+	"email",
+	"logger",
+	"rustfs",
+	"petfinder",
+	"rustfs",
+}
 
 // AppConfig contains fluffly app settings
 type AppConfig struct {
-	ENV             string `koanf:"env"`
-	Host            string `koanf:"host"`
-	Port            int    `koanf:"port"`
-	BaseURL         string `koanf:"base_url"`
-	WebsiteURL      string `koanf:"website_url"`
-	FileStorage     string `koanf:"file_storage"`
-	UploadDir       string `koanf:"upload_dir"`
-	OpenapiSpecURL  string `koanf:"openapi_spec_url"`
-	KratosPublicURL string `koanf:"kratos_public_url"`
-	KratosAdminURL  string `koanf:"kratos_admin_url"`
-	KratosAPIKey    string `koanf:"kratos_api_key"`
-	KetoReadURL     string `koanf:"keto_read_url"`
-	KetoWriteURL    string `koanf:"keto_write_url"`
-	KetoAPIKey      string `koanf:"keto_api_key"`
+	ENV            string `koanf:"env"`
+	Host           string `koanf:"host"`
+	Port           int    `koanf:"port"`
+	BaseURL        string `koanf:"base_url"`
+	WebsiteURL     string `koanf:"website_url"`
+	FileStorage    string `koanf:"file_storage"`
+	UploadDir      string `koanf:"upload_dir"`
+	OpenapiSpecURL string `koanf:"openapi_spec_url"`
 }
 
-// ServerConfig contains the http server settings
+// ServerConfig contains http server settings
 type ServerConfig struct {
 	ReadHeaderTimeout time.Duration `koanf:"read_header_timeout"`
 	ReadTimeout       time.Duration `koanf:"read_timeout"`
@@ -52,7 +59,21 @@ type ServerConfig struct {
 	KEY_FILE          string        `koanf:"key_file"`
 }
 
-// CorsConfig contains the CORS settings
+// KratosConfig contains kratos settings
+type KratosConfig struct {
+	ServePublicBaseURL string `koanf:"serve_public_base_url"`
+	ServeAdminBaseURL  string `koanf:"serve_admin_base_url"`
+	ApiKey             string `koanf:"api_key"`
+}
+
+// KetoConfig contains keto settings
+type KetoConfig struct {
+	ServeReadURL  string `koanf:"serve_read_url"`
+	ServeWriteURL string `koanf:"serve_write_url"`
+	ApiKey        string `koanf:"api_key"`
+}
+
+// CorsConfig contains CORS settings
 type CorsConfig struct {
 	AllowOrigins     []string `koanf:"allow_origins"`
 	AllowMethods     []string `koanf:"allow_methods"`
@@ -63,8 +84,8 @@ type CorsConfig struct {
 	Debug            bool     `koanf:"debug"`
 }
 
-// DatabaseConfig contains DB settings
-type DatabaseConfig struct {
+// PostgresConfig contains postgres settings
+type PostgresConfig struct {
 	Host         string        `koanf:"host"`
 	Port         int           `koanf:"port"`
 	DB           string        `koanf:"db"`
@@ -79,8 +100,8 @@ type DatabaseConfig struct {
 // RustfsConfig contains rustfs settings
 type RustfsConfig struct {
 	Host                      string   `koanf:"host"`
-	Address                   int      `koanf:"address"`
-	ConsoleAddress            int      `koanf:"console_address"`
+	Port                      int      `koanf:"port"`
+	ConsolePort               int      `koanf:"console_port"`
 	ConsoleEnable             bool     `koanf:"console_enable"`
 	CorsAllowedOrigins        []string `koanf:"cors_allowed_origins"`
 	ConsoleCorsAllowedOrigins []string `koanf:"console_cors_allowed_origins"`
@@ -92,7 +113,7 @@ type RustfsConfig struct {
 	Token                     string   `koanf:"token"`
 }
 
-// RedisConfig contains Redis db settings
+// RedisConfig contains redis settings
 type RedisConfig struct {
 	Host     string `koanf:"host"`
 	Port     int    `koanf:"port"`
@@ -116,7 +137,7 @@ type EmailConfig struct {
 	DevSMTPPassword string `koanf:"dev_smtp_password"`
 }
 
-// LoggerConfig contains the logger settings
+// LoggerConfig contains logger settings
 type LoggerConfig struct {
 	Level  string `koanf:"level"`
 	Pretty bool   `koanf:"pretty"`
@@ -129,7 +150,7 @@ type PetfinderConfig struct {
 	AccessToken string `koanf:"access_token"`
 }
 
-// GeocodingConfig contains the geocoding settings
+// GeocodingConfig contains geocoding settings
 type GeocodingConfig struct {
 	Enabled bool `koanf:"enabled"`
 }
@@ -138,8 +159,10 @@ type GeocodingConfig struct {
 type Config struct {
 	App       AppConfig       `koanf:"app"`
 	Server    ServerConfig    `koanf:"server"`
+	Kratos    KratosConfig    `koanf:"kratos"`
+	Keto      KetoConfig      `koanf:"keto"`
 	Cors      CorsConfig      `koanf:"cors"`
-	Database  DatabaseConfig  `koanf:"postgres"`
+	Postgres  PostgresConfig  `koanf:"postgres"`
 	Redis     RedisConfig     `koanf:"redis"`
 	Email     EmailConfig     `koanf:"email"`
 	Logger    LoggerConfig    `koanf:"logger"`

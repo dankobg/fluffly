@@ -145,16 +145,16 @@ func (ic *ImportAnimalsCmd) Run() error {
 		return err
 	}
 
-	kratosClient := kratos.NewClient(cfg.App.KratosPublicURL, cfg.App.KratosAdminURL)
+	kratosClient := kratos.NewClient(cfg.Kratos.ServePublicBaseURL, cfg.Kratos.ServeAdminBaseURL)
 
-	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
+	ketoClient, err := keto.NewClient(cfg.Keto.ServeReadURL, cfg.Keto.ServeWriteURL)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	pool, err := postgres.NewPool(ctx, cfg.Database)
+	pool, err := postgres.NewPool(ctx, cfg.Postgres)
 	if err != nil {
 		return fmt.Errorf("pgxpool.New: %w", err)
 	}

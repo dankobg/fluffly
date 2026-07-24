@@ -106,14 +106,14 @@ func (ic *ImportOrgsCmd) Run() error {
 		return err
 	}
 
-	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
+	ketoClient, err := keto.NewClient(cfg.Keto.ServeReadURL, cfg.Keto.ServeWriteURL)
 	if err != nil {
 		return err
 	}
 
 	ctx := context.Background()
 
-	pool, err := postgres.NewPool(ctx, cfg.Database)
+	pool, err := postgres.NewPool(ctx, cfg.Postgres)
 	if err != nil {
 		return fmt.Errorf("pgxpool.New: %w", err)
 	}

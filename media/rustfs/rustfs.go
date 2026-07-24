@@ -25,11 +25,12 @@ type RustfsUploader struct {
 }
 
 func NewRustfsUploader(cfg config.RustfsConfig) (*RustfsUploader, error) {
-	endpoint := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Address))
+	endpoint := net.JoinHostPort(cfg.Host, strconv.Itoa(cfg.Port))
 
 	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, cfg.Token),
-		Secure: cfg.UseSSL,
+		Creds:        credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, cfg.Token),
+		Secure:       cfg.UseSSL,
+		BucketLookup: minio.BucketLookupPath,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to init rustfs client: %w", err)

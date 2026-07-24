@@ -29,14 +29,14 @@ func (ic *ImportIdentitiesCmd) Run() error {
 		return err
 	}
 
-	kratosClient := kratos.NewClient(cfg.App.KratosPublicURL, cfg.App.KratosAdminURL)
+	kratosClient := kratos.NewClient(cfg.Kratos.ServePublicBaseURL, cfg.Kratos.ServeAdminBaseURL)
 
-	ketoClient, err := keto.NewClient(cfg.App.KetoReadURL, cfg.App.KetoWriteURL)
+	ketoClient, err := keto.NewClient(cfg.Keto.ServeReadURL, cfg.Keto.ServeWriteURL)
 	if err != nil {
 		return err
 	}
 
-	pool, err := postgres.NewPool(context.Background(), cfg.Database)
+	pool, err := postgres.NewPool(context.Background(), cfg.Postgres)
 	if err != nil {
 		return fmt.Errorf("failed to connect to postgres: %w", err)
 	}
