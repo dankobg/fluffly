@@ -7,7 +7,6 @@ require (
 	github.com/alecthomas/kong v1.16.0
 	github.com/getkin/kin-openapi v0.143.0
 	github.com/go-faker/faker/v4 v4.10.0
-	github.com/goforj/godump v1.9.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
@@ -20,7 +19,7 @@ require (
 	github.com/oapi-codegen/nethttp-middleware v1.2.0
 	github.com/oapi-codegen/nullable v1.2.0
 	github.com/oapi-codegen/runtime v1.6.0
-	github.com/ory/client-go v1.22.64
+	github.com/ory/client-go v1.22.65
 	github.com/ory/keto/proto v0.13.0-alpha.0.0.20251107121730-f5635433a563
 	github.com/redis/go-redis/v9 v9.21.0
 	github.com/rs/cors v1.11.1
