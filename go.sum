@@ -60,8 +60,8 @@ github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2
 github.com/felixge/httpsnoop v1.0.4/go.mod h1:m8KPJKqk1gH5J9DgRY2ASl2lWCfGKXixSwevea8zH2U=
 github.com/getkin/kin-openapi v0.143.0 h1:mIrOpir9J5x2m1vdree2rhuJ/GYGwbTVBp1kuSCJ62Y=
 github.com/getkin/kin-openapi v0.143.0/go.mod h1:3BH9M9XDe/y9M5DSvEocVYAYq1w0qrhJHjC/vZi0AaY=
-github.com/go-faker/faker/v4 v4.10.0 h1:rHTZVwG1x8aN4zXDYJUFucOGDQojuxOby5MTdC/M2Fw=
-github.com/go-faker/faker/v4 v4.10.0/go.mod h1:X+KzPB4JZ82GY4MYr7NV7zmp+i/K0SG5EDKqIg5zd1k=
+github.com/go-faker/faker/v4 v4.10.1 h1:mGH3y0X8AfrXsfgPsPuTkWBYIebomvdkWEN1uDLoFFg=
+github.com/go-faker/faker/v4 v4.10.1/go.mod h1:VFIEwWDd16EdYDLF6NJ5gAAzEp7vz5LgKgJ2iZ17Tdg=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
@@ -74,8 +74,6 @@ github.com/go-openapi/testify/v2 v2.6.0 h1:5PKH2HE7YJ/LuRPQGvSxBRlFXNQhSetBLlGAg
 github.com/go-openapi/testify/v2 v2.6.0/go.mod h1:SgsVHtfooshd0tublTtJ50FPKhujf47YRqauXXOUxfw=
 github.com/go-viper/mapstructure/v2 v2.5.0 h1:vM5IJoUAy3d7zRSVtIwQgBj7BiWtMPfmPEgAXnvj1Ro=
 github.com/go-viper/mapstructure/v2 v2.5.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
-github.com/goforj/godump v1.9.1 h1:9OGpb978Ytz3B59d5Yi2PzRYYLid6UkmhYDIDNiF15Y=
-github.com/goforj/godump v1.9.1/go.mod h1:JsuL6AEZfKIU+iR5ewL6iQ2fIuhvLtPmJDH47M9Ptrc=
 github.com/gogo/protobuf v1.3.2 h1:Ov1cvc58UF3b5XjBnZv7+opcTcQFZebYjWzi34vdm4Q=
 github.com/gogo/protobuf v1.3.2/go.mod h1:P1XiOD3dCwIKUDQYPy72D8LYyHL2YPYrpS2s69NZV8Q=
 github.com/golang/protobuf v1.5.4 h1:i7eJL8qZTpSEXOPTxNKhASYpMn+8e5Q6AdndVa1dWek=
