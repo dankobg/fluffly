@@ -1522,6 +1522,22 @@ paths:
             type: array
             items:
               type: string
+        - in: query
+          name: organization_id
+          description: Organization id
+          required: false
+          explode: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+        - in: query
+          name: organization
+          description: Organization name
+          required: false
+          schema:
+            type: string
         - name: embed
           in: query
           description: Whether to embed nested resources in response

@@ -139,6 +139,17 @@ export const load: PageLoad = async ({ fetch, depends, url }) => {
 	if (sortParams.length > 0) {
 		listAnimalsParams.query!.sort = sortParams;
 	}
+	const organizationNameParam = url.searchParams.get('organization');
+	if (organizationNameParam) {
+		listAnimalsParams.query!.organization = organizationNameParam;
+	}
+	const organizationIdParams = url.searchParams.getAll('organization_id');
+	if (organizationIdParams.length > 0) {
+		const organizationIds = organizationIdParams.map(Number).filter(Number.isFinite);
+		if (organizationIds.length > 0) {
+			listAnimalsParams.query!.organization_id = organizationIds;
+		}
+	}
 
 	const properties: Record<string, string[]> = {};
 	url.searchParams.entries().forEach(([key, value]) => {

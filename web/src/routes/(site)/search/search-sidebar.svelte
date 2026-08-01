@@ -140,6 +140,7 @@
 			}
 		}
 	});
+	let organizationName = $derived(page.url.searchParams.get('organization') ?? '');
 
 	let properties = $derived.by(() => {
 		return page.url.searchParams.entries().reduce(
@@ -266,6 +267,19 @@
 				sp.set('name', animalName);
 			} else {
 				sp.delete('name');
+			}
+			gotoWithFilters(sp);
+		},
+		() => 700
+	);
+
+	const debounceOrganizationNameFilter = useDebounce(
+		() => {
+			const sp = new URLSearchParams(page.url.searchParams);
+			if (organizationName) {
+				sp.set('organization', organizationName);
+			} else {
+				sp.delete('organization');
 			}
 			gotoWithFilters(sp);
 		},
@@ -746,6 +760,24 @@
 								v => {
 									animalName = v;
 									debounceNameFilter();
+								}
+							}
+						/>
+						<InputGroup.Addon>
+							<IconSearch />
+						</InputGroup.Addon>
+					</InputGroup.Root>
+				</div>
+
+				<div class="mt-4">
+					<InputGroup.Root>
+						<InputGroup.Input
+							placeholder="Search by organization"
+							bind:value={
+								() => organizationName,
+								v => {
+									organizationName = v;
+									debounceOrganizationNameFilter();
 								}
 							}
 						/>

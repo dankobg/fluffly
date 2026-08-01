@@ -143,7 +143,7 @@
 			}
 		}
 	});
-
+	let organization = $derived(page.url.searchParams.get('organization') ?? undefined);
 	let properties = $derived.by(() => {
 		const props = page.url.searchParams.entries().reduce(
 			(acc, [key, value]) => {
@@ -183,6 +183,7 @@
 			tag,
 			days_lt,
 			days_gt,
+			organization,
 			properties
 		};
 	});

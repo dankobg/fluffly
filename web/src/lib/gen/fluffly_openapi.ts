@@ -4847,6 +4847,10 @@ export interface operations {
                 radius_m?: number;
                 /** @description Sort by fields (add prefix `-` for descending e.g. -created_at) */
                 sort?: string[];
+                /** @description Organization id */
+                organization_id?: number[];
+                /** @description Organization name */
+                organization?: string;
                 /** @description Whether to embed nested resources in response */
                 embed?: PathsAnimalsGetParametersQueryEmbed[];
             };

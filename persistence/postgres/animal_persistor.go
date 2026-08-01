@@ -357,6 +357,27 @@ func (pst *PgAnimalPersistor) ListAnimals(ctx context.Context, filters dbtype.Li
 			}
 		}
 
+		if filters.OrganizationID != nil {
+			organizationIDs := make([]any, len(*filters.OrganizationID))
+			for i, id := range *filters.OrganizationID {
+				organizationIDs[i] = id
+			}
+
+			q.Apply(sm.Where(models.Animals.Columns.OrganizationID.In(psql.Arg(organizationIDs...))))
+		}
+
+		if filters.Organization != nil {
+			if filters.Embed == nil || (filters.Embed != nil && !slices.Contains(*filters.Embed, api.ListAnimalsParamsEmbedOrganization)) {
+				q.Apply(sm.LeftJoin(models.Organizations.Name()).
+					On(models.Organizations.Columns.ID.EQ(models.Animals.Columns.OrganizationID)),
+				)
+			}
+
+			q.Apply(sm.Where(
+				models.Organizations.Columns.Name.ILike(psql.Arg("%" + *filters.Organization + "%")),
+			))
+		}
+
 		if filters.Tag != nil {
 			// could probably use `any array` or `unnest` but whatever...
 			orTagLike := []bob.Expression{psql.Raw("false")}
