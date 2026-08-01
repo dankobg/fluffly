@@ -146,7 +146,7 @@
 		{/if}
 	</div>
 
-	<a href={`/animal/${animal.id}`} class="inline-block p-4">
+	<a href={`/animals/${animal.id}`} class="inline-block p-4">
 		<button
 			class="transition-bg w-full cursor-pointer rounded-xl bg-purple-400 p-2 font-semibold text-black duration-200 hover:bg-purple-400/80"
 		>

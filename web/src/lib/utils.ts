@@ -84,3 +84,10 @@ export function getErrorFallbackAnimalImage(animalTypeName: string): string {
 	const num = Math.floor(Math.random() * max) + 1;
 	return `${backendBaseUrl}/public/images/placeholder/${name}-${num}.svg`;
 }
+
+export function getErrorFallbackOrganizationImage(): string {
+	const max = 5;
+	const name = 'shelter';
+	const num = Math.floor(Math.random() * max) + 1;
+	return `${backendBaseUrl}/public/images/placeholder/${name}-${num}.svg`;
+}

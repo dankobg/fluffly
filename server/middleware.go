@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"slices"
 	"strings"
 
 	"github.com/dankobg/fluffly/config"
@@ -15,8 +16,7 @@ type Middleware func(http.Handler) http.Handler
 
 func MiddlewareChain(xs ...Middleware) Middleware {
 	return func(next http.Handler) http.Handler {
-		for i := len(xs) - 1; i >= 0; i-- {
-			x := xs[i]
+		for _, x := range slices.Backward(xs) {
 			next = x(next)
 		}
 

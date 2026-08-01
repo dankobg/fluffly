@@ -144,6 +144,14 @@
 		}
 	});
 	let organization = $derived(page.url.searchParams.get('organization') ?? undefined);
+	let organization_id = $derived.by(() => {
+		const params = page.url.searchParams.getAll('organization_id');
+		const ids = params.map(Number).filter(Number.isFinite);
+		if (ids.length > 0) {
+			return ids;
+		}
+	});
+
 	let properties = $derived.by(() => {
 		const props = page.url.searchParams.entries().reduce(
 			(acc, [key, value]) => {
@@ -184,6 +192,7 @@
 			days_lt,
 			days_gt,
 			organization,
+			organization_id,
 			properties
 		};
 	});
@@ -211,9 +220,9 @@
 			Toggle filters sidebar
 		</label>
 
-		<div class="p-4">
-			<div class="flex flex-wrap items-center gap-2">
-				{#if hasFilters}
+		{#if hasFilters}
+			<div class="p-4">
+				<div class="flex flex-wrap items-center gap-2">
 					<Button
 						variant="destructive"
 						onclick={() => {
@@ -223,70 +232,70 @@
 						Clear all filters
 						<IconTrash2 />
 					</Button>
-				{/if}
 
-				{#each Object.entries(filters) as [key, val] (key)}
-					{#if ['string', 'number', 'boolean'].includes(typeof val)}
-						<RemovableTag
-							onClose={() => {
-								const sp = new URLSearchParams(page.url.searchParams);
-								sp.delete(key, `${val}`);
-								gotoWithFilters(sp);
-							}}
-							class="rounded-full bg-fuchsia-800"
-						>
-							{key}
-						</RemovableTag>
-					{/if}
+					{#each Object.entries(filters) as [key, val] (key)}
+						{#if ['string', 'number', 'boolean'].includes(typeof val)}
+							<RemovableTag
+								onClose={() => {
+									const sp = new URLSearchParams(page.url.searchParams);
+									sp.delete(key, `${val}`);
+									gotoWithFilters(sp);
+								}}
+								class="rounded-full bg-fuchsia-800"
+							>
+								{key}
+							</RemovableTag>
+						{/if}
 
-					{#if typeof val === 'object'}
-						{#if Array.isArray(val)}
-							{#each val as item (item)}
-								<RemovableTag
-									onClose={() => {
-										const sp = new URLSearchParams(page.url.searchParams);
-										sp.delete(key, `${item}`);
-										gotoWithFilters(sp);
-									}}
-									class="rounded-full bg-fuchsia-800"
-								>
-									{item}
-								</RemovableTag>
-							{/each}
-						{:else}
-							{#each Object.entries(val) as [propName, propValues] (propName)}
-								{#each propValues as prop (prop)}
+						{#if typeof val === 'object'}
+							{#if Array.isArray(val)}
+								{#each val as item (item)}
 									<RemovableTag
 										onClose={() => {
 											const sp = new URLSearchParams(page.url.searchParams);
-											const newItems = propValues.filter(x => x !== prop);
-											propValues.forEach((pv, idx) => {
-												sp.delete(`${key}[${propName}][${idx}]`, `${pv}`);
-											});
-											newItems.forEach((pv, idx) => {
-												sp.append(`${key}[${propName}][${idx}]`, `${pv}`);
-											});
+											sp.delete(key, `${item}`);
 											gotoWithFilters(sp);
 										}}
 										class="rounded-full bg-fuchsia-800"
 									>
-										{#if prop === 'true'}
-											<IconCheck />
-											{propName}
-										{:else if prop === 'false'}
-											<IconCircleX />
-											{propName}
-										{:else}
-											{prop}
-										{/if}
+										{item}
 									</RemovableTag>
 								{/each}
-							{/each}
+							{:else}
+								{#each Object.entries(val) as [propName, propValues] (propName)}
+									{#each propValues as prop (prop)}
+										<RemovableTag
+											onClose={() => {
+												const sp = new URLSearchParams(page.url.searchParams);
+												const newItems = propValues.filter(x => x !== prop);
+												propValues.forEach((pv, idx) => {
+													sp.delete(`${key}[${propName}][${idx}]`, `${pv}`);
+												});
+												newItems.forEach((pv, idx) => {
+													sp.append(`${key}[${propName}][${idx}]`, `${pv}`);
+												});
+												gotoWithFilters(sp);
+											}}
+											class="rounded-full bg-fuchsia-800"
+										>
+											{#if prop === 'true'}
+												<IconCheck />
+												{propName}
+											{:else if prop === 'false'}
+												<IconCircleX />
+												{propName}
+											{:else}
+												{prop}
+											{/if}
+										</RemovableTag>
+									{/each}
+								{/each}
+							{/if}
 						{/if}
-					{/if}
-				{/each}
+					{/each}
+				</div>
 			</div>
-		</div>
+		{/if}
 
 		<div class="grid w-full grid-cols-[repeat(auto-fill,minmax(min(22rem,100%),1fr))] gap-4 p-4">
 			{#each data?.animalsResult?.data?.data ?? [] as animal (animal.id)}

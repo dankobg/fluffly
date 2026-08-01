@@ -212,9 +212,9 @@
 	</section>
 </div>
 
-<h3 class="mt-6 text-center text-xl">Or search by organizations</h3>
+<h3 class="mt-6 text-center text-xl">Or search our organizations</h3>
 <div class="mt-4 mb-10 flex justify-center">
-	<a href="/search?organizations=true" class="group">
+	<a href="/organizations" class="group">
 		<div
 			class="flex w-full max-w-[12rem] flex-col items-center justify-center gap-2 rounded-md border-4 border-pink-600 p-3 transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.05] hover:border-pink-400 hover:bg-pink-300/20 hover:shadow-lg dark:hover:bg-pink-200/10"
 		>

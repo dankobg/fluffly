@@ -78,30 +78,24 @@ func New(opts ...LoggerOption) *slog.Logger {
 		Level:     slog.LevelDebug,
 	})
 
-	prettyHandler := tint.NewHandler(lopts.w, &tint.Options{
-		Level:      lopts.level,
-		AddSource:  false,
-		TimeFormat: time.TimeOnly,
-		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
-			if a.Key == slog.LevelKey {
-				level := a.Value.Any().(slog.Level)
-				switch level {
-				case slog.LevelError:
-					a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightRed, "ERR", ansiReset))
-				case slog.LevelWarn:
-					a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightYellow, "WRN", ansiReset))
-				case slog.LevelInfo:
-					a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightGreen, "INF", ansiReset))
-				case slog.LevelDebug:
-					a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiMagenta, "DBG", ansiReset))
-				default:
-					a.Value = slog.StringValue("UNKNOWN")
-				}
+	prettyHandler := tint.NewTextHandler(lopts.w, &tint.Options{Level: lopts.level, AddSource: false, TimeFormat: time.TimeOnly, ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+		if a.Key == slog.LevelKey {
+			level := a.Value.Any().(slog.Level)
+			switch level {
+			case slog.LevelError:
+				a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightRed, "ERR", ansiReset))
+			case slog.LevelWarn:
+				a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightYellow, "WRN", ansiReset))
+			case slog.LevelInfo:
+				a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiBrightGreen, "INF", ansiReset))
+			case slog.LevelDebug:
+				a.Value = slog.StringValue(fmt.Sprintf("[%s%s%s]", ansiMagenta, "DBG", ansiReset))
+			default:
+				a.Value = slog.StringValue("UNKNOWN")
 			}
-
-			return a
-		},
-	})
+		}
+		return a
+	}})
 
 	var handler slog.Handler = jsonHandler
 	if lopts.consolePretty {
