@@ -7,7 +7,6 @@ require (
 	github.com/alecthomas/kong v1.16.0
 	github.com/getkin/kin-openapi v0.143.0
 	github.com/go-faker/faker/v4 v4.10.0
-	github.com/goforj/godump v1.9.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
@@ -31,7 +30,7 @@ require (
 	github.com/twpayne/pgx-geom v1.0.0
 	github.com/wneessen/go-mail v0.8.1
 	golang.org/x/time v0.15.0
-	google.golang.org/grpc v1.82.1
+	google.golang.org/grpc v1.83.0
 )
 
 require (
