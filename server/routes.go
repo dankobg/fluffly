@@ -28,6 +28,7 @@ func (a *ApiHandler) SetupRoutes(env, uploadDir string) http.Handler {
 		mux.Handle("GET /debug/pprof/block", pprof.Handler("block"))
 		mux.HandleFunc("GET /debug/pprof/cmdline", pprof.Cmdline)
 		mux.Handle("GET /debug/pprof/goroutine", pprof.Handler("goroutine"))
+		mux.Handle("GET /debug/pprof/goroutineleak", pprof.Handler("goroutineleak"))
 		mux.Handle("GET /debug/pprof/heap", pprof.Handler("heap"))
 		mux.Handle("GET /debug/pprof/mutex", pprof.Handler("mutex"))
 		mux.HandleFunc("GET /debug/pprof/profile", pprof.Profile)
