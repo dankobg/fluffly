@@ -841,18 +841,14 @@ func (a *ApiHandler) LikeAnimal(ctx context.Context, request api.LikeAnimalReque
 	if err := a.persistor.Animal().LikeAnimal(ctx, userID, request.ID); err != nil {
 		msg := "failed to like an animal"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.LikeAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_like", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "animal integrity error"
 			return api.LikeAnimal400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_like", msg, reason)}, nil
 		}

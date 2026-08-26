@@ -49,15 +49,15 @@ var (
 	ErrOrganizationPhotoNotFound                    = errors.New("organization photo not found")
 	ErrOrganizationVideoNotFound                    = errors.New("organization video not found")
 	errOrganizationIntegrity                        = ErrOrganizationIntegrityViolation{}
-	errOrganizationUniqueName                       = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "name"}}
-	errOrganizationContactForeignKeyOrganizationID  = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.organization_id"}}
-	errOrganizationContactForeignKeyAddressID       = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "contact.address_id"}}
-	errOrganizationAddressForeignKeyCountryID       = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "address.country_id"}}
-	errOrganizationWorkHourUniqueOrganizationID     = ErrOrganizationUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "work_hour.organization_id"}}
-	errOrganizationWorkHourForeignKeyOrganizationID = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "work_hour.organization_id"}}
-	errOrganizationWorkHourCheckDayProvided         = ErrOrganizationCheckViolation{errCheckViolation: errCheckViolation{Name: "work_hour.day_provided"}}
-	errOrganizationPhotoForeignKeyOrganizationID    = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "photo.organization_id"}}
-	errOrganizationSocialForeignKeyOrganizationID   = ErrOrganizationForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "social.organization_id"}}
+	errOrganizationUniqueName                       = ErrOrganizationUniqueViolation{Name: "name"}
+	errOrganizationContactForeignKeyOrganizationID  = ErrOrganizationForeignKeyViolation{Name: "contact.organization_id"}
+	errOrganizationContactForeignKeyAddressID       = ErrOrganizationForeignKeyViolation{Name: "contact.address_id"}
+	errOrganizationAddressForeignKeyCountryID       = ErrOrganizationForeignKeyViolation{Name: "address.country_id"}
+	errOrganizationWorkHourUniqueOrganizationID     = ErrOrganizationUniqueViolation{Name: "work_hour.organization_id"}
+	errOrganizationWorkHourForeignKeyOrganizationID = ErrOrganizationForeignKeyViolation{Name: "work_hour.organization_id"}
+	errOrganizationWorkHourCheckDayProvided         = ErrOrganizationCheckViolation{Name: "work_hour.day_provided"}
+	errOrganizationPhotoForeignKeyOrganizationID    = ErrOrganizationForeignKeyViolation{Name: "photo.organization_id"}
+	errOrganizationSocialForeignKeyOrganizationID   = ErrOrganizationForeignKeyViolation{Name: "social.organization_id"}
 )
 
 func convertOrganizationPgError(pgErr *pgconn.PgError) error {

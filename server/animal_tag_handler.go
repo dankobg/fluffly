@@ -104,18 +104,14 @@ func (a *ApiHandler) CreateAnimalTags(ctx context.Context, request api.CreateAni
 	if err != nil {
 		msg := "could not create animal tags"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.CreateAnimalTags400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_tags_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "animal integrity error"
 			return api.CreateAnimalTags400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_tags_save", msg, reason)}, nil
 		}
@@ -208,8 +204,7 @@ func (a *ApiHandler) UpdateAnimalTag(ctx context.Context, request api.UpdateAnim
 			return api.UpdateAnimalTag400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_tag_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "tag integrity error"
 			return api.UpdateAnimalTag400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_tag_update", msg, reason)}, nil
 		}

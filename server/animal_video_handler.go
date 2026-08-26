@@ -182,18 +182,14 @@ func (a *ApiHandler) CreateAnimalVideos(ctx context.Context, request api.CreateA
 	if err != nil {
 		msg := "could not create animal videos"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.CreateAnimalVideos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_videos_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "animal integrity error"
 			return api.CreateAnimalVideos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_videos_save", msg, reason)}, nil
 		}
@@ -235,7 +231,7 @@ func (a *ApiHandler) DeleteAnimalVideos(ctx context.Context, request api.DeleteA
 		return api.DeleteAnimalVideos403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("animal_videos_permission", "permission denied")}, nil
 	}
 
-	filters := dbtype.ListAnimalVideosFilters{ListAnimalVideosParams: api.ListAnimalVideosParams{ID: &request.Body.Ids}}
+	filters := dbtype.ListAnimalVideosFilters{ID: &request.Body.Ids}
 
 	oldVideosResults, err := a.persistor.Animal().ListAnimalVideos(ctx, request.ID, filters)
 	if err != nil {
@@ -341,18 +337,14 @@ func (a *ApiHandler) UpdateAnimalVideo(ctx context.Context, request api.UpdateAn
 	if err != nil {
 		msg := "could not update animal video"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.UpdateAnimalVideo400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_video_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "animal integrity error"
 			return api.UpdateAnimalVideo400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "animal_video_update", msg, reason)}, nil
 		}

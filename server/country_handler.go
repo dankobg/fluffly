@@ -53,8 +53,7 @@ func (a *ApiHandler) CreateCountry(ctx context.Context, request api.CreateCountr
 			return api.CreateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "country integrity error"
 			return api.CreateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_save", msg, reason)}, nil
 		}
@@ -108,8 +107,7 @@ func (a *ApiHandler) UpdateCountry(ctx context.Context, request api.UpdateCountr
 			return api.UpdateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_edit", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "country integrity error"
 			return api.UpdateCountry400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "country_edit", msg, reason)}, nil
 		}

@@ -253,8 +253,7 @@ func (a *ApiHandler) ApplyForOrganization(ctx context.Context, request api.Apply
 			return api.ApplyForOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.ApplyForOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
@@ -536,8 +535,7 @@ func (a *ApiHandler) CreateOrganization(ctx context.Context, request api.CreateO
 			return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.CreateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_save", msg, reason)}, nil
 		}
@@ -784,8 +782,7 @@ func (a *ApiHandler) UpdateOrganization(ctx context.Context, request api.UpdateO
 			return api.UpdateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_edit", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.UpdateOrganization400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_edit", msg, reason)}, nil
 		}

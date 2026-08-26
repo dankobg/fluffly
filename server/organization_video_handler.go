@@ -192,8 +192,7 @@ func (a *ApiHandler) CreateOrganizationVideos(ctx context.Context, request api.C
 			return api.CreateOrganizationVideos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_videos_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.CreateOrganizationVideos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_videos_save", msg, reason)}, nil
 		}
@@ -235,7 +234,7 @@ func (a *ApiHandler) DeleteOrganizationVideos(ctx context.Context, request api.D
 		return api.DeleteOrganizationVideos403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_videos_permission", "permission denied")}, nil
 	}
 
-	filters := dbtype.ListOrganizationVideosFilters{ListOrganizationVideosParams: api.ListOrganizationVideosParams{ID: &request.Body.Ids}}
+	filters := dbtype.ListOrganizationVideosFilters{ID: &request.Body.Ids}
 
 	oldVideosResults, err := a.persistor.Organization().ListOrganizationVideos(ctx, request.ID, filters)
 	if err != nil {
@@ -351,8 +350,7 @@ func (a *ApiHandler) UpdateOrganizationVideo(ctx context.Context, request api.Up
 			return api.UpdateOrganizationVideo400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_video_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.UpdateOrganizationVideo400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_video_update", msg, reason)}, nil
 		}

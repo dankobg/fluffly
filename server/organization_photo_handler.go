@@ -196,8 +196,7 @@ func (a *ApiHandler) CreateOrganizationPhotos(ctx context.Context, request api.C
 			return api.CreateOrganizationPhotos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_photos_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.CreateOrganizationPhotos400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_photos_save", msg, reason)}, nil
 		}
@@ -239,7 +238,7 @@ func (a *ApiHandler) DeleteOrganizationPhotos(ctx context.Context, request api.D
 		return api.DeleteOrganizationPhotos403JSONResponse{UnauthorizedErrorResponseJSONResponse: newUnauthorizedResp("organization_photos_permission", "permission denied")}, nil
 	}
 
-	filters := dbtype.ListOrganizationPhotosFilters{ListOrganizationPhotosParams: api.ListOrganizationPhotosParams{ID: &request.Body.Ids}}
+	filters := dbtype.ListOrganizationPhotosFilters{ID: &request.Body.Ids}
 
 	oldPhotosResults, err := a.persistor.Organization().ListOrganizationPhotos(ctx, request.ID, filters)
 	if err != nil {
@@ -359,8 +358,7 @@ func (a *ApiHandler) UpdateOrganizationPhoto(ctx context.Context, request api.Up
 			return api.UpdateOrganizationPhoto400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_photo_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.UpdateOrganizationPhoto400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_photo_update", msg, reason)}, nil
 		}

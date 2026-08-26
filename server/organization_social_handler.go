@@ -114,8 +114,7 @@ func (a *ApiHandler) CreateOrganizationSocials(ctx context.Context, request api.
 			return api.CreateOrganizationSocials400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_socials_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "organization integrity error"
 			return api.CreateOrganizationSocials400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_socials_save", msg, reason)}, nil
 		}
@@ -211,8 +210,7 @@ func (a *ApiHandler) UpdateOrganizationSocial(ctx context.Context, request api.U
 			return api.UpdateOrganizationSocial400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_social_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "social integrity error"
 			return api.UpdateOrganizationSocial400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "organization_social_update", msg, reason)}, nil
 		}

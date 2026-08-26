@@ -1,6 +1,6 @@
 module github.com/dankobg/fluffly/tools
 
-go 1.26
+go 1.27
 
 tool (
 	github.com/air-verse/air

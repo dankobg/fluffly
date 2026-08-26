@@ -1,6 +1,6 @@
 module github.com/dankobg/fluffly
 
-go 1.26.0
+go 1.27
 
 require (
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65

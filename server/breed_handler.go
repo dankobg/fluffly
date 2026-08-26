@@ -102,18 +102,14 @@ func (a *ApiHandler) CreateBreed(ctx context.Context, request api.CreateBreedReq
 	if err != nil {
 		msg := "could not create an animal type"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.CreateBreed400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "breed_save", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "breed integrity error"
 			return api.CreateBreed400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "breed_save", msg, reason)}, nil
 		}
@@ -154,18 +150,14 @@ func (a *ApiHandler) UpdateBreed(ctx context.Context, request api.UpdateBreedReq
 	if err != nil {
 		msg := "could not update an animal type"
 
-		var (
-			reason string
-			e1     postgres.ErrAnimalUniqueViolation
-		)
+		var reason string
 
-		if errors.As(err, &e1) {
+		if e1, ok := errors.AsType[postgres.ErrAnimalUniqueViolation](err); ok {
 			reason = "duplicate " + e1.Name
 			return api.UpdateBreed400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "breed_update", msg, reason)}, nil
 		}
 
-		var e2 postgres.IntegrityViolationError
-		if errors.As(err, &e2) {
+		if _, ok := errors.AsType[postgres.IntegrityViolationError](err); ok {
 			reason = "breed integrity error"
 			return api.UpdateBreed400JSONResponse{GenericErrorResponseJSONResponse: newGenericResp(http.StatusBadRequest, "breed_update", msg, reason)}, nil
 		}

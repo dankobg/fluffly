@@ -39,10 +39,10 @@ type (
 var (
 	ErrCountryNotFound         = errors.New("country not found")
 	errCountryIntegrity        = ErrCountryIntegrityViolation{}
-	errCountryUniqueName       = ErrCountryUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "name"}}
-	errCountryUniqueIsoAlpha2  = ErrCountryUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "iso_alpha2"}}
-	errCountryUniqueIsoAlpha3  = ErrCountryUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "iso_alpha3"}}
-	errCountryUniqueIsoNumeric = ErrCountryUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "iso_numeric"}}
+	errCountryUniqueName       = ErrCountryUniqueViolation{Name: "name"}
+	errCountryUniqueIsoAlpha2  = ErrCountryUniqueViolation{Name: "iso_alpha2"}
+	errCountryUniqueIsoAlpha3  = ErrCountryUniqueViolation{Name: "iso_alpha3"}
+	errCountryUniqueIsoNumeric = ErrCountryUniqueViolation{Name: "iso_numeric"}
 )
 
 func convertCountryPgError(pgErr *pgconn.PgError) error {

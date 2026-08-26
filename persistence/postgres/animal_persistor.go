@@ -58,14 +58,14 @@ var (
 	errAnimalIntegrity       = ErrAnimalIntegrityViolation{}
 	ErrAnimalAlreadyAdopted  = errors.New("animal already adopted")
 
-	errAnimalForeignKeyUserID           = ErrAnimalForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "user_id"}}
-	errAnimalForeignKeyOrganizationID   = ErrAnimalForeignKeyViolation{errForeignKeyViolation: errForeignKeyViolation{Name: "organization_id"}}
-	errAnimalCheckAgeValid              = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "age valid"}}
-	errAnimalCheckSizeValid             = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "size valid"}}
-	errAnimalCheckUserIdOrOrgIDProvided = ErrAnimalCheckViolation{errCheckViolation: errCheckViolation{Name: "user_id or organization_id not provided"}}
-	errAnimalLikeUnique                 = ErrAnimalUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "like"}}
+	errAnimalForeignKeyUserID           = ErrAnimalForeignKeyViolation{Name: "user_id"}
+	errAnimalForeignKeyOrganizationID   = ErrAnimalForeignKeyViolation{Name: "organization_id"}
+	errAnimalCheckAgeValid              = ErrAnimalCheckViolation{Name: "age valid"}
+	errAnimalCheckSizeValid             = ErrAnimalCheckViolation{Name: "size valid"}
+	errAnimalCheckUserIdOrOrgIDProvided = ErrAnimalCheckViolation{Name: "user_id or organization_id not provided"}
+	errAnimalLikeUnique                 = ErrAnimalUniqueViolation{Name: "like"}
 
-	errAnimalTypeUniqueName = ErrAnimalUniqueViolation{errUniqueViolation: errUniqueViolation{Name: "animal_type.name"}}
+	errAnimalTypeUniqueName = ErrAnimalUniqueViolation{Name: "animal_type.name"}
 )
 
 func convertAnimalPgError(pgErr *pgconn.PgError) error {

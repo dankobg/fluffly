@@ -15,8 +15,7 @@ import (
 func collectFieldErrors(err error, out *[]api.ValidationDetail) {
 	fmt.Println("KIN API ERROR: ", err.Error())
 
-	var me openapi3.MultiError
-	if errors.As(err, &me) {
+	if me, ok := errors.AsType[openapi3.MultiError](err); ok {
 		for _, e := range me {
 			collectFieldErrors(e, out)
 		}
@@ -24,8 +23,7 @@ func collectFieldErrors(err error, out *[]api.ValidationDetail) {
 		return
 	}
 
-	var se *openapi3.SchemaError
-	if errors.As(err, &se) {
+	if se, ok := errors.AsType[*openapi3.SchemaError](err); ok {
 		p := "/" + strings.Join(se.JSONPointer(), "/")
 
 		*out = append(*out, api.ValidationDetail{
@@ -40,8 +38,7 @@ func collectFieldErrors(err error, out *[]api.ValidationDetail) {
 		return
 	}
 
-	var re *openapi3filter.RequestError
-	if errors.As(err, &re) {
+	if re, ok := errors.AsType[*openapi3filter.RequestError](err); ok {
 		var in, pointer string
 		if re.Parameter != nil {
 			in = re.Parameter.In
@@ -63,8 +60,7 @@ func collectFieldErrors(err error, out *[]api.ValidationDetail) {
 		// }
 	}
 
-	var pe *openapi3filter.ParseError
-	if errors.As(err, &pe) {
+	if pe, ok := errors.AsType[*openapi3filter.ParseError](err); ok {
 		var in, pointer string
 
 		in = "body"
