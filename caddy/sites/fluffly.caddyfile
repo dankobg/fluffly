@@ -7,7 +7,7 @@ fluffly-dev.xyz {
         }
 
         # backend api (go)
-        @backend path /api/* /webhooks/* /public/* /uploads/* /spec* /docs/*
+        @backend path /api/* /webhooks/* /public/* /uploads/* /spec* /docs/* /debug/*
         handle @backend {
                 reverse_proxy host.docker.internal:6969
         }
