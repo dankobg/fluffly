@@ -6,8 +6,7 @@ require (
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
 	github.com/alecthomas/kong v1.16.1
 	github.com/getkin/kin-openapi v0.147.0
-	github.com/go-faker/faker/v4 v4.11.0
-	github.com/goforj/godump v1.9.1
+	github.com/go-faker/faker/v4 v4.12.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
