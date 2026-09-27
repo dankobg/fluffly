@@ -123,6 +123,12 @@ func WithTLSConfig(tls *tls.Config) ServerOption {
 	})
 }
 
+func WithTLSNextProto(m map[string]func(*http.Server, *tls.Conn, http.Handler)) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.tLSNextProto = m
+	})
+}
+
 func WithConnState(state func(net.Conn, http.ConnState)) ServerOption {
 	return serverOptionFunc(func(so *serverOpts) {
 		so.connState = state
