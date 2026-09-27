@@ -21,15 +21,25 @@ type serverOpts struct {
 	writeTimeout                 time.Duration
 	idleTimeout                  time.Duration
 	maxHeaderBytes               int
+	maxHeaderValueCount          int
 	tLSNextProto                 map[string]func(*http.Server, *tls.Conn, http.Handler)
 	connState                    func(net.Conn, http.ConnState)
 	errorLog                     *log.Logger
 	baseContext                  func(net.Listener) context.Context
 	connContext                  func(ctx context.Context, c net.Conn) context.Context
+	http2                        *http.HTTP2Config
+	protocols                    *http.Protocols
+	disableClientPriority        bool
 }
 
 type ServerOption interface {
 	apply(so *serverOpts)
+}
+
+type serverOptionFunc func(*serverOpts)
+
+func (f serverOptionFunc) apply(s *serverOpts) {
+	f(s)
 }
 
 type ServerOptions []ServerOption
@@ -40,90 +50,117 @@ func (o ServerOptions) apply(so *serverOpts) {
 	}
 }
 
-type addrOpt string
-
-func (o addrOpt) apply(s *serverOpts)   { s.addr = string(o) }
-func WithAddr(addr string) ServerOption { return addrOpt(addr) }
-func WithHostPort(host string, port int) ServerOption {
-	addr := net.JoinHostPort(host, strconv.Itoa(port))
-	return addrOpt(addr)
+func WithAddr(addr string) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.addr = addr
+	})
 }
 
-type handlerOpt struct{ h http.Handler }
+func WithHostPort(host string, port int) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		addr := net.JoinHostPort(host, strconv.Itoa(port))
+		so.addr = addr
+	})
+}
 
-func (o handlerOpt) apply(s *serverOpts)      { s.handler = o.h }
-func WithHandler(h http.Handler) ServerOption { return handlerOpt{h: h} }
+func WithHandler(h http.Handler) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.handler = h
+	})
+}
 
-type readTimeoutOpt time.Duration
+func WithReadTimeout(dur time.Duration) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.readTimeout = dur
+	})
+}
 
-func (o readTimeoutOpt) apply(s *serverOpts)         { s.readTimeout = time.Duration(o) }
-func WithReadTimeout(dur time.Duration) ServerOption { return readTimeoutOpt(dur) }
+func WithReadHeaderTimeout(dur time.Duration) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.readHeaderTimeout = dur
+	})
+}
 
-type readHeaderTimeoutOpt time.Duration
+func WithWriteTimeout(dur time.Duration) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.writeTimeout = dur
+	})
+}
 
-func (o readHeaderTimeoutOpt) apply(s *serverOpts)         { s.readHeaderTimeout = time.Duration(o) }
-func WithReadHeaderTimeout(dur time.Duration) ServerOption { return readHeaderTimeoutOpt(dur) }
+func WithIdleTimeout(dur time.Duration) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.idleTimeout = dur
+	})
+}
 
-type writeTimeoutOpt time.Duration
-
-func (o writeTimeoutOpt) apply(s *serverOpts)         { s.writeTimeout = time.Duration(o) }
-func WithWriteTimeout(dur time.Duration) ServerOption { return writeTimeoutOpt(dur) }
-
-type idleTimeoutOpt time.Duration
-
-func (o idleTimeoutOpt) apply(s *serverOpts)         { s.idleTimeout = time.Duration(o) }
-func WithIdleTimeout(dur time.Duration) ServerOption { return idleTimeoutOpt(dur) }
-
-type maxHeaderBytesOpt int
-
-func (o maxHeaderBytesOpt) apply(s *serverOpts) { s.maxHeaderBytes = int(o) }
-func WithMaxHeaderBytes(bytes int) ServerOption { return maxHeaderBytesOpt(bytes) }
-
-type disableGeneralOptionsHandlerOpt bool
-
-func (o disableGeneralOptionsHandlerOpt) apply(s *serverOpts) {
-	s.disableGeneralOptionsHandler = bool(o)
+func WithMaxHeaderBytes(n int) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.maxHeaderBytes = n
+	})
 }
 
 func WithDisableGeneralOptionsHandler(flag bool) ServerOption {
-	return disableGeneralOptionsHandlerOpt(flag)
+	return serverOptionFunc(func(so *serverOpts) {
+		so.disableGeneralOptionsHandler = flag
+	})
 }
 
-type errorLogOpt struct{ log *log.Logger }
+func WithErrorLog(log *log.Logger) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.errorLog = log
+	})
+}
 
-func (o errorLogOpt) apply(s *serverOpts)       { s.errorLog = o.log }
-func WithErrorLog(log *log.Logger) ServerOption { return errorLogOpt{log: log} }
 func WithErrorSlog(sl *slog.Logger, level slog.Level) ServerOption {
-	return errorLogOpt{log: slog.NewLogLogger(sl.Handler(), level)}
+	return serverOptionFunc(func(so *serverOpts) {
+		so.errorLog = slog.NewLogLogger(sl.Handler(), level)
+	})
 }
 
-type tLSConfigOpt struct{ tls *tls.Config }
-
-func (o tLSConfigOpt) apply(s *serverOpts)       { s.tLSConfig = o.tls }
-func WithTLSConfig(tls *tls.Config) ServerOption { return tLSConfigOpt{tls: tls} }
-
-type tLSNextProtoOpt map[string]func(*http.Server, *tls.Conn, http.Handler)
-
-func (o tLSNextProtoOpt) apply(s *serverOpts) { s.tLSNextProto = o }
-func WithTLSNextProto(proto map[string]func(*http.Server, *tls.Conn, http.Handler)) ServerOption {
-	return tLSNextProtoOpt(proto)
+func WithTLSConfig(tls *tls.Config) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.tLSConfig = tls
+	})
 }
 
-type connStateOpt func(net.Conn, http.ConnState)
-
-func (o connStateOpt) apply(s *serverOpts)                            { s.connState = o }
-func WithConnState(state func(net.Conn, http.ConnState)) ServerOption { return connStateOpt(state) }
-
-type baseContextOpt func(net.Listener) context.Context
-
-func (o baseContextOpt) apply(s *serverOpts) { s.baseContext = o }
-func WithBaseContext(basectx func(net.Listener) context.Context) ServerOption {
-	return baseContextOpt(basectx)
+func WithConnState(state func(net.Conn, http.ConnState)) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.connState = state
+	})
 }
 
-type connContextOpt func(ctx context.Context, c net.Conn) context.Context
+func WithBaseContext(f func(net.Listener) context.Context) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.baseContext = f
+	})
+}
 
-func (o connContextOpt) apply(s *serverOpts) { s.connContext = o }
-func WithConnContext(connctx func(ctx context.Context, c net.Conn) context.Context) ServerOption {
-	return connContextOpt(connctx)
+func WithConnContext(f func(ctx context.Context, c net.Conn) context.Context) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.connContext = f
+	})
+}
+
+func WithMaxHeaderValueCount(n int) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.maxHeaderValueCount = n
+	})
+}
+
+func WithHTTP2(cfg *http.HTTP2Config) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.http2 = cfg
+	})
+}
+
+func WithProtocols(protocols *http.Protocols) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.protocols = protocols
+	})
+}
+
+func WithDisableClientPriority(flag bool) ServerOption {
+	return serverOptionFunc(func(so *serverOpts) {
+		so.disableClientPriority = flag
+	})
 }
