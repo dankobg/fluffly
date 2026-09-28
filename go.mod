@@ -7,14 +7,13 @@ require (
 	github.com/alecthomas/kong v1.16.1
 	github.com/getkin/kin-openapi v0.147.0
 	github.com/go-faker/faker/v4 v4.11.0
-	github.com/goforj/godump v1.9.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgerrcode v0.0.0-20250907135507-afb5586c32a6
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/joho/godotenv v1.5.1
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/structs v1.0.1
-	github.com/knadh/koanf/v2 v2.3.6
+	github.com/knadh/koanf/v2 v2.3.7
 	github.com/lmittmann/tint v1.2.0
 	github.com/minio/minio-go/v7 v7.3.0
 	github.com/oapi-codegen/nethttp-middleware v1.2.0
