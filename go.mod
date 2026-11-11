@@ -18,8 +18,8 @@ require (
 	github.com/minio/minio-go/v7 v7.4.1
 	github.com/oapi-codegen/nethttp-middleware v1.3.1
 	github.com/oapi-codegen/nullable v1.2.0
-	github.com/oapi-codegen/runtime v1.8.0
-	github.com/ory/client-go v1.22.92
+	github.com/oapi-codegen/runtime v1.9.0
+	github.com/ory/client-go v1.22.93
 	github.com/ory/keto/proto v0.13.0-alpha.0.0.20251107121730-f5635433a563
 	github.com/redis/go-redis/v9 v9.23.0
 	github.com/rs/cors v1.11.1
@@ -29,7 +29,7 @@ require (
 	github.com/twpayne/go-geom v1.7.0
 	github.com/twpayne/pgx-geom v1.0.0
 	github.com/wneessen/go-mail v0.8.2
-	golang.org/x/time v0.15.0
+	golang.org/x/time v0.16.0
 	google.golang.org/grpc v1.85.0
 )
 

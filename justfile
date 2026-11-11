@@ -7,15 +7,18 @@ cwd := justfile_directory()
 
 redis_host := env('REDIS_HOST', "localhost")
 redis_port := env('REDIS_PORT', "6379")
+redis_container_port := "6379"
 redis_pwd := env('REDIS_PASSWORD', "")
 
 db_host := env('POSTGRES_HOST', "localhost")
 db_port := env('POSTGRES_PORT', "5432")
+db_container_port := "5432"
 db_user := env('POSTGRES_USER', "test")
 db_pwd := env('POSTGRES_PASSWORD', "test")
 db_name := env('POSTGRES_DB', "test")
 
 db_uri := "postgres://" + db_user + ":" + db_pwd + "@" + db_host + ":" + db_port + "/" + db_name + "?sslmode=disable"
+db_container_uri := "postgres://" + db_user + ":" + db_pwd + "@" + db_host + ":" + db_container_port + "/" + db_name + "?sslmode=disable"
 migrations_dir := "db/migrations"
 
 # ----------------------------------------------------------------------------
@@ -59,10 +62,12 @@ deps:
 	go mod graph
 
 # List dependencies that have updates
-# go list -u -m -f '{{if .Update}}{{.}}{{end}}' all
-# go list -u -m -f '{{if (and (not (or .Main .Indirect)) .Update)}}{{.Path}}: {{.Version}} -> {{.Update.Version}}{{end}}' all
-# deps-outdated:
-# 	echo "TODO"
+list-updates:
+	go list -u -m -f '{{ "{{if (and (not (or .Main .Indirect)) .Update)}}{{.Path}}: {{.Version}} -> {{.Update.Version}}{{end}}" }}' all
+
+# List all dependencies that have updates
+list-updates-all:
+	go list -u -m -f '{{ "{{if .Update}}{{.}}{{end}}" }}' all
 
 # Lint code with golangci-lint
 lint:
@@ -164,12 +169,12 @@ sh name:
 # connect to redis via redis-cli
 [group('docker')]
 rediscli:
-	docker compose exec -it redis redis-cli -h "{{redis_host}}" -p "{{redis_port}}" {{ if redis_pwd != "" { "-a " + redis_pwd } else { "" } }}
+	docker compose exec -it redis redis-cli -h "{{redis_host}}" -p "{{redis_container_port}}" {{ if redis_pwd != "" { "-a " + redis_pwd } else { "" } }}
 
 # connect to postgres via psql
 [group('docker')]
 psql:
-	docker compose exec -it pg psql "{{db_uri}}"
+	docker compose exec -it pg psql "{{db_container_uri}}"
 
 # ----------------------------------------------------------------------------
 
@@ -261,15 +266,15 @@ pg-backup:
 # restore postgres backup
 [group('backup')]
 pg-restore:
-	docker compose exec -T pg psql "{{db_uri}}" < {{cwd}}/db/dev_dump.sql
+	docker compose exec -T pg psql "{{db_container_uri}}" < {{cwd}}/db/dev_dump.sql
 
 # drop database
 pg-drop-schema:
-	docker compose exec -T pg psql "{{db_uri}}" -c "drop schema public cascade;"
+	docker compose exec -T pg psql "{{db_container_uri}}" -c "drop schema public cascade;"
 
 # create database
 pg-create-schema:
-	docker compose exec -T pg psql "{{db_uri}}" -c "create schema public;"
+	docker compose exec -T pg psql "{{db_container_uri}}" -c "create schema public;"
 
 # ----------------------------------------------------------------------------
 
