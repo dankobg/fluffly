@@ -5,12 +5,12 @@
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Form from '$lib/components/ui/form';
-	import { fluffly } from '$lib/fluffly/client';
-	import type { components, OrganizationStatus } from '$lib/gen/fluffly_openapi';
-	import * as Alert from '$lib/components/ui/alert';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import type { components, OrganizationStatus } from '#lib/gen/fluffly_openapi.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
 	import IconPlus from '@lucide/svelte/icons/plus';
 	import IconX from '@lucide/svelte/icons/x';
 	import IconTrash from '@lucide/svelte/icons/trash-2';
@@ -22,14 +22,14 @@
 	import { Uppy } from '@uppy/core';
 	import UppyDashboard from '@uppy/dashboard';
 	import UppyImageEditor from '@uppy/image-editor';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
 	import { invalidate } from '$app/navigation';
-	import * as Item from '$lib/components/ui/item/index.js';
-	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-	import { capitalize, getChangedFormFields } from '$lib/utils';
-	import { emptyStringToNull } from '$lib/validation/common';
-	import { organizationStatusValues } from '$lib/enum-values';
+	import * as Item from '#lib/components/ui/item/index.js';
+	import Checkbox from '#lib/components/ui/checkbox/checkbox.svelte';
+	import { capitalize, getChangedFormFields } from '#lib/utils.ts';
+	import { emptyStringToNull } from '#lib/validation/common.ts';
+	import { organizationStatusValues } from '#lib/enum-values.ts';
 
 	let { data }: PageProps = $props();
 

@@ -2,7 +2,7 @@ import IconCheck from '@lucide/svelte/icons/check';
 import IconX from '@lucide/svelte/icons/x';
 import IconShieldUser from '@lucide/svelte/icons/shield-user';
 import IconUser from '@lucide/svelte/icons/user';
-import { IdentityState } from '$lib/gen/fluffly_openapi';
+import { IdentityState } from '#lib/gen/fluffly_openapi.ts';
 
 export const stateIcons = new Map([
 	[IdentityState.active, IconCheck],

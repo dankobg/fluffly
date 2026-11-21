@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index';
+	import { Badge } from '#lib/components/ui/badge/index.ts';
 	import { schemaIdIcons } from './data';
 
 	let { value }: { value?: string } = $props();

@@ -1,17 +1,17 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Table from '$lib/components/ui/table/index';
+	import * as Table from '#lib/components/ui/table/index.ts';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconX from '@lucide/svelte/icons/x';
 	import IconEye from '@lucide/svelte/icons/eye';
 	import { stateIcons } from '../../identities/identities-data-grid/data';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { fluffly } from '$lib/fluffly/client';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
 	import { invalidate } from '$app/navigation';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import { IdentityState, type components } from '$lib/gen/fluffly_openapi';
-	import type { CustomTraits } from '$lib/kratos/service';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import { IdentityState, type components } from '#lib/gen/fluffly_openapi.ts';
+	import type { CustomTraits } from '#lib/kratos/service.ts';
 
 	let { data }: PageProps = $props();
 	const fmt = new Intl.DateTimeFormat(undefined, {

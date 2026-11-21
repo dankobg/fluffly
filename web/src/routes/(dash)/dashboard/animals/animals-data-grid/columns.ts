@@ -1,76 +1,48 @@
-import type { ColumnDef } from '@tanstack/table-core';
-import { renderComponent, renderSnippet } from '$lib/components/ui/data-table/index';
-import DataTableCheckbox from '$lib/components/data-grid-shared/data-table-checkbox.svelte';
-import DataTableCellId from '$lib/components/data-grid-shared/data-table-cell-id.svelte';
-import DataTableColumnHeader from '$lib/components/data-grid-shared/data-table-column-header.svelte';
 import DataTableRowActions from './data-table-row-actions.svelte';
+import type { components } from '#lib/gen/fluffly_openapi.ts';
+import { renderComponent, renderSnippet } from '@tanstack/svelte-table';
+import { createAppColumnHelper } from '#lib/components/data-grid-shared/app-table.ts';
 import { createRawSnippet } from 'svelte';
-import type { components } from '$lib/gen/fluffly_openapi';
 
-export const columns: ColumnDef<components['schemas']['Animal']>[] = [
-	{
+const columnHelper = createAppColumnHelper<components['schemas']['Animal']>();
+
+export const columns = columnHelper.columns([
+	columnHelper.display({
 		id: 'select',
-		header: ({ table }) =>
-			renderComponent(DataTableCheckbox, {
-				checked: table.getIsAllPageRowsSelected(),
-				onCheckedChange: value => table.toggleAllPageRowsSelected(!!value),
-				'aria-label': 'Select all',
-				class: 'translate-y-[2px]'
-			}),
-		cell: ({ row }) =>
-			renderComponent(DataTableCheckbox, {
-				checked: row.getIsSelected(),
-				onCheckedChange: value => row.toggleSelected(!!value),
-				'aria-label': 'Select row',
-				class: 'translate-y-[2px]'
-			}),
+		header: ({ header }) => renderComponent(header.SelectHeader),
+		cell: ({ cell }) => renderComponent(cell.SelectCell),
 		enableSorting: false,
-		enableHiding: false
-	},
-	{
-		accessorKey: 'id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				column,
-				title: 'Id'
+		enableHiding: false,
+		enableResizing: false,
+		maxSize: 40
+	}),
+	columnHelper.accessor('id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'ID'
 			});
 		},
-		cell: ({ row }) => {
-			return renderComponent(DataTableCellId, {
-				value: `${row.original.id}`,
+		cell: ({ cell, row }) => {
+			return renderComponent(cell.DataTableCellId, {
+				value: row.original.id,
 				href: `/dashboard/animals/${row.original.id}`
 			});
-		},
-		enableSorting: false,
-		enableHiding: false
-	},
-	{
-		accessorKey: 'name',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Name',
-				column
+		}
+	}),
+	columnHelper.accessor('name', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Name'
 			});
 		},
-		cell: ({ row }) => {
-			const nameSnippet = createRawSnippet<[{ name: string }]>(getName => {
-				const { name } = getName();
-				return {
-					render: () => `<div>${name}</div>`
-				};
-			});
-			return renderSnippet(nameSnippet, {
-				name: row.original.name
-			});
-		},
-		enableSorting: false
-	},
-	{
-		accessorKey: 'type',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Animal type',
-				column
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
+		}
+	}),
+	columnHelper.accessor('type', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Animal type'
 			});
 		},
 		cell: ({ row }) => {
@@ -85,13 +57,11 @@ export const columns: ColumnDef<components['schemas']['Animal']>[] = [
 			});
 		},
 		enableSorting: false
-	},
-	{
-		accessorKey: 'specie',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Specie',
-				column
+	}),
+	columnHelper.accessor('specie', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Animal specie'
 			});
 		},
 		cell: ({ row }) => {
@@ -108,13 +78,11 @@ export const columns: ColumnDef<components['schemas']['Animal']>[] = [
 		filterFn: (row, id, value) => {
 			return value.includes(row.getValue(id));
 		}
-	},
-	{
-		accessorKey: 'gender',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Gender',
-				column
+	}),
+	columnHelper.accessor('gender', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Gender'
 			});
 		},
 		cell: ({ row }) => {
@@ -127,207 +95,94 @@ export const columns: ColumnDef<components['schemas']['Animal']>[] = [
 			return renderSnippet(genderSnippet, {
 				gender: row.original.gender
 			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
 		}
-	},
-	{
-		accessorKey: 'hermaphrodite',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Hermaphrodite',
-				column
+	}),
+	columnHelper.accessor('hermaphrodite', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Hermaphrodite'
 			});
 		},
-		cell: ({ row }) => {
-			const hermaphroditeSnippet = createRawSnippet<[{ hermaphrodite: boolean }]>(getHermaphrodite => {
-				const { hermaphrodite } = getHermaphrodite();
-				return {
-					render: () => `<div>${hermaphrodite}</div>`
-				};
-			});
-			return renderSnippet(hermaphroditeSnippet, {
-				hermaphrodite: row.original.hermaphrodite
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'age',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'age',
-				column
+	}),
+	columnHelper.accessor('age', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Age'
 			});
 		},
-		cell: ({ row }) => {
-			const ageSnippet = createRawSnippet<[{ age: string | undefined }]>(getAge => {
-				const { age } = getAge();
-				return {
-					render: () => `<div>${age ?? ''}</div>`
-				};
-			});
-			return renderSnippet(ageSnippet, {
-				age: row.original.age
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'size',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Size',
-				column
+	}),
+	columnHelper.accessor('size', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Size'
 			});
 		},
-		cell: ({ row }) => {
-			const sizeSnippet = createRawSnippet<[{ size: string | undefined }]>(getSize => {
-				const { size } = getSize();
-				return {
-					render: () => `<div>${size ?? ''}</div>`
-				};
-			});
-			return renderSnippet(sizeSnippet, {
-				size: row.original.size
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'status',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Status',
-				column
+	}),
+	columnHelper.accessor('status', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Status'
 			});
 		},
-		cell: ({ row }) => {
-			const statusSnippet = createRawSnippet<[{ status: string | undefined }]>(getStatus => {
-				const { status } = getStatus();
-				return {
-					render: () => `<div>${status ?? ''}</div>`
-				};
-			});
-			return renderSnippet(statusSnippet, {
-				status: row.original.status
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'description',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Description',
-				column
+	}),
+	columnHelper.accessor('description', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Description'
 			});
 		},
-		cell: ({ row }) => {
-			const descriptionSnippet = createRawSnippet<[{ description: string | undefined }]>(getDescription => {
-				const { description } = getDescription();
-				return {
-					render: () => `<div>${description ?? ''}</div>`
-				};
-			});
-			return renderSnippet(descriptionSnippet, {
-				description: row.original.description
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'adoption_id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Adoption ID',
-				column
+	}),
+	columnHelper.accessor('adoption_id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Adoption ID'
 			});
 		},
-		cell: ({ row }) => {
-			const sizeSnippet = createRawSnippet<[{ adoptionId: number | undefined }]>(getAdoptionId => {
-				const { adoptionId } = getAdoptionId();
-				return {
-					render: () => `<div>${adoptionId ?? ''}</div>`
-				};
-			});
-			return renderSnippet(sizeSnippet, {
-				adoptionId: row.original.adoption_id
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'created_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Create time',
-				column
+	}),
+	columnHelper.accessor('created_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Create time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const createdAtSnippet = createRawSnippet<[{ createdAt: string }]>(getCreatedAt => {
-				const { createdAt } = getCreatedAt();
-				return {
-					render: () => `<div>${fmt.format(new Date(createdAt))}</div>`
-				};
-			});
-			return renderSnippet(createdAtSnippet, {
-				createdAt: row.original.created_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
-		accessorKey: 'updated_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Animal'], unknown>, {
-				title: 'Update time',
-				column
+	}),
+	columnHelper.accessor('updated_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Update time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const updatedAtSnippet = createRawSnippet<[{ updatedAt: string }]>(getUpdatedAt => {
-				const { updatedAt } = getUpdatedAt();
-				return {
-					render: () => `<div>${fmt.format(new Date(updatedAt))}</div>`
-				};
-			});
-			return renderSnippet(updatedAtSnippet, {
-				updatedAt: row.original.updated_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
+	}),
+	columnHelper.display({
 		id: 'actions',
-		cell: ({ row }) => renderComponent(DataTableRowActions<components['schemas']['Animal']>, { row })
-	}
-];
+		cell: () => renderComponent(DataTableRowActions),
+		enableSorting: false,
+		enableHiding: false,
+		enableResizing: false,
+		maxSize: 40
+	})
+]);

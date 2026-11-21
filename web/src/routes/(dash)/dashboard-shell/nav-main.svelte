@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type NavItem } from './nav-items';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import * as Collapsible from '#lib/components/ui/collapsible/index.js';
 	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 
 	let { items }: { items: NavItem[] } = $props();

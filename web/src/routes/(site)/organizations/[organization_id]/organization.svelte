@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { type components } from '$lib/gen/fluffly_openapi';
+	import { type components } from '#lib/gen/fluffly_openapi.ts';
 	import type { PageProps } from './$types';
 	import useEmblaCarousel from 'embla-carousel-svelte';
 	import { type EmblaCarouselType } from 'embla-carousel';
-	import { capitalize, getErrorFallbackOrganizationImage } from '$lib/utils';
+	import { capitalize, getErrorFallbackOrganizationImage } from '#lib/utils.ts';
 	import { onDestroy } from 'svelte';
 	import IconMapPin from '@lucide/svelte/icons/map-pin';
 	import IconMail from '@lucide/svelte/icons/mail';
 	import IconPhone from '@lucide/svelte/icons/phone';
 	import IconClock from '@lucide/svelte/icons/clock';
 	import { MapLibre, DefaultMarker, Popup } from 'svelte-maplibre';
-	import * as Item from '$lib/components/ui/item/index.js';
+	import * as Item from '#lib/components/ui/item/index.js';
 
 	let { data }: PageProps = $props();
 

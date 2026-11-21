@@ -2,9 +2,9 @@
 	import { type UiNode } from '@ory/client-fetch';
 	import type { PageProps } from './$types';
 	import { toast } from 'svelte-sonner';
-	import { Switch } from '$lib/components/ui/switch/index.js';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
+	import { Switch } from '#lib/components/ui/switch/index.js';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
 
 	let { data, socialsAction }: PageProps & { socialsAction?: 'link' | 'unlink' } = $props();
 

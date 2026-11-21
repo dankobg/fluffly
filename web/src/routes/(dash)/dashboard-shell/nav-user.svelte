@@ -3,11 +3,11 @@
 	import IconChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 	import IconLogout from '@lucide/svelte/icons/log-out';
 	import IconDashboard from '@lucide/svelte/icons/layout-dashboard';
-	import * as Avatar from '$lib/components/ui/avatar/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { User } from '$lib/kratos/service';
-	import { getInitials } from '$lib/utils';
+	import * as Avatar from '#lib/components/ui/avatar/index.js';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import type { User } from '#lib/kratos/service.ts';
+	import { getInitials } from '#lib/utils.ts';
 
 	let { logoutUrl, user }: { logoutUrl?: string; user: User } = $props();
 

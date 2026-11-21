@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import AnimalCard from '$lib/components/animal-card/animal-card.svelte';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Pagination from '#lib/components/ui/pagination/index.js';
+	import AnimalCard from '#lib/components/animal-card/animal-card.svelte';
 	import { page } from '$app/state';
 	import { goto, invalidate } from '$app/navigation';
 
@@ -29,7 +29,7 @@
 	const selectedPageSizeText = $derived(pageSizes.find(x => x === pageSize) ?? 'Page size');
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto('/dashboard/animals/posted' + params.size ? `?${params}` : '', { keepFocus: true });
+		goto('/dashboard/animals/posted' + params.size ? `?${params}` : '', { reset: false });
 	}
 </script>
 
@@ -58,7 +58,7 @@
 			bind:value={
 				() => String(pageSize),
 				v => {
-					const sp = new URLSearchParams(page.url.searchParams);
+					const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 					sp.set('page_size', v);
 					gotoWithFilters(sp);
 				}
@@ -91,7 +91,7 @@
 				<Pagination.Item>
 					<Pagination.Previous
 						onclick={() => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('page', String(currentPage - 1));
 							gotoWithFilters(sp);
 						}}
@@ -108,7 +108,7 @@
 								page={pageItem}
 								isActive={currentPage === pageItem.value}
 								onclick={() => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.set('page', String(pageItem.value));
 									gotoWithFilters(sp);
 								}}
@@ -124,7 +124,7 @@
 				<Pagination.Item>
 					<Pagination.Next
 						onclick={() => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('page', String(currentPage + 1));
 							gotoWithFilters(sp);
 						}}

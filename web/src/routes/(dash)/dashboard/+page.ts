@@ -1,6 +1,6 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { fluffly } from '$lib/fluffly/client';
+import { fluffly } from '#lib/fluffly/client.ts';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, depends, parent }) => {

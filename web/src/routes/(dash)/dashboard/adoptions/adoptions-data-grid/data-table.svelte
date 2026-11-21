@@ -1,163 +1,156 @@
-<script lang="ts" module>
-	type TData = unknown;
-	type TValue = unknown;
-</script>
-
-<script lang="ts" generics="TData, TValue">
+<script lang="ts">
 	import {
+		createTableState,
 		type ColumnDef,
 		type ColumnFiltersState,
+		type ColumnVisibilityState,
 		type PaginationState,
 		type RowSelectionState,
-		type SortingState,
-		type VisibilityState,
-		getCoreRowModel,
-		getFacetedRowModel,
-		getFacetedUniqueValues,
-		getFilteredRowModel,
-		getPaginationRowModel,
-		getSortedRowModel
-	} from '@tanstack/table-core';
+		type SortingState
+	} from '@tanstack/svelte-table';
 	import DataTableToolbar from './data-table-toolbar.svelte';
-	import DataTablePagination from '$lib/components/data-grid-shared/data-table-pagination.svelte';
-	import { createSvelteTable } from '$lib/components/ui/data-table/data-table.svelte';
-	import FlexRender from '$lib/components/ui/data-table/flex-render.svelte';
-	import * as Table from '$lib/components/ui/table/index';
-	import type { components } from '$lib/gen/fluffly_openapi';
+	import * as Table from '#lib/components/ui/table/index.ts';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { createAppTable, type AppFeatures } from '#lib/components/data-grid-shared/app-table.ts';
+	import { cn } from '#lib/utils.ts';
+	import { getCommonPinningStyles } from '#lib/components/data-grid-shared/common-pinning-styles.ts';
 
 	let {
 		columns,
 		data,
 		meta
-	}: { columns: ColumnDef<TData, TValue>[]; data: TData[]; meta: components['schemas']['PaginationMeta'] } = $props();
+	}: {
+		columns: ColumnDef<AppFeatures, components['schemas']['Adoption']>[];
+		data: components['schemas']['Adoption'][];
+		meta: components['schemas']['PaginationMeta'];
+	} = $props();
 
-	let rowSelection = $state<RowSelectionState>({});
-	let columnVisibility = $state<VisibilityState>({});
-	let columnFilters = $state<ColumnFiltersState>([]);
-	let sorting = $state<SortingState>([]);
-	let pagination = $state<PaginationState>({ pageIndex: meta.page - 1, pageSize: meta.page_size });
+	const [rowSelection, setRowSelection] = createTableState<RowSelectionState>({});
+	const [columnVisibility, setColumnVisibility] = createTableState<ColumnVisibilityState>({});
+	const [columnFilters, setColumnFilters] = createTableState<ColumnFiltersState>([]);
+	const [sorting, setSorting] = createTableState<SortingState>([]);
+	const [pagination, setPagination] = createTableState<PaginationState>(
+		(() => ({
+			pageIndex: meta.page - 1,
+			pageSize: meta.page_size
+		}))()
+	);
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto(page.url.pathname + params.size ? `?${params}` : '', { keepFocus: true });
+		goto(page.url.pathname + params.size ? `?${params}` : '', { reset: false });
 	}
 
-	const table = createSvelteTable({
+	const table = createAppTable({
 		get data() {
 			return data;
+		},
+		get columns() {
+			return columns;
+		},
+		initialState: {
+			columnPinning: { start: ['select'], end: ['actions'] }
 		},
 		get rowCount() {
 			return meta.total;
 		},
-		manualPagination: true,
-		manualFiltering: true,
 		state: {
 			get sorting() {
-				return sorting;
+				return sorting();
 			},
 			get columnVisibility() {
-				return columnVisibility;
+				return columnVisibility();
 			},
 			get rowSelection() {
-				return rowSelection;
+				return rowSelection();
 			},
 			get columnFilters() {
-				return columnFilters;
+				return columnFilters();
 			},
 			get pagination() {
-				return pagination;
+				return pagination();
 			}
 		},
-		columns,
-		enableRowSelection: true,
-		onRowSelectionChange: updater => {
-			if (typeof updater === 'function') {
-				rowSelection = updater(rowSelection);
-			} else {
-				rowSelection = updater;
-			}
-		},
-		onSortingChange: updater => {
-			if (typeof updater === 'function') {
-				sorting = updater(sorting);
-			} else {
-				sorting = updater;
-			}
-		},
-		onColumnFiltersChange: updater => {
-			if (typeof updater === 'function') {
-				columnFilters = updater(columnFilters);
-			} else {
-				columnFilters = updater;
-			}
-		},
-		onColumnVisibilityChange: updater => {
-			if (typeof updater === 'function') {
-				columnVisibility = updater(columnVisibility);
-			} else {
-				columnVisibility = updater;
-			}
-		},
+		onSortingChange: setSorting,
+		onColumnVisibilityChange: setColumnVisibility,
+		onRowSelectionChange: setRowSelection,
+		onColumnFiltersChange: setColumnFilters,
 		onPaginationChange: updater => {
-			if (typeof updater === 'function') {
-				pagination = updater(pagination);
-			} else {
-				pagination = updater;
-			}
-			const sp = new URLSearchParams(page.url.searchParams);
-			sp.set('page', `${pagination.pageIndex + 1}`);
-			sp.set('page_size', `${pagination.pageSize}`);
+			const p: PaginationState = typeof updater === 'function' ? updater(pagination()) : updater;
+			setPagination(p);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
+			sp.set('page', String(p.pageIndex + 1));
+			sp.set('page_size', String(p.pageSize));
 			gotoWithFilters(sp);
 		},
-		getCoreRowModel: getCoreRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getFacetedRowModel: getFacetedRowModel(),
-		getFacetedUniqueValues: getFacetedUniqueValues()
+		manualPagination: true,
+		manualFiltering: true
 	});
-
-	function getStickyColumnClasses(id: string): string {
-		if (id === 'actions') return `sticky right-0`;
-		if (id === 'select') return `sticky left-0`;
-		return '';
-	}
 </script>
 
-<div class="space-y-4">
-	<DataTableToolbar {table} />
-	<div class="rounded-md border">
-		<Table.Root>
-			<Table.Header>
-				{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-					<Table.Row class="custom-row">
-						{#each headerGroup.headers as header (header.id)}
-							<Table.Head colspan={header.colSpan} class={getStickyColumnClasses(header.column.id)}>
-								{#if !header.isPlaceholder}
-									<FlexRender content={header.column.columnDef.header} context={header.getContext()} />
-								{/if}
-							</Table.Head>
-						{/each}
-					</Table.Row>
-				{/each}
-			</Table.Header>
-			<Table.Body>
-				{#each table.getRowModel().rows as row (row.id)}
-					<Table.Row data-state={row.getIsSelected() && 'selected'} class="custom-row">
-						{#each row.getVisibleCells() as cell (cell.id)}
-							<Table.Cell class={getStickyColumnClasses(cell.column.id)}>
-								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-							</Table.Cell>
-						{/each}
-					</Table.Row>
-				{:else}
-					<Table.Row>
-						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
-					</Table.Row>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+<table.AppTable>
+	<div class="space-y-4">
+		<DataTableToolbar />
+		<div class="rounded-md border">
+			<Table.Root>
+				<Table.Header>
+					{#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+						<Table.Row>
+							{#each headerGroup.headers.filter(header => header.column.getIsVisible()) as header (header.id)}
+								<table.AppHeader {header}>
+									{#snippet children(h)}
+										<Table.Head
+											colspan={h.colSpan}
+											class={cn('relative', {
+												'border-r': h.id !== 'actions',
+												'text-center [&>[role=checkbox]]:mx-auto': h.column.id === 'select'
+											})}
+											style={`flex-grow: ${h.getSize()}; width: ${h.getSize()}px; ${getCommonPinningStyles(h.column)}`}
+										>
+											{#if !h.isPlaceholder}
+												<h.FlexRender header={h} />
+											{/if}
+											<h.ResizeHandle />
+										</Table.Head>
+									{/snippet}
+								</table.AppHeader>
+							{/each}
+						</Table.Row>
+					{/each}
+				</Table.Header>
+				<Table.Body>
+					{#each table.getRowModel().rows as row (row.id)}
+						<Table.Row data-state={row.getIsSelected() ? 'selected' : undefined} aria-selected={row.getIsSelected()}>
+							{#each row.getVisibleCells() as cell (cell.id)}
+								<table.AppCell {cell}>
+									{#snippet children(c)}
+										<Table.Cell
+											class={cn(
+												c.column.id === 'actions' ? '' : 'border-r',
+												c.column.id === 'select' && 'text-center [&>[role=checkbox]]:mx-auto'
+											)}
+											style={`flex-grow: ${c.column.getSize()}; width: ${c.column.getSize()}px; ${getCommonPinningStyles(c.column, row.getIsSelected())}`}
+										>
+											<!-- {#if c.getIsGrouped()}
+												<c.GroupedCell />
+											{:else}
+												<c.FlexRender cell={c} />
+											{/if} -->
+											<c.FlexRender cell={c} />
+										</Table.Cell>
+									{/snippet}
+								</table.AppCell>
+							{/each}
+						</Table.Row>
+					{:else}
+						<Table.Row>
+							<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+						</Table.Row>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</div>
+		<table.DataTablePagination />
 	</div>
-	<DataTablePagination {table} />
-</div>
+</table.AppTable>

@@ -1,14 +1,10 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
+<script lang="ts">
+	import Settings2Icon from '@lucide/svelte/icons/settings-2';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.ts';
+	import { buttonVariants } from '#lib/components/ui/button/index.ts';
+	import { useTableContext } from './app-table';
 
-<script lang="ts" generics="TData">
-	import IconSettings2 from '@lucide/svelte/icons/settings-2';
-	import type { Table } from '@tanstack/table-core';
-	import { buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-
-	let { table }: { table: Table<TData> } = $props();
+	const table = useTableContext();
 </script>
 
 <DropdownMenu.Root>
@@ -16,10 +12,10 @@
 		class={buttonVariants({
 			variant: 'outline',
 			size: 'sm',
-			class: 'ml-auto hidden h-8 lg:flex'
+			class: 'ms-auto hidden h-8 lg:flex'
 		})}
 	>
-		<IconSettings2 />
+		<Settings2Icon />
 		View
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content>
@@ -28,7 +24,7 @@
 			<DropdownMenu.Separator />
 			{#each table
 				.getAllColumns()
-				.filter(col => typeof col.accessorFn !== 'undefined' && col.getCanHide()) as column (column)}
+				.filter(col => typeof col.accessorFn !== 'undefined' && col.getCanHide()) as column (column.id)}
 				<DropdownMenu.CheckboxItem
 					bind:checked={() => column.getIsVisible(), v => column.toggleVisibility(!!v)}
 					class="capitalize"

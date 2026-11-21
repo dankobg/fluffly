@@ -1,290 +1,142 @@
-import type { ColumnDef } from '@tanstack/table-core';
-import { renderComponent, renderSnippet } from '$lib/components/ui/data-table/index';
-import DataTableCheckbox from '$lib/components/data-grid-shared/data-table-checkbox.svelte';
-import DataTableCellId from '$lib/components/data-grid-shared/data-table-cell-id.svelte';
-import DataTableColumnHeader from '$lib/components/data-grid-shared/data-table-column-header.svelte';
 import DataTableRowActions from './data-table-row-actions.svelte';
-import { createRawSnippet } from 'svelte';
-import type { components } from '$lib/gen/fluffly_openapi';
+import type { components } from '#lib/gen/fluffly_openapi.ts';
 import DataTableCellStatus from './data-table-cell-status.svelte';
+import { createAppColumnHelper } from '#lib/components/data-grid-shared/app-table.ts';
+import { renderComponent } from '@tanstack/svelte-table';
 
-export const columns: ColumnDef<components['schemas']['Adoption']>[] = [
-	{
+const columnHelper = createAppColumnHelper<components['schemas']['Adoption']>();
+
+export const columns = columnHelper.columns([
+	columnHelper.display({
 		id: 'select',
-		header: ({ table }) =>
-			renderComponent(DataTableCheckbox, {
-				checked: table.getIsAllPageRowsSelected(),
-				onCheckedChange: value => table.toggleAllPageRowsSelected(!!value),
-				'aria-label': 'Select all',
-				class: 'translate-y-[2px]'
-			}),
-		cell: ({ row }) =>
-			renderComponent(DataTableCheckbox, {
-				checked: row.getIsSelected(),
-				onCheckedChange: value => row.toggleSelected(!!value),
-				'aria-label': 'Select row',
-				class: 'translate-y-[2px]'
-			}),
+		header: ({ header }) => renderComponent(header.SelectHeader),
+		cell: ({ cell }) => renderComponent(cell.SelectCell),
 		enableSorting: false,
-		enableHiding: false
-	},
-	{
-		accessorKey: 'id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				column,
-				title: 'Id'
+		enableHiding: false,
+		enableResizing: false,
+		maxSize: 40
+	}),
+	columnHelper.accessor('id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'ID'
 			});
 		},
-		cell: ({ row }) => {
-			return renderComponent(DataTableCellId, {
-				value: `${row.original.id}`,
+		cell: ({ cell, row }) => {
+			return renderComponent(cell.DataTableCellId, {
+				value: row.original.id,
 				href: `/dashboard/adoptions/${row.original.id}`
 			});
-		},
-		enableSorting: false,
-		enableHiding: false
-	},
-	{
-		accessorKey: 'animal_id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Animal ID',
-				column
+		}
+	}),
+	columnHelper.accessor('animal_id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Animal ID'
 			});
 		},
-		cell: ({ row }) => {
-			const animalIdSnippet = createRawSnippet<[{ animalId: number }]>(getAnimalId => {
-				const { animalId } = getAnimalId();
-				return {
-					render: () => `<div>${animalId}</div>`
-				};
-			});
-			return renderSnippet(animalIdSnippet, {
-				animalId: row.original.animal_id
-			});
-		},
-		enableSorting: false
-	},
-	{
-		accessorKey: 'user_id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'User ID',
-				column
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
+		}
+	}),
+	columnHelper.accessor('user_id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'User ID'
 			});
 		},
-		cell: ({ row }) => {
-			const userIdSnippet = createRawSnippet<[{ userId: string }]>(getUserId => {
-				const { userId } = getUserId();
-				return {
-					render: () => `<div>${userId}</div>`
-				};
-			});
-			return renderSnippet(userIdSnippet, {
-				userId: row.original.user_id
-			});
-		},
-		enableSorting: false
-	},
-	{
-		accessorKey: 'organization_id',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Organization ID',
-				column
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
+		}
+	}),
+	columnHelper.accessor('organization_id', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Organization ID'
 			});
 		},
-		cell: ({ row }) => {
-			const organizationIdSnippet = createRawSnippet<[{ organizationId: number | undefined }]>(getOrganizationId => {
-				const { organizationId } = getOrganizationId();
-				return {
-					render: () => `<div>${organizationId ?? ''}</div>`
-				};
-			});
-			return renderSnippet(organizationIdSnippet, {
-				organizationId: row.original.organization_id
-			});
-		},
-		enableSorting: false
-	},
-	{
-		accessorKey: 'status',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Status',
-				column
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
+		}
+	}),
+	columnHelper.accessor('status', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Status'
 			});
 		},
 		cell: ({ row }) => {
 			return renderComponent(DataTableCellStatus, {
 				value: row.original.status
 			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
 		}
-	},
-	{
-		accessorKey: 'note',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Note',
-				column
+	}),
+	columnHelper.accessor('note', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Note'
 			});
 		},
-		cell: ({ row }) => {
-			const noteSnippet = createRawSnippet<[{ note: string | undefined }]>(getNote => {
-				const { note } = getNote();
-				return {
-					render: () => `<div>${note ?? ''}</div>`
-				};
-			});
-			return renderSnippet(noteSnippet, {
-				note: row.original.note
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'is_permanent',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Permanent',
-				column
+	}),
+	columnHelper.accessor('is_permanent', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Permanent'
 			});
 		},
-		cell: ({ row }) => {
-			const isPermanentSnippet = createRawSnippet<[{ is_permanent: boolean }]>(getIsPermanent => {
-				const { is_permanent } = getIsPermanent();
-				return {
-					render: () => `<div>${is_permanent}</div>`
-				};
-			});
-			return renderSnippet(isPermanentSnippet, {
-				is_permanent: row.original.is_permanent
-			});
-		},
-		filterFn: (row, id, value) => {
-			return (row.getValue(id) as string).includes(value);
+		cell: ({ cell }) => {
+			return renderComponent(cell.TextCell);
 		}
-	},
-	{
-		accessorKey: 'adopted_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Adoption time',
-				column
+	}),
+	columnHelper.accessor('adopted_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Adopted time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const adoptedAtSnippet = createRawSnippet<[{ adoptedAt: string | undefined }]>(getAdoptedAt => {
-				const { adoptedAt } = getAdoptedAt();
-				return {
-					render: () => `<div>${adoptedAt ? fmt.format(new Date(adoptedAt)) : ''}</div>`
-				};
-			});
-			return renderSnippet(adoptedAtSnippet, {
-				adoptedAt: row.original.adopted_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
-		accessorKey: 'returned_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Returned time',
-				column
+	}),
+	columnHelper.accessor('returned_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Returned time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const returnedAtSnippet = createRawSnippet<[{ returnedAt: string | undefined }]>(getReturnedAt => {
-				const { returnedAt } = getReturnedAt();
-				return {
-					render: () => `<div>${returnedAt ? fmt.format(new Date(returnedAt)) : ''}</div>`
-				};
-			});
-			return renderSnippet(returnedAtSnippet, {
-				returnedAt: row.original.returned_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
-		accessorKey: 'created_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Create time',
-				column
+	}),
+	columnHelper.accessor('created_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Create time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const createdAtSnippet = createRawSnippet<[{ createdAt: string }]>(getCreatedAt => {
-				const { createdAt } = getCreatedAt();
-				return {
-					render: () => `<div>${fmt.format(new Date(createdAt))}</div>`
-				};
-			});
-			return renderSnippet(createdAtSnippet, {
-				createdAt: row.original.created_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
-		accessorKey: 'updated_at',
-		header: ({ column }) => {
-			return renderComponent(DataTableColumnHeader<components['schemas']['Adoption'], unknown>, {
-				title: 'Update time',
-				column
+	}),
+	columnHelper.accessor('updated_at', {
+		header: ({ header }) => {
+			return renderComponent(header.DataTableColumnHeader, {
+				title: 'Update time'
 			});
 		},
-		cell: ({ row }) => {
-			const fmt = new Intl.DateTimeFormat(undefined, {
-				dateStyle: 'short',
-				timeStyle: 'short',
-				hour12: false
-			});
-			const updatedAtSnippet = createRawSnippet<[{ updatedAt: string }]>(getUpdatedAt => {
-				const { updatedAt } = getUpdatedAt();
-				return {
-					render: () => `<div>${fmt.format(new Date(updatedAt))}</div>`
-				};
-			});
-			return renderSnippet(updatedAtSnippet, {
-				updatedAt: row.original.updated_at
-			});
-		},
-		filterFn: (row, id, value) => {
-			return value.includes(row.getValue(id));
+		cell: ({ cell }) => {
+			return renderComponent(cell.DateCell);
 		}
-	},
-	{
+	}),
+	columnHelper.display({
 		id: 'actions',
-		cell: ({ row }) => renderComponent(DataTableRowActions<components['schemas']['Adoption']>, { row })
-	}
-];
+		cell: () => renderComponent(DataTableRowActions),
+		enableSorting: false,
+		enableHiding: false,
+		enableResizing: false,
+		maxSize: 40
+	})
+]);

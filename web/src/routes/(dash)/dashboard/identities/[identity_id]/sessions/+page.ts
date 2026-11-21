@@ -1,9 +1,9 @@
-import { fluffly } from '$lib/fluffly/client';
+import { fluffly } from '#lib/fluffly/client.ts';
 import type { PageLoad } from './$types';
-import type { operations } from '$lib/gen/fluffly_openapi';
-import { browser } from '$app/environment';
+import type { operations } from '#lib/gen/fluffly_openapi.ts';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { config } from '$lib/kratos/config';
+import { config } from '#lib/kratos/config.ts';
 
 export const load: PageLoad = async ({ fetch, url, params, depends }) => {
 	depends(`data:dashboard-identities-${params.identity_id}-sessions`);

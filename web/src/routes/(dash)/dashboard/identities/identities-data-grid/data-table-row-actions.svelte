@@ -1,25 +1,23 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
-
-<script lang="ts" generics="TData">
+<script lang="ts">
 	import IconEllipsis from '@lucide/svelte/icons/ellipsis';
 	import IconEye from '@lucide/svelte/icons/eye';
 	import IconCopy from '@lucide/svelte/icons/copy';
 	import IconPen from '@lucide/svelte/icons/pen';
 	import IconFingerprint from '@lucide/svelte/icons/fingerprint';
 	import IconTrash2 from '@lucide/svelte/icons/trash-2';
-	import type { Row } from '@tanstack/table-core';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import type { Row } from '@tanstack/svelte-table';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import { toast } from 'svelte-sonner';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import { fluffly } from '$lib/fluffly/client';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { invalidate } from '$app/navigation';
-	import type { components } from '$lib/gen/fluffly_openapi';
-	import type { CustomTraits } from '$lib/kratos/service';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
+	import type { CustomTraits } from '#lib/kratos/service.ts';
+	import { useCellContext } from '#lib/components/data-grid-shared/app-table.ts';
 
-	let { row }: { row: Row<TData> } = $props();
+	const cell = useCellContext();
+	const row = $derived(cell.row);
 
 	const hasId = $derived(
 		typeof row.original === 'object' && !!row.original && 'id' in row.original && typeof row.original.id === 'string'
@@ -27,11 +25,13 @@
 
 	function copyIdToClipboard() {
 		try {
-			navigator.clipboard.writeText((row.original as TData & { id: string }).id).then(() => {
+			navigator.clipboard.writeText(row.original.id).then(() => {
 				toast.success('id coppied');
 			});
 		} catch (error) {
-			if (error instanceof Error) toast.error('failed to copy id: ' + error.message);
+			if (Error.isError(error)) {
+				toast.error('failed to copy id: ' + error.message);
+			}
 		}
 	}
 

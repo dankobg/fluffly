@@ -4,20 +4,20 @@
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import * as Form from '$lib/components/ui/form';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import { fluffly } from '$lib/fluffly/client';
-	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-	import PasswordInput from '$lib/components/password-input/password-input.svelte';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import Checkbox from '#lib/components/ui/checkbox/checkbox.svelte';
+	import PasswordInput from '#lib/components/password-input/password-input.svelte';
 	import {
 		CreateIdentityBodyState,
 		IdentityState,
 		VerifiableIdentityAddressVia,
 		type components
-	} from '$lib/gen/fluffly_openapi';
-	import type { CustomTraits } from '$lib/kratos/service';
+	} from '#lib/gen/fluffly_openapi.ts';
+	import type { CustomTraits } from '#lib/kratos/service.ts';
 
 	let { data }: PageProps = $props();
 

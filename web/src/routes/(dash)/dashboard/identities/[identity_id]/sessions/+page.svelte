@@ -2,7 +2,7 @@
 	import DataTable from './identity-sessions-data-grid/data-table.svelte';
 	import { columns } from './identity-sessions-data-grid/columns';
 	import type { PageProps } from './$types';
-	import type { CustomTraits } from '$lib/kratos/service';
+	import type { CustomTraits } from '#lib/kratos/service.ts';
 
 	let { data }: PageProps = $props();
 </script>

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index';
-	import { CourierMessageTemplateType } from '$lib/gen/fluffly_openapi';
+	import { Badge } from '#lib/components/ui/badge/index.ts';
+	import { CourierMessageTemplateType } from '#lib/gen/fluffly_openapi.ts';
 	import { templateTypeIcons } from './data';
 
 	let { value }: { value?: string } = $props();

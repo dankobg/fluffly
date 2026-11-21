@@ -1,13 +1,13 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { fluffly } from '$lib/fluffly/client';
-import { PathsOrganizationsIdGetParametersQueryEmbed } from '$lib/gen/fluffly_openapi';
+import { fluffly } from '#lib/fluffly/client.ts';
+import { PathsOrganizationsIdGetParametersQueryEmbed } from '#lib/gen/fluffly_openapi.ts';
 import type { PageLoad } from './$types';
 
 export const prerender = false;
 
 export const load: PageLoad = async ({ fetch, depends, params }) => {
-  depends(`data:organization:${params.organization_id}`);
+	depends(`data:organization:${params.organization_id}`);
 
 	try {
 		const organizationResult = await fluffly.GET('/organizations/{id}', {

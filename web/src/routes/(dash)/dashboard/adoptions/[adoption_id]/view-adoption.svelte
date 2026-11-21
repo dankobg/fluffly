@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import IconCircleCheck from '@lucide/svelte/icons/circle-check';
 	import IconCircleX from '@lucide/svelte/icons/circle-x';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconX from '@lucide/svelte/icons/x';
 	import IconClock from '@lucide/svelte/icons/clock';
-	import { fluffly } from '$lib/fluffly/client';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import { invalidate } from '$app/navigation';
-	import { AdoptionStatus, OrganizationStatus } from '$lib/gen/fluffly_openapi';
+	import { AdoptionStatus, OrganizationStatus } from '#lib/gen/fluffly_openapi.ts';
 
 	let { data }: PageProps = $props();
 	const fmt = new Intl.DateTimeFormat(undefined, {

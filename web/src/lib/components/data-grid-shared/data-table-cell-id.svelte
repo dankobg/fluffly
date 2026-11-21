@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconEye from '@lucide/svelte/icons/eye';
 	import Button from '../ui/button/button.svelte';
-	let { value, href }: { value?: string; href?: string } = $props();
+	let { value, href }: { value?: string | number; href?: string } = $props();
 </script>
 
 <div class="flex w-[320px] items-center gap-2">

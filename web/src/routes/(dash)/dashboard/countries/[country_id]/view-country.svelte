@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { fluffly } from '$lib/fluffly/client';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
 	import type { PageProps } from './$types';
 	import IconTrash from '@lucide/svelte/icons/trash';

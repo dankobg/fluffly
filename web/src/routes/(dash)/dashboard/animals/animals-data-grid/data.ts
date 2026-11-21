@@ -3,7 +3,7 @@ import IconHourglass from '@lucide/svelte/icons/hourglass';
 import IconClock from '@lucide/svelte/icons/clock';
 import IconCircleX from '@lucide/svelte/icons/circle-x';
 import IconHandHeart from '@lucide/svelte/icons/hand-heart';
-import { AnimalStatus } from '$lib/gen/fluffly_openapi';
+import { AnimalStatus } from '#lib/gen/fluffly_openapi.ts';
 
 export const statusIcons = new Map([
 	[AnimalStatus.pending, IconClock],

@@ -10,8 +10,8 @@
 		isGenericErrorResponse
 	} from '@ory/client-fetch';
 	import { goto } from '$app/navigation';
-	import { config } from '$lib/kratos/config';
-	import { kratos } from '$lib/kratos/client';
+	import { config } from '#lib/kratos/config.ts';
+	import { kratos } from '#lib/kratos/client.ts';
 	import { superForm, type ValidationErrors } from 'sveltekit-superforms/client';
 	import set from 'just-safe-set';
 	import { valibot } from 'sveltekit-superforms/adapters';
@@ -22,15 +22,15 @@
 		isErrorIdSelfServiceFlowExpired,
 		isErrorIdSessionAlreadyAvailable,
 		providers
-	} from '$lib/kratos/helpers';
+	} from '#lib/kratos/helpers.ts';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Tooltip from '$lib/components/ui/tooltip';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
-	import * as Form from '$lib/components/ui/form';
-	import { browser } from '$app/environment';
-	import PasswordInput from '$lib/components/password-input/password-input.svelte';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.ts';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { browser } from '$app/env';
+	import PasswordInput from '#lib/components/password-input/password-input.svelte';
 
 	let {
 		data,
@@ -278,6 +278,7 @@
 								data-provider={provider.name}
 							>
 								<input type="hidden" name="csrf_token" value={data.csrf} readonly required />
+
 								<input type="hidden" name="provider" value={provider.name} readonly required />
 
 								<Tooltip.Provider>

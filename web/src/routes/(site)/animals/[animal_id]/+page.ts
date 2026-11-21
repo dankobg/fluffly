@@ -1,7 +1,7 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { fluffly } from '$lib/fluffly/client';
-import { PathsAnimalsIdGetParametersQueryEmbed } from '$lib/gen/fluffly_openapi';
+import { fluffly } from '#lib/fluffly/client.ts';
+import { PathsAnimalsIdGetParametersQueryEmbed } from '#lib/gen/fluffly_openapi.ts';
 import type { PageLoad } from './$types';
 
 export const prerender = false;

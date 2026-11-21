@@ -11,7 +11,7 @@ import IconShieldQuestion from '@lucide/svelte/icons/shield-question';
 import IconShieldUser from '@lucide/svelte/icons/shield-user';
 import IconShieldX from '@lucide/svelte/icons/shield-x';
 import IconAsterisk from '@lucide/svelte/icons/asterisk';
-import { CourierMessageStatus, CourierMessageTemplateType, CourierMessageType } from '$lib/gen/fluffly_openapi';
+import { CourierMessageStatus, CourierMessageTemplateType, CourierMessageType } from '#lib/gen/fluffly_openapi.ts';
 
 export const statusIcons = new Map([
 	[CourierMessageStatus.abandoned, IconMailX],

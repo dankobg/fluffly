@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Checkbox } from '$lib/components/ui/checkbox/index';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.ts';
 	import type { Checkbox as CheckboxPrimitive, WithoutChildrenOrChild } from 'bits-ui';
 
 	let {

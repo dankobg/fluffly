@@ -1,9 +1,9 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { adoptionStatusValues } from '$lib/enum-values';
-import { fluffly } from '$lib/fluffly/client';
-import type { AdoptionStatus, operations } from '$lib/gen/fluffly_openapi';
-import { config } from '$lib/kratos/config';
+import { adoptionStatusValues } from '#lib/enum-values.ts';
+import { fluffly } from '#lib/fluffly/client.ts';
+import type { AdoptionStatus, operations } from '#lib/gen/fluffly_openapi.ts';
+import { config } from '#lib/kratos/config.ts';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {

@@ -3,9 +3,9 @@
 </script>
 
 <script lang="ts" generics="T = unknown">
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index';
+	import * as AlertDialog from '#lib/components/ui/alert-dialog/index.ts';
 	import { buttonVariants } from '../ui/button';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
 </script>
 
 <AlertDialog.Root bind:open={confirmation.open}>

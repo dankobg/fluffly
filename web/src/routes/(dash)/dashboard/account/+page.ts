@@ -7,17 +7,17 @@ import {
 	ResponseError,
 	type SettingsFlow
 } from '@ory/client-fetch';
-import { kratos } from '$lib/kratos/client';
+import { kratos } from '#lib/kratos/client.ts';
 import {
 	extractCSRFToken,
 	isErrorIdSecurityCsrfViolation,
 	isErrorIdSecurityIdentityMismatch,
 	isErrorIdSessionInactive
-} from '$lib/kratos/helpers';
-import { browser } from '$app/environment';
+} from '#lib/kratos/helpers.ts';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
-import { config } from '$lib/kratos/config';
+import { config } from '#lib/kratos/config.ts';
 
 export const load: PageLoad = (async ({ url, depends }) => {
 	depends('data:dashboard-account');

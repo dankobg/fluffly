@@ -1,30 +1,28 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
-
-<script lang="ts" generics="TData">
+<script lang="ts">
 	import IconX from '@lucide/svelte/icons/x';
-	import type { Table } from '@tanstack/table-core';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import DataTableFacetedFilter from '$lib/components/data-grid-shared/data-table-faceted-filter.svelte';
-	import DataTableViewOptions from '$lib/components/data-grid-shared/data-table-view-options.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import DataTableFacetedFilter from '#lib/components/data-grid-shared/data-table-faceted-filter.svelte';
+	import DataTableViewOptions from '#lib/components/data-grid-shared/data-table-view-options.svelte';
 	import { aals } from './data';
-	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-	import Label from '$lib/components/ui/label/label.svelte';
+	import Checkbox from '#lib/components/ui/checkbox/checkbox.svelte';
+	import Label from '#lib/components/ui/label/label.svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { expandSessions } from '../expandSessions.svelte';
-	import Input from '$lib/components/ui/input/input.svelte';
-	import { PathsSessionsGetParametersQueryExpand } from '$lib/gen/fluffly_openapi';
+	import { PathsSessionsGetParametersQueryExpand } from '#lib/gen/fluffly_openapi.ts';
+	import { useTableContext } from '#lib/components/data-grid-shared/app-table.ts';
+	import FilterInput from '#lib/components/data-grid-shared/filter-input.svelte';
 
-	let { table }: { table: Table<TData> } = $props();
+	const table = useTableContext();
 
-	const isFiltered = $derived(table.getState().columnFilters.length > 0);
+	const isFiltered = $derived(table.atoms.columnFilters.get().length > 0);
+	const emailCol = $derived(table.getColumn('email'));
+	const fullnameCol = $derived(table.getColumn('full_name'));
 	const aalCol = $derived(table.getColumn('authenticator_assurance_level'));
 	const expandOptions = Object.values(PathsSessionsGetParametersQueryExpand);
 
-	const searchParams = new SvelteURLSearchParams(page.url.searchParams);
+	const searchParams = new SvelteURLSearchParams(new URL(page.url.href).searchParams);
 
 	function onExpandCheckedChange(val: boolean, opt: PathsSessionsGetParametersQueryExpand) {
 		const all = searchParams.getAll('expand') as PathsSessionsGetParametersQueryExpand[];
@@ -80,28 +78,12 @@
 <div class="flex items-center justify-between">
 	<div class="flex flex-1 flex-wrap items-center space-x-2 gap-y-2">
 		{#if expandSessions.expanded.includes(PathsSessionsGetParametersQueryExpand.identity)}
-			<Input
-				placeholder="Filter by email..."
-				value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
-				oninput={e => {
-					table.getColumn('email')?.setFilterValue(e.currentTarget.value);
-				}}
-				onchange={e => {
-					table.getColumn('email')?.setFilterValue(e.currentTarget.value);
-				}}
-				class="h-8 w-[150px] lg:w-[250px]"
-			/>
-			<Input
-				placeholder="Filter by full name..."
-				value={(table.getColumn('full_name')?.getFilterValue() as string) ?? ''}
-				oninput={e => {
-					table.getColumn('full_name')?.setFilterValue(e.currentTarget.value);
-				}}
-				onchange={e => {
-					table.getColumn('full_name')?.setFilterValue(e.currentTarget.value);
-				}}
-				class="h-8 w-[150px] lg:w-[250px]"
-			/>
+			{#if emailCol}
+				<FilterInput column={emailCol} />
+			{/if}
+			{#if fullnameCol}
+				<FilterInput column={fullnameCol} title="full name" />
+			{/if}
 		{/if}
 
 		{#if aalCol}
@@ -115,5 +97,5 @@
 			</Button>
 		{/if}
 	</div>
-	<DataTableViewOptions {table} />
+	<DataTableViewOptions />
 </div>

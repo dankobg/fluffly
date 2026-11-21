@@ -1,6 +1,6 @@
-import { fluffly } from '$lib/fluffly/client';
+import { fluffly } from '#lib/fluffly/client.ts';
 import type { PageLoad } from './$types';
-import { PathsSessionsIdGetParametersQueryExpand, type operations } from '$lib/gen/fluffly_openapi';
+import { PathsSessionsIdGetParametersQueryExpand, type operations } from '#lib/gen/fluffly_openapi.ts';
 
 export const load: PageLoad = async ({ fetch, params, url, depends }) => {
 	depends(`data:dashboard-sessions-${params.session_id}`);

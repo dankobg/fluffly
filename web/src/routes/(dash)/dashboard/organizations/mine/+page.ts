@@ -1,7 +1,7 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { fluffly } from '$lib/fluffly/client';
-import { config } from '$lib/kratos/config';
+import { fluffly } from '#lib/fluffly/client.ts';
+import { config } from '#lib/kratos/config.ts';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, depends }) => {

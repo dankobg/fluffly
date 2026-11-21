@@ -9,25 +9,25 @@
 		ResponseError,
 		type UpdateSettingsFlowWithProfileMethod
 	} from '@ory/client-fetch';
-	import { goto, invalidateAll } from '$app/navigation';
-	import { kratos } from '$lib/kratos/client';
+	import { goto, refreshAll } from '$app/navigation';
+	import { kratos } from '#lib/kratos/client.ts';
 	import { superForm, type ValidationErrors } from 'sveltekit-superforms/client';
 	import set from 'just-safe-set';
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
-	import * as Form from '$lib/components/ui/form';
-	import { browser } from '$app/environment';
-	import { config } from '$lib/kratos/config';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { browser } from '$app/env';
+	import { config } from '#lib/kratos/config.ts';
 	import {
 		isErrorIdSecurityCsrfViolation,
 		isErrorIdSecurityIdentityMismatch,
 		isErrorIdSessionInactive,
 		isErrorIdSessionRefreshRequired
-	} from '$lib/kratos/helpers';
+	} from '#lib/kratos/helpers.ts';
 
 	let {
 		data,
@@ -94,7 +94,7 @@
 					});
 					data = { ...data, flow: settingsFlow, csrf: data?.csrf ?? '' };
 					toast.success('Account settings have been updated');
-					invalidateAll();
+					refreshAll();
 					if (settingsFlow.continue_with) {
 						for (const item of settingsFlow.continue_with) {
 							switch (item.action) {
@@ -103,10 +103,10 @@
 										goto(item?.flow?.url as string);
 									}
 									break;
-								// case 'redirect_browser_to':
-								// 	window.location.href = item.redirect_browser_to;
-								// 	break;
 							}
+							// case 'redirect_browser_to':
+							// 	window.location.href = item.redirect_browser_to;
+							// 	break;
 						}
 					}
 				} catch (error: unknown) {

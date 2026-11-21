@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Pagination from '#lib/components/ui/pagination/index.js';
 	import { page } from '$app/state';
 	import { goto, invalidate } from '$app/navigation';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconCircleX from '@lucide/svelte/icons/circle-x';
 	import IconTrash2 from '@lucide/svelte/icons/trash-2';
 	import IconSearch from '@lucide/svelte/icons/search';
-	import RemovableTag from '$lib/components/removable-tag/removable-tag.svelte';
-	import OrganizationCard from '$lib/components/organization-card/organization-card.svelte';
+	import RemovableTag from '#lib/components/removable-tag/removable-tag.svelte';
+	import OrganizationCard from '#lib/components/organization-card/organization-card.svelte';
 	import { useDebounce } from 'runed';
-	import * as InputGroup from '$lib/components/ui/input-group/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
 
 	let { data }: PageProps = $props();
 
@@ -37,14 +37,14 @@
 	const selectedPageSizeText = $derived(pageSizes.find(x => x === pageSize) ?? 'Page size');
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto('/organizations' + params.size ? `?${params}` : '', { keepFocus: true });
+		goto('/organizations' + params.size ? `?${params}` : '', { reset: false });
 	}
 
 	let name = $derived(page.url.searchParams.get('name') ?? undefined);
 
 	const debounceNameFilter = useDebounce(
 		() => {
-			const sp = new URLSearchParams(page.url.searchParams);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 			if (name) {
 				sp.set('name', name);
 			} else {
@@ -102,7 +102,7 @@
 					{#if ['string', 'number', 'boolean'].includes(typeof val)}
 						<RemovableTag
 							onClose={() => {
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								sp.delete(key, `${val}`);
 								gotoWithFilters(sp);
 							}}
@@ -131,7 +131,7 @@
 				bind:value={
 					() => String(pageSize),
 					v => {
-						const sp = new URLSearchParams(page.url.searchParams);
+						const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 						sp.set('page_size', v);
 						gotoWithFilters(sp);
 					}
@@ -164,7 +164,7 @@
 					<Pagination.Item>
 						<Pagination.Previous
 							onclick={() => {
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								sp.set('page', String(currentPage - 1));
 								gotoWithFilters(sp);
 							}}
@@ -181,7 +181,7 @@
 									page={pageItem}
 									isActive={currentPage === pageItem.value}
 									onclick={() => {
-										const sp = new URLSearchParams(page.url.searchParams);
+										const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 										sp.set('page', String(pageItem.value));
 										gotoWithFilters(sp);
 									}}
@@ -197,7 +197,7 @@
 					<Pagination.Item>
 						<Pagination.Next
 							onclick={() => {
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								sp.set('page', String(currentPage + 1));
 								gotoWithFilters(sp);
 							}}

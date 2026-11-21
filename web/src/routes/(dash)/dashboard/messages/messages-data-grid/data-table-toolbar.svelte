@@ -1,19 +1,16 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
-
-<script lang="ts" generics="TData">
+<script lang="ts">
 	import IconX from '@lucide/svelte/icons/x';
-	import type { Table } from '@tanstack/table-core';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { Input } from '$lib/components/ui/input/index';
-	import DataTableFacetedFilter from '$lib/components/data-grid-shared/data-table-faceted-filter.svelte';
-	import DataTableViewOptions from '$lib/components/data-grid-shared/data-table-view-options.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import DataTableFacetedFilter from '#lib/components/data-grid-shared/data-table-faceted-filter.svelte';
+	import DataTableViewOptions from '#lib/components/data-grid-shared/data-table-view-options.svelte';
 	import { statuses, templateTypes, types } from './data';
+	import { useTableContext } from '#lib/components/data-grid-shared/app-table.ts';
+	import FilterInput from '#lib/components/data-grid-shared/filter-input.svelte';
 
-	let { table }: { table: Table<TData> } = $props();
+	const table = useTableContext();
 
-	const isFiltered = $derived(table.getState().columnFilters.length > 0);
+	const isFiltered = $derived(table.atoms.columnFilters.get().length > 0);
+	const recipientCol = $derived(table.getColumn('recipient'));
 	const statusCol = $derived(table.getColumn('status'));
 	const typeCol = $derived(table.getColumn('type'));
 	const templateTypeCol = $derived(table.getColumn('template_type'));
@@ -21,17 +18,9 @@
 
 <div class="flex items-center justify-between">
 	<div class="flex flex-1 flex-wrap items-center space-x-2 gap-y-2">
-		<Input
-			placeholder="Filter by recipient..."
-			value={(table.getColumn('recipient')?.getFilterValue() as string) ?? ''}
-			oninput={e => {
-				table.getColumn('recipient')?.setFilterValue(e.currentTarget.value);
-			}}
-			onchange={e => {
-				table.getColumn('recipient')?.setFilterValue(e.currentTarget.value);
-			}}
-			class="h-8 w-[150px] lg:w-[250px]"
-		/>
+		{#if recipientCol}
+			<FilterInput column={recipientCol} />
+		{/if}
 
 		{#if statusCol}
 			<DataTableFacetedFilter column={statusCol} title="Status" options={statuses} />
@@ -50,5 +39,5 @@
 			</Button>
 		{/if}
 	</div>
-	<DataTableViewOptions {table} />
+	<DataTableViewOptions />
 </div>

@@ -9,26 +9,26 @@
 		FetchError,
 		RequiredError
 	} from '@ory/client-fetch';
-	import { kratos } from '$lib/kratos/client';
+	import { kratos } from '#lib/kratos/client.ts';
 	import { superForm, type ValidationErrors } from 'sveltekit-superforms/client';
 	import set from 'just-safe-set';
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
-	import * as Form from '$lib/components/ui/form';
-	import * as InputOTP from '$lib/components/ui/input-otp/index';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import * as InputOTP from '#lib/components/ui/input-otp/index.ts';
 	import { REGEXP_ONLY_DIGITS } from 'bits-ui';
 	import { goto } from '$app/navigation';
-	import { browser } from '$app/environment';
-	import { config } from '$lib/kratos/config';
+	import { browser } from '$app/env';
+	import { config } from '#lib/kratos/config.ts';
 	import {
 		isErrorIdSecurityCsrfViolation,
 		isErrorIdSecurityIdentityMismatch,
 		isErrorIdSelfServiceFlowExpired,
 		isErrorIdSessionAlreadyAvailable
-	} from '$lib/kratos/helpers';
+	} from '#lib/kratos/helpers.ts';
 
 	let { data }: PageProps = $props();
 

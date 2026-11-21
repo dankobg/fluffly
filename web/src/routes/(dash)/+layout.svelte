@@ -3,14 +3,14 @@
 	import { type Snippet } from 'svelte';
 	import Header from './dashboard-shell/header.svelte';
 	import SiteSidebar from './dashboard-shell/site-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { page } from '$app/state';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index';
-	import * as Drawer from '$lib/components/ui/drawer/index';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
-	import { buttonVariants } from '$lib/components/ui/button/index';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import * as Breadcrumb from '#lib/components/ui/breadcrumb/index.ts';
+	import * as Drawer from '#lib/components/ui/drawer/index.ts';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.ts';
+	import { buttonVariants } from '#lib/components/ui/button/index.ts';
+	import { Skeleton } from '#lib/components/ui/skeleton/index.js';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 

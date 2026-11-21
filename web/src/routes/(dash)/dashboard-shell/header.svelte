@@ -1,17 +1,17 @@
 <script lang="ts">
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
-	import * as Avatar from '$lib/components/ui/avatar/index';
-	import { config } from '$lib/kratos/config';
-	import ModeSwitcher from '$lib/components/mode-switcher/mode-switcher.svelte';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.ts';
+	import * as Avatar from '#lib/components/ui/avatar/index.ts';
+	import { config } from '#lib/kratos/config.ts';
+	import ModeSwitcher from '#lib/components/mode-switcher/mode-switcher.svelte';
 	import IconLogout from '@lucide/svelte/icons/log-out';
 	import IconUserIcon from '@lucide/svelte/icons/user';
 	import IconGauge from '@lucide/svelte/icons/gauge';
 	import IconSidebar from '@lucide/svelte/icons/sidebar';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import type { User } from '$lib/kratos/service';
-	import { getInitials } from '$lib/utils';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Separator } from '#lib/components/ui/separator/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import type { User } from '#lib/kratos/service.ts';
+	import { getInitials } from '#lib/utils.ts';
 
 	type Props = {
 		logoutUrl?: string;

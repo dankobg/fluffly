@@ -5,13 +5,13 @@
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Form from '$lib/components/ui/form';
-	import { fluffly } from '$lib/fluffly/client';
-	import type { components } from '$lib/gen/fluffly_openapi';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Item from '$lib/components/ui/item/index.js';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import * as Item from '#lib/components/ui/item/index.js';
 	import IconPlus from '@lucide/svelte/icons/plus';
 	import IconTrash from '@lucide/svelte/icons/trash-2';
 	import IconGlobe from '@lucide/svelte/icons/globe';
@@ -21,7 +21,7 @@
 	import { Uppy } from '@uppy/core';
 	import UppyDashboard from '@uppy/dashboard';
 	import UppyImageEditor from '@uppy/image-editor';
-	import { emptyStringToUndefined } from '$lib/validation/common';
+	import { emptyStringToUndefined } from '#lib/validation/common.ts';
 
 	let {
 		data,

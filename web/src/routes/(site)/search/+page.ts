@@ -1,7 +1,7 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { animalAgeValues, animalGenderValues, animalSizeValues } from '$lib/enum-values';
-import { fluffly } from '$lib/fluffly/client';
+import { animalAgeValues, animalGenderValues, animalSizeValues } from '#lib/enum-values.ts';
+import { fluffly } from '#lib/fluffly/client.ts';
 import {
 	AnimalAge,
 	AnimalGender,
@@ -9,7 +9,7 @@ import {
 	AnimalStatus,
 	PathsAnimalsGetParametersQueryEmbed,
 	type operations
-} from '$lib/gen/fluffly_openapi';
+} from '#lib/gen/fluffly_openapi.ts';
 import type { PageLoad } from './$types';
 
 export const prerender = false;

@@ -5,15 +5,15 @@
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import { Textarea } from '$lib/components/ui/textarea/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Card from '$lib/components/ui/card';
-	import * as Form from '$lib/components/ui/form';
-	import { fluffly } from '$lib/fluffly/client';
-	import { AnimalAge, AnimalGender, AnimalSize, type components } from '$lib/gen/fluffly_openapi';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import * as Item from '$lib/components/ui/item/index.js';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import { Textarea } from '#lib/components/ui/textarea/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import { AnimalAge, AnimalGender, AnimalSize, type components } from '#lib/gen/fluffly_openapi.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import * as Item from '#lib/components/ui/item/index.js';
 	import IconPlus from '@lucide/svelte/icons/plus';
 	import IconTrash from '@lucide/svelte/icons/trash-2';
 	import IconImage from '@lucide/svelte/icons/image';
@@ -22,13 +22,13 @@
 	import { Uppy } from '@uppy/core';
 	import UppyDashboard from '@uppy/dashboard';
 	import UppyImageEditor from '@uppy/image-editor';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
-	import Label from '$lib/components/ui/label/label.svelte';
-	import { animalAgeValues, animalGenderValues, animalSizeValues } from '$lib/enum-values';
-	import { capitalize } from '$lib/utils';
-	import TagsInput from '$lib/components/tags-input/tags-input.svelte';
-	import { emptyStringToUndefined, zeroToUndefined } from '$lib/validation/common';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.ts';
+	import * as RadioGroup from '#lib/components/ui/radio-group/index.js';
+	import Label from '#lib/components/ui/label/label.svelte';
+	import { animalAgeValues, animalGenderValues, animalSizeValues } from '#lib/enum-values.ts';
+	import { capitalize } from '#lib/utils.ts';
+	import TagsInput from '#lib/components/tags-input/tags-input.svelte';
+	import { emptyStringToUndefined, zeroToUndefined } from '#lib/validation/common.ts';
 
 	let {
 		data,

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { fluffly } from '$lib/fluffly/client';
-	import { AnimalStatus, OrganizationStatus, type components } from '$lib/gen/fluffly_openapi';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import { AnimalStatus, OrganizationStatus, type components } from '#lib/gen/fluffly_openapi.ts';
 	import type { PageProps } from './$types';
 	import { toast } from 'svelte-sonner';
 	import useEmblaCarousel from 'embla-carousel-svelte';
 	import { type EmblaCarouselType } from 'embla-carousel';
-	import { capitalize, getErrorFallbackAnimalImage } from '$lib/utils';
+	import { capitalize, getErrorFallbackAnimalImage } from '#lib/utils.ts';
 	import { onDestroy } from 'svelte';
 	import IconMapPin from '@lucide/svelte/icons/map-pin';
 	import IconHeart from '@lucide/svelte/icons/heart';
@@ -14,18 +14,18 @@
 	import IconMail from '@lucide/svelte/icons/mail';
 	import IconPhone from '@lucide/svelte/icons/phone';
 	import IconClock from '@lucide/svelte/icons/clock';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
+	import Badge from '#lib/components/ui/badge/badge.svelte';
 	import { invalidate } from '$app/navigation';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconX from '@lucide/svelte/icons/x';
 	import IconCircleQuestionMark from '@lucide/svelte/icons/circle-question-mark';
 	import { MapLibre, DefaultMarker, Popup } from 'svelte-maplibre';
-	import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import * as Field from '$lib/components/ui/field/index.js';
-	import * as RadioGroup from '$lib/components/ui/radio-group/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import Label from '$lib/components/ui/label/label.svelte';
+	import { Button, buttonVariants } from '#lib/components/ui/button/index.js';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import * as Field from '#lib/components/ui/field/index.js';
+	import * as RadioGroup from '#lib/components/ui/radio-group/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import Label from '#lib/components/ui/label/label.svelte';
 
 	let { data }: PageProps = $props();
 

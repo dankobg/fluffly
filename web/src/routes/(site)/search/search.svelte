@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import SearchSidebar from './search-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as Pagination from '#lib/components/ui/pagination/index.js';
 	import { page } from '$app/state';
 	import { goto, invalidate } from '$app/navigation';
-	import AnimalCard from '$lib/components/animal-card/animal-card.svelte';
-	import type { AnimalAge, AnimalGender, AnimalSize } from '$lib/gen/fluffly_openapi';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import AnimalCard from '#lib/components/animal-card/animal-card.svelte';
+	import type { AnimalAge, AnimalGender, AnimalSize } from '#lib/gen/fluffly_openapi.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconCircleX from '@lucide/svelte/icons/circle-x';
 	import IconTrash2 from '@lucide/svelte/icons/trash-2';
-	import RemovableTag from '$lib/components/removable-tag/removable-tag.svelte';
+	import RemovableTag from '#lib/components/removable-tag/removable-tag.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -37,7 +37,7 @@
 	const selectedPageSizeText = $derived(pageSizes.find(x => x === pageSize) ?? 'Page size');
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto('/search' + params.size ? `?${params}` : '', { keepFocus: true });
+		goto('/search' + params.size ? `?${params}` : '', { reset: false });
 	}
 
 	let use_my_location = $derived.by(() => {
@@ -237,7 +237,7 @@
 						{#if ['string', 'number', 'boolean'].includes(typeof val)}
 							<RemovableTag
 								onClose={() => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.delete(key, `${val}`);
 									gotoWithFilters(sp);
 								}}
@@ -252,7 +252,7 @@
 								{#each val as item (item)}
 									<RemovableTag
 										onClose={() => {
-											const sp = new URLSearchParams(page.url.searchParams);
+											const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 											sp.delete(key, `${item}`);
 											gotoWithFilters(sp);
 										}}
@@ -266,7 +266,7 @@
 									{#each propValues as prop (prop)}
 										<RemovableTag
 											onClose={() => {
-												const sp = new URLSearchParams(page.url.searchParams);
+												const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 												const newItems = propValues.filter(x => x !== prop);
 												propValues.forEach((pv, idx) => {
 													sp.delete(`${key}[${propName}][${idx}]`, `${pv}`);
@@ -322,7 +322,7 @@
 					bind:value={
 						() => String(pageSize),
 						v => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('page_size', v);
 							gotoWithFilters(sp);
 						}
@@ -355,7 +355,7 @@
 						<Pagination.Item>
 							<Pagination.Previous
 								onclick={() => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.set('page', String(currentPage - 1));
 									gotoWithFilters(sp);
 								}}
@@ -372,7 +372,7 @@
 										page={pageItem}
 										isActive={currentPage === pageItem.value}
 										onclick={() => {
-											const sp = new URLSearchParams(page.url.searchParams);
+											const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 											sp.set('page', String(pageItem.value));
 											gotoWithFilters(sp);
 										}}
@@ -388,7 +388,7 @@
 						<Pagination.Item>
 							<Pagination.Next
 								onclick={() => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.set('page', String(currentPage + 1));
 									gotoWithFilters(sp);
 								}}

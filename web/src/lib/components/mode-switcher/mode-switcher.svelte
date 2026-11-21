@@ -2,8 +2,8 @@
 	import IconSun from '@lucide/svelte/icons/sun';
 	import IconMoon from '@lucide/svelte/icons/moon';
 	import { resetMode, setMode } from 'mode-watcher';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
-	import { buttonVariants } from '$lib/components/ui/button/index';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.ts';
+	import { buttonVariants } from '#lib/components/ui/button/index.ts';
 </script>
 
 <DropdownMenu.Root>

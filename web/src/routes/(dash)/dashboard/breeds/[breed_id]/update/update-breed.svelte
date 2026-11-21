@@ -5,12 +5,12 @@
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Form from '$lib/components/ui/form';
-	import { fluffly } from '$lib/fluffly/client';
-	import type { components } from '$lib/gen/fluffly_openapi';
-	import * as Alert from '$lib/components/ui/alert';
-	import { getChangedFormFields } from '$lib/utils';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import { getChangedFormFields } from '#lib/utils.ts';
 
 	let {
 		data,

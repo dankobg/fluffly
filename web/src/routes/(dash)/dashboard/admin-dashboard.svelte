@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Card from '$lib/components/ui/card/index';
+	import * as Card from '#lib/components/ui/card/index.ts';
 	import { PieChart, Text } from 'layerchart';
-	import * as Chart from '$lib/components/ui/chart/index.js';
+	import * as Chart from '#lib/components/ui/chart/index.js';
 	import IconUsers from '@lucide/svelte/icons/users';
 	import IconCat from '@lucide/svelte/icons/cat';
 	import IconBuilding2 from '@lucide/svelte/icons/building-2';

@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 import { type FlowError } from '@ory/client-fetch';
-import { kratos } from '$lib/kratos/client';
-import { browser } from '$app/environment';
+import { kratos } from '#lib/kratos/client.ts';
+import { browser } from '$app/env';
 
 export const load: PageLoad = (async ({ url }) => {
 	const errorIdParam = browser && url.searchParams.get('id');

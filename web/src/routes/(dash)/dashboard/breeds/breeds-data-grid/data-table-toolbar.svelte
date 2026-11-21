@@ -1,29 +1,27 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
-
-<script lang="ts" generics="TData">
+<script lang="ts">
 	import IconX from '@lucide/svelte/icons/x';
-	import type { Table } from '@tanstack/table-core';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { Input } from '$lib/components/ui/input/index';
-	import DataTableViewOptions from '$lib/components/data-grid-shared/data-table-view-options.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import DataTableViewOptions from '#lib/components/data-grid-shared/data-table-view-options.svelte';
 	import IconTrash from '@lucide/svelte/icons/trash-2';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import type { components } from '$lib/gen/fluffly_openapi';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
 	import { page } from '$app/state';
 	import { useDebounce } from 'runed';
 	import { goto, invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { capitalize } from '$lib/utils';
-	import DataTableFacetedFilter from '$lib/components/data-grid-shared/data-table-faceted-filter.svelte';
-	import { fluffly } from '$lib/fluffly/client';
+	import { capitalize } from '#lib/utils.ts';
+	import DataTableFacetedFilter from '#lib/components/data-grid-shared/data-table-faceted-filter.svelte';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
+	import { useTableContext } from '#lib/components/data-grid-shared/app-table.ts';
+	import FilterInputServer from '#lib/components/data-grid-shared/filter-input-server.svelte';
 
-	let { table, animalSpecies }: { table: Table<TData>; animalSpecies: components['schemas']['AnimalSpecie'][] } =
-		$props();
+	let { animalSpecies }: { animalSpecies: components['schemas']['AnimalSpecie'][] } = $props();
 
-	const isFiltered = $derived(table.getState().columnFilters.length > 0);
+	const table = useTableContext();
+
+	const isFiltered = $derived(table.atoms.columnFilters.get().length > 0);
 	let nameCol = $derived(table.getColumn('name'));
 	let animalSpecieIdCol = $derived(table.getColumn('animal_specie_id'));
 
@@ -43,7 +41,7 @@
 
 	const debounceNameFilter = useDebounce(
 		() => {
-			const sp = new URLSearchParams(page.url.searchParams);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 			if (name) {
 				sp.set('name', name);
 			} else {
@@ -56,7 +54,7 @@
 	);
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto(page.url.pathname + params.size ? `?${params}` : '', { keepFocus: true });
+		goto(page.url.pathname + params.size ? `?${params}` : '', { reset: false });
 	}
 
 	onMount(() => {
@@ -93,19 +91,9 @@
 
 <div class="flex items-center justify-between">
 	<div class="flex flex-1 flex-wrap items-center space-x-2 gap-y-2">
-		<Input
-			placeholder="Filter by name..."
-			value={name}
-			oninput={e => {
-				name = e.currentTarget.value;
-				debounceNameFilter();
-			}}
-			onchange={e => {
-				name = e.currentTarget.value;
-				debounceNameFilter();
-			}}
-			class="h-8 w-[150px] lg:w-[250px]"
-		/>
+		{#if nameCol}
+			<FilterInputServer column={nameCol} bind:value={name} onFilterChange={debounceNameFilter} />
+		{/if}
 
 		{#if animalSpecieIdCol}
 			<DataTableFacetedFilter
@@ -113,7 +101,7 @@
 				title="Animal species"
 				options={animalSpeciesOptions}
 				onFacetChange={(selected, opt) => {
-					const sp = new URLSearchParams(page.url.searchParams);
+					const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 					if (selected) {
 						sp.append('animal_specie_id', opt.value);
 					} else {
@@ -162,5 +150,5 @@
 		{/if}
 	</div>
 
-	<DataTableViewOptions {table} />
+	<DataTableViewOptions />
 </div>

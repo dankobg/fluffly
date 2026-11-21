@@ -10,26 +10,26 @@
 		type UpdateRecoveryFlowWithCodeMethod
 	} from '@ory/client-fetch';
 	import { goto } from '$app/navigation';
-	import { kratos } from '$lib/kratos/client';
+	import { kratos } from '#lib/kratos/client.ts';
 	import { superForm, type ValidationErrors } from 'sveltekit-superforms/client';
 	import set from 'just-safe-set';
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
-	import * as Form from '$lib/components/ui/form';
-	import * as InputOTP from '$lib/components/ui/input-otp/index';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import * as InputOTP from '#lib/components/ui/input-otp/index.ts';
 	import { REGEXP_ONLY_DIGITS } from 'bits-ui';
-	import { config } from '$lib/kratos/config';
-	import { browser } from '$app/environment';
+	import { config } from '#lib/kratos/config.ts';
+	import { browser } from '$app/env';
 	import {
 		isErrorIdSecurityCsrfViolation,
 		isErrorIdSecurityIdentityMismatch,
 		isErrorIdSelfServiceFlowExpired,
 		isErrorIdSessionAlreadyAvailable
-	} from '$lib/kratos/helpers';
+	} from '#lib/kratos/helpers.ts';
 
 	let { data }: PageProps = $props();
 
@@ -87,10 +87,8 @@
 			if (url) {
 				try {
 					const theFlowId = codeSentToEmail ? (secondFlowId ?? '') : (data.flow?.id ?? '');
-					const recoveryFlow = await kratos.updateRecoveryFlow({
-						flow: theFlowId,
-						updateRecoveryFlowBody: body
-					});
+					const recoveryFlow = await kratos.updateRecoveryFlow({ flow: theFlowId, updateRecoveryFlowBody: body });
+
 					codeSentToEmail = recoveryFlow?.state === 'sent_email';
 					data = { ...data, flow: recoveryFlow, csrf: data?.csrf ?? '' };
 					secondFlowId = recoveryFlow.ui.action.split('flow=')[1];

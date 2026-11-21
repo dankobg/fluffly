@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index';
+	import { Badge } from '#lib/components/ui/badge/index.ts';
 
 	let { address, verified }: { address?: string; verified: boolean } = $props();
 

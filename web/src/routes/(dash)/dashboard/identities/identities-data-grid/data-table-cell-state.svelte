@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Badge } from '$lib/components/ui/badge/index';
-	import { IdentityState } from '$lib/gen/fluffly_openapi';
+	import { Badge } from '#lib/components/ui/badge/index.ts';
+	import { IdentityState } from '#lib/gen/fluffly_openapi.ts';
 	import { stateIcons } from './data';
 
 	let { value }: { value?: string } = $props();

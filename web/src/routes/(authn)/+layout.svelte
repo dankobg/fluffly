@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { LayoutData } from '../$types';
 	import { type Snippet } from 'svelte';
-	import Header from '$lib/components/shell/header.svelte';
-	import SiteSidebar from '$lib/components/shell/site-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import Header from '#lib/components/shell/header.svelte';
+	import SiteSidebar from '#lib/components/shell/site-sidebar.svelte';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>

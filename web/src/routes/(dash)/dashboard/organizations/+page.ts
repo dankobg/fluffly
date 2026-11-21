@@ -1,9 +1,9 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
-import { organizationStatusValues } from '$lib/enum-values';
-import { fluffly } from '$lib/fluffly/client';
-import type { operations, OrganizationStatus } from '$lib/gen/fluffly_openapi';
-import { config } from '$lib/kratos/config';
+import { organizationStatusValues } from '#lib/enum-values.ts';
+import { fluffly } from '#lib/fluffly/client.ts';
+import type { operations, OrganizationStatus } from '#lib/gen/fluffly_openapi.ts';
+import { config } from '#lib/kratos/config.ts';
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, url, depends }) => {
@@ -36,6 +36,7 @@ export const load: PageLoad = async ({ fetch, url, depends }) => {
 		const statuses = statusParams.filter(x =>
 			organizationStatusValues.includes(x as OrganizationStatus)
 		) as OrganizationStatus[];
+
 		if (statuses.length > 0) {
 			listOrganizationsParams.query!.status = statuses;
 		}

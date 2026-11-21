@@ -1,16 +1,16 @@
 <script lang="ts">
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as InputGroup from '$lib/components/ui/input-group/index.js';
-	import type { components } from '$lib/gen/fluffly_openapi';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
 	import type { PageProps } from './$types';
 	import IconSearch from '@lucide/svelte/icons/search';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { radiusMetersOptions } from '$lib/enum-values';
-	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
-	import Label from '$lib/components/ui/label/label.svelte';
+	import { radiusMetersOptions } from '#lib/enum-values.ts';
+	import Checkbox from '#lib/components/ui/checkbox/checkbox.svelte';
+	import Label from '#lib/components/ui/label/label.svelte';
 	import { toast } from 'svelte-sonner';
-	import { getCurrentPosition } from '$lib/geocoding/geocoding';
-	import { cn } from '$lib/utils';
+	import { getCurrentPosition } from '#lib/geocoding/geocoding.ts';
+	import { cn } from '#lib/utils.ts';
 
 	let { data }: PageProps = $props();
 

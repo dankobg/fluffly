@@ -1,16 +1,16 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Card from '$lib/components/ui/card/index';
-	import * as Item from '$lib/components/ui/item/index.js';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Item from '#lib/components/ui/item/index.js';
 	import IconBadgeCheck from '@lucide/svelte/icons/badge-check';
 	import IconClock from '@lucide/svelte/icons/clock';
 	import IconCircleX from '@lucide/svelte/icons/circle-x';
 	import IconChevronRight from '@lucide/svelte/icons/chevron-right';
 	import IconSquareDashed from '@lucide/svelte/icons/square-dashed';
-	import { OrganizationStatus } from '$lib/gen/fluffly_openapi';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
-	import * as Empty from '$lib/components/ui/empty/index.js';
-	import { cn } from '$lib/utils';
+	import { OrganizationStatus } from '#lib/gen/fluffly_openapi.ts';
+	import Badge from '#lib/components/ui/badge/badge.svelte';
+	import * as Empty from '#lib/components/ui/empty/index.js';
+	import { cn } from '#lib/utils.ts';
 
 	let { data }: PageProps = $props();
 </script>

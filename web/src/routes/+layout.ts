@@ -1,5 +1,5 @@
-import { kratos } from '$lib/kratos/client';
-import { createSessionService } from '$lib/kratos/service';
+import { kratos } from '#lib/kratos/client.ts';
+import { createSessionService } from '#lib/kratos/service.ts';
 import type { LayoutLoad } from './$types';
 
 export const ssr = true;

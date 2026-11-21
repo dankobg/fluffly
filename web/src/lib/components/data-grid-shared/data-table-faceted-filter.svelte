@@ -1,34 +1,32 @@
-<script lang="ts" module>
-	type TData = unknown;
-	type TValue = unknown;
-</script>
-
-<script lang="ts" generics="TData, TValue">
-	import IconCirclePlus from '@lucide/svelte/icons/circle-plus';
-	import IconCheck from '@lucide/svelte/icons/check';
-	import type { Column } from '@tanstack/table-core';
+<script lang="ts" generics="TData extends RowData">
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import CirclePlusIcon from '@lucide/svelte/icons/circle-plus';
 	import { SvelteSet } from 'svelte/reactivity';
-	import * as Command from '$lib/components/ui/command/index';
-	import * as Popover from '$lib/components/ui/popover/index';
-	import { Button } from '$lib/components/ui/button/index';
-	import { Separator } from '$lib/components/ui/separator/index';
-	import { Badge } from '$lib/components/ui/badge/index';
-	import { cn } from '$lib/utils.js';
+	import * as Command from '#lib/components/ui/command/index.js';
+	import * as Popover from '#lib/components/ui/popover/index.js';
+	import { Badge } from '#lib/components/ui/badge/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Separator } from '#lib/components/ui/separator/index.js';
+	import { cn } from '#lib/utils.js';
+	import type { Component } from 'svelte';
+	import { type AppFeatures } from './app-table';
+	import type { Column, RowData } from '@tanstack/svelte-table';
 
-	type Props<TData, TValue> = {
-		column: Column<TData, TValue>;
+	let {
+		column,
+		title,
+		options,
+		onFacetChange
+	}: {
+		column: Column<AppFeatures, TData, unknown>;
 		title: string;
 		options: {
 			label: string;
 			value: string;
-			// This should be `Component` after @lucide/svelte updates types
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			icon?: any;
+			icon?: Component;
 		}[];
 		onFacetChange?: (selected: boolean, option: { label: string; value: string }) => void;
-	};
-
-	let { column, title, options, onFacetChange }: Props<TData, TValue> = $props();
+	} = $props();
 
 	const facets = $derived(column?.getFacetedUniqueValues());
 	const selectedValues = $derived(new SvelteSet(column?.getFilterValue() as string[]));
@@ -38,10 +36,10 @@
 	<Popover.Trigger>
 		{#snippet child({ props })}
 			<Button {...props} variant="outline" size="sm" class="h-8 border-dashed">
-				<IconCirclePlus />
+				<CirclePlusIcon />
 				{title}
 				{#if selectedValues.size > 0}
-					<Separator orientation="vertical" class="mx-2 h-4" />
+					<Separator orientation="vertical" class="mx-2 data-vertical:h-4 data-vertical:self-auto" />
 					<Badge variant="secondary" class="rounded-sm px-1 font-normal lg:hidden">
 						{selectedValues.size}
 					</Badge>
@@ -62,7 +60,7 @@
 			</Button>
 		{/snippet}
 	</Popover.Trigger>
-	<Popover.Content class="p-0" align="start">
+	<Popover.Content class="w-[200px] p-0" align="start">
 		<Command.Root>
 			<Command.Input placeholder={title} />
 			<Command.List>
@@ -84,11 +82,11 @@
 						>
 							<div
 								class={cn(
-									'mr-2 flex size-4 items-center justify-center rounded-sm border border-primary',
+									'me-2 flex size-4 items-center justify-center rounded-sm border border-primary',
 									isSelected ? 'bg-primary text-primary-foreground' : 'opacity-50 [&_svg]:invisible'
 								)}
 							>
-								<IconCheck class="size-4" />
+								<CheckIcon class="size-4" />
 							</div>
 							{#if option.icon}
 								{@const Icon = option.icon}
@@ -96,11 +94,11 @@
 							{/if}
 
 							<span>{option.label}</span>
-							<!-- {#if facets?.get(option.value)}
-								<span class="ml-auto flex size-4 items-center justify-center font-mono text-xs">
+							{#if facets?.get(option.value)}
+								<span class="ms-auto flex size-4 items-center justify-center font-mono text-xs">
 									{facets.get(option.value)}
 								</span>
-							{/if} -->
+							{/if}
 						</Command.Item>
 					{/each}
 				</Command.Group>

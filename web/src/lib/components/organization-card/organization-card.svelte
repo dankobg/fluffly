@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { components } from '$lib/gen/fluffly_openapi';
-	import { cn, getErrorFallbackOrganizationImage } from '$lib/utils';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
+	import { cn, getErrorFallbackOrganizationImage } from '#lib/utils.ts';
 
 	let {
 		className,

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/button/button.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import IconTrash from '@lucide/svelte/icons/trash';
 	import IconCircleCheck from '@lucide/svelte/icons/circle-check';
 	import IconCircleX from '@lucide/svelte/icons/circle-x';
 	import type { PageProps } from './$types';
-	import { confirmation } from '$lib/components/confirmation-dialog/confirmation-dialog-state.svelte';
-	import { getErrorFallbackAnimalImage } from '$lib/utils';
-	import { fluffly } from '$lib/fluffly/client';
+	import { confirmation } from '#lib/components/confirmation-dialog/confirmation-dialog-state.svelte.ts';
+	import { getErrorFallbackAnimalImage } from '#lib/utils.ts';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
 	import { goto, invalidate } from '$app/navigation';
-	import { AnimalStatus } from '$lib/gen/fluffly_openapi';
+	import { AnimalStatus } from '#lib/gen/fluffly_openapi.ts';
 
 	let { data }: PageProps = $props();
 	const timeFmt = new Intl.DateTimeFormat(undefined, {

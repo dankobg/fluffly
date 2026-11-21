@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { type ComponentProps } from 'svelte';
-	import { Checkbox } from '$lib/components/ui/checkbox';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
-	import * as InputGroup from '$lib/components/ui/input-group/index.js';
-	import * as Collapsible from '$lib/components/ui/collapsible/index.js';
-	import { AnimalAge, AnimalGender, AnimalSize, type components } from '$lib/gen/fluffly_openapi';
+	import { Checkbox } from '#lib/components/ui/checkbox/index.ts';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import * as Select from '#lib/components/ui/select/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
+	import * as Collapsible from '#lib/components/ui/collapsible/index.js';
+	import { AnimalAge, AnimalGender, AnimalSize, type components } from '#lib/gen/fluffly_openapi.ts';
 	import IconSearch from '@lucide/svelte/icons/search';
 	import IconChevronDown from '@lucide/svelte/icons/chevron-down';
 	import {
@@ -15,15 +15,15 @@
 		daysGreaterThanOptions,
 		animalSizeValues,
 		radiusMetersOptions
-	} from '$lib/enum-values';
-	import { capitalize } from '$lib/utils';
-	import Label from '$lib/components/ui/label/label.svelte';
-	import { buttonVariants } from '$lib/components/ui/button';
+	} from '#lib/enum-values.ts';
+	import { capitalize } from '#lib/utils.ts';
+	import Label from '#lib/components/ui/label/label.svelte';
+	import { buttonVariants } from '#lib/components/ui/button/index.ts';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import TagsInput from '$lib/components/tags-input/tags-input.svelte';
+	import TagsInput from '#lib/components/tags-input/tags-input.svelte';
 	import { useDebounce } from 'runed';
-	import { getCurrentPosition } from '$lib/geocoding/geocoding';
+	import { getCurrentPosition } from '#lib/geocoding/geocoding.ts';
 	import { toast } from 'svelte-sonner';
 
 	let {
@@ -262,7 +262,7 @@
 
 	const debounceNameFilter = useDebounce(
 		() => {
-			const sp = new URLSearchParams(page.url.searchParams);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 			if (animalName) {
 				sp.set('name', animalName);
 			} else {
@@ -275,7 +275,7 @@
 
 	const debounceOrganizationNameFilter = useDebounce(
 		() => {
-			const sp = new URLSearchParams(page.url.searchParams);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 			if (organizationName) {
 				sp.set('organization', organizationName);
 			} else {
@@ -288,7 +288,7 @@
 
 	const debounceLocationFilter = useDebounce(
 		() => {
-			const sp = new URLSearchParams(page.url.searchParams);
+			const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 			if (location) {
 				sp.set('location', location);
 			} else {
@@ -300,7 +300,7 @@
 	);
 
 	function gotoWithFilters(params: URLSearchParams) {
-		goto('/search' + params.size ? `?${params}` : '', { keepFocus: true });
+		goto('/search' + params.size ? `?${params}` : '', { reset: false });
 	}
 
 	type SchemaProperty = {
@@ -376,7 +376,7 @@
 							checked={useMyLocation}
 							onCheckedChange={async v => {
 								useMyLocation = v;
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								if (v) {
 									try {
 										position = await getCurrentPosition();
@@ -430,7 +430,7 @@
 					<Select.Root
 						type="single"
 						onValueChange={v => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('radius_m', v);
 							gotoWithFilters(sp);
 						}}
@@ -462,7 +462,7 @@
 					<Select.Root
 						type="single"
 						onValueChange={v => {
-							const sp = removeOldProperties(page.url.searchParams);
+							const sp = removeOldProperties(new URL(page.url.href).searchParams);
 							sp.set('animal_type_id', v);
 
 							// set animal_specie_id if only 1 exists for given animal_type_id
@@ -509,7 +509,7 @@
 					<Select.Root
 						type="single"
 						onValueChange={v => {
-							const sp = removeOldProperties(page.url.searchParams);
+							const sp = removeOldProperties(new URL(page.url.href).searchParams);
 							sp.set('animal_specie_id', v);
 
 							const species = speciesById.get(Number(v));
@@ -551,7 +551,7 @@
 						bind:value={
 							() => (animalBreedIds ?? []).map(String),
 							v => {
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								sp.delete('animal_breed_id');
 								for (const id of v) {
 									sp.append('animal_breed_id', id);
@@ -619,7 +619,7 @@
 										bind:checked={
 											() => Boolean(animalAges?.includes(age.value)),
 											v => {
-												const sp = new URLSearchParams(page.url.searchParams);
+												const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 												if (v) {
 													sp.append('age', age.value);
 												} else {
@@ -656,7 +656,7 @@
 										bind:checked={
 											() => Boolean(animalSizes?.includes(size.value)),
 											v => {
-												const sp = new URLSearchParams(page.url.searchParams);
+												const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 												if (v) {
 													sp.append('size', size.value);
 												} else {
@@ -692,7 +692,7 @@
 										bind:checked={
 											() => Boolean(animalGenders?.includes(gender.value)),
 											v => {
-												const sp = new URLSearchParams(page.url.searchParams);
+												const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 												if (v) {
 													sp.append('gender', gender.value);
 												} else {
@@ -719,7 +719,7 @@
 							bind:checked={
 								() => Boolean(animalHermaphrodite),
 								v => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.set('hermaphrodite', String(v));
 									gotoWithFilters(sp);
 								}
@@ -739,7 +739,7 @@
 							bind:checked={
 								() => Boolean(animalMicrochip),
 								v => {
-									const sp = new URLSearchParams(page.url.searchParams);
+									const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 									sp.set('microchip', String(v));
 									gotoWithFilters(sp);
 								}
@@ -794,7 +794,7 @@
 						bind:value={
 							() => animalTags ?? [],
 							v => {
-								const sp = new URLSearchParams(page.url.searchParams);
+								const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 								sp.delete('tag');
 								v.forEach(x => {
 									sp.append('tag', x);
@@ -821,7 +821,7 @@
 										bind:checked={
 											() => Boolean(properties?.[dynamicFilter.key]?.includes('true')),
 											v => {
-												const sp = new URLSearchParams(page.url.searchParams);
+												const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 												sp.set(`properties[${dynamicFilter.key}][0]`, String(v));
 												gotoWithFilters(sp);
 											}
@@ -855,7 +855,7 @@
 														bind:checked={
 															() => Boolean(properties?.[dynamicFilter.key]?.includes(item)),
 															v => {
-																const sp = new URLSearchParams(page.url.searchParams);
+																const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 																if (v) {
 																	const n: number = (properties?.[dynamicFilter.key] ?? []).length;
 																	sp.append(`properties[${dynamicFilter.key}][${n}]`, item);
@@ -889,7 +889,7 @@
 											bind:value={
 												() => properties?.[dynamicFilter.key] ?? [],
 												v => {
-													const sp = new URLSearchParams(page.url.searchParams);
+													const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 													for (const key of [...sp.keys()]) {
 														if (key.startsWith(`properties[${dynamicFilter.key}]`)) {
 															sp.delete(key);
@@ -919,7 +919,7 @@
 					<Select.Root
 						type="single"
 						onValueChange={v => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('days_lt', v);
 							gotoWithFilters(sp);
 						}}
@@ -946,7 +946,7 @@
 					<Select.Root
 						type="single"
 						onValueChange={v => {
-							const sp = new URLSearchParams(page.url.searchParams);
+							const sp = new URLSearchParams(new URL(page.url.href).searchParams);
 							sp.set('days_gt', v);
 							gotoWithFilters(sp);
 						}}

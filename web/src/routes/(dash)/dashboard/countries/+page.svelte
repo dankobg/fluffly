@@ -2,7 +2,7 @@
 	import DataTable from './countries-data-grid/data-table.svelte';
 	import { columns } from './countries-data-grid/columns';
 	import type { PageProps } from './$types';
-	import Button from '$lib/components/ui/button/button.svelte';
+	import Button from '#lib/components/ui/button/button.svelte';
 	import IconPlus from '@lucide/svelte/icons/plus';
 
 	let { data }: PageProps = $props();

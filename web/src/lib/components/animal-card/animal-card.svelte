@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { components } from '$lib/gen/fluffly_openapi';
-	import { Badge } from '$lib/components/ui/badge/index.js';
+	import type { components } from '#lib/gen/fluffly_openapi.ts';
+	import { Badge } from '#lib/components/ui/badge/index.js';
 	import IconHeart from '@lucide/svelte/icons/heart';
 	import IconHeartOff from '@lucide/svelte/icons/heart-off';
-	import { capitalize, cn, getErrorFallbackAnimalImage } from '$lib/utils';
-	import Button from '$lib/components/ui/button/button.svelte';
-	import { fluffly } from '$lib/fluffly/client';
+	import { capitalize, cn, getErrorFallbackAnimalImage } from '#lib/utils.ts';
+	import Button from '#lib/components/ui/button/button.svelte';
+	import { fluffly } from '#lib/fluffly/client.ts';
 	import { toast } from 'svelte-sonner';
 
 	let {

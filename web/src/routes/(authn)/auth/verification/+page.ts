@@ -1,19 +1,19 @@
 import type { PageLoad } from './$types';
 import { type VerificationFlow } from '@ory/client-fetch';
-import { kratos } from '$lib/kratos/client';
-import { extractCSRFToken } from '$lib/kratos/helpers';
-import { browser } from '$app/environment';
+import { kratos } from '#lib/kratos/client.ts';
+import { extractCSRFToken } from '#lib/kratos/helpers.ts';
+import { browser } from '$app/env';
 import { goto } from '$app/navigation';
 import { toast } from 'svelte-sonner';
-import { config } from '$lib/kratos/config';
+import { config } from '#lib/kratos/config.ts';
 import { ResponseError } from '@ory/client-fetch';
 import { isGenericErrorResponse } from '@ory/client-fetch';
-import { isErrorIdSessionAlreadyAvailable } from '$lib/kratos/helpers';
-import { isErrorIdSelfServiceFlowExpired } from '$lib/kratos/helpers';
+import { isErrorIdSessionAlreadyAvailable } from '#lib/kratos/helpers.ts';
+import { isErrorIdSelfServiceFlowExpired } from '#lib/kratos/helpers.ts';
 import { FetchError } from '@ory/client-fetch';
 import { RequiredError } from '@ory/client-fetch';
-import { isErrorIdSecurityCsrfViolation } from '$lib/kratos/helpers';
-import { isErrorIdSecurityIdentityMismatch } from '$lib/kratos/helpers';
+import { isErrorIdSecurityCsrfViolation } from '#lib/kratos/helpers.ts';
+import { isErrorIdSecurityIdentityMismatch } from '#lib/kratos/helpers.ts';
 
 export const load: PageLoad = (async ({ url, depends }) => {
 	depends('data:verification');

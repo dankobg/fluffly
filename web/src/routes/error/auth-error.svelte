@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Header from '$lib/components/shell/header.svelte';
-	import SiteSidebar from '$lib/components/shell/site-sidebar.svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { Button } from '$lib/components/ui/button/index';
+	import Header from '#lib/components/shell/header.svelte';
+	import SiteSidebar from '#lib/components/shell/site-sidebar.svelte';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
+	import { Button } from '#lib/components/ui/button/index.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();

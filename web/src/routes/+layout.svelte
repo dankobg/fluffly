@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ModeWatcher } from 'mode-watcher';
-	import { Toaster } from '$lib/components/ui/sonner/index';
-	import ConfirmationDialog from '$lib/components/confirmation-dialog/confirmation-dialog.svelte';
+	import { Toaster } from '#lib/components/ui/sonner/index.ts';
+	import ConfirmationDialog from '#lib/components/confirmation-dialog/confirmation-dialog.svelte';
 	import '../app.css';
 	import '@uppy/core/css/style.min.css';
 	import '@uppy/dashboard/css/style.min.css';

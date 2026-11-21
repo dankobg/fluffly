@@ -3,13 +3,13 @@
 
 <script lang="ts">
 	import type { ComponentProps } from 'svelte';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import * as Sidebar from '#lib/components/ui/sidebar/index.js';
 	import NavMain from './nav-main.svelte';
 	import NavUser from './nav-user.svelte';
 	import IconEllipsis from '@lucide/svelte/icons/ellipsis';
-	import type { User } from '$lib/kratos/service';
-	import { config } from '$lib/kratos/config';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import type { User } from '#lib/kratos/service.ts';
+	import { config } from '#lib/kratos/config.ts';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
 	import { resetMode, setMode } from 'mode-watcher';
 
 	let {

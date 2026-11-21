@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Input from '$lib/components/ui/input/input.svelte';
-	import Toggle from '$lib/components/ui/toggle/toggle.svelte';
-	import { cn } from '$lib/utils';
+	import Input from '#lib/components/ui/input/input.svelte';
+	import Toggle from '#lib/components/ui/toggle/toggle.svelte';
+	import { cn } from '#lib/utils.ts';
 	import IconEye from '@lucide/svelte/icons/eye';
 	import IconEyeOff from '@lucide/svelte/icons/eye-off';
 	import type { WithElementRef } from 'bits-ui';

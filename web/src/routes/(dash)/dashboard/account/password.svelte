@@ -10,24 +10,24 @@
 		type UpdateSettingsFlowWithPasswordMethod
 	} from '@ory/client-fetch';
 	import { goto } from '$app/navigation';
-	import { kratos } from '$lib/kratos/client';
+	import { kratos } from '#lib/kratos/client.ts';
 	import { superForm, type ValidationErrors } from 'sveltekit-superforms/client';
 	import set from 'just-safe-set';
 	import { valibot } from 'sveltekit-superforms/adapters';
 	import * as v from 'valibot';
 	import { toast } from 'svelte-sonner';
-	import { Input } from '$lib/components/ui/input';
-	import * as Card from '$lib/components/ui/card';
-	import * as Alert from '$lib/components/ui/alert';
-	import * as Form from '$lib/components/ui/form';
-	import { browser } from '$app/environment';
-	import { config } from '$lib/kratos/config';
+	import { Input } from '#lib/components/ui/input/index.ts';
+	import * as Card from '#lib/components/ui/card/index.ts';
+	import * as Alert from '#lib/components/ui/alert/index.ts';
+	import * as Form from '#lib/components/ui/form/index.ts';
+	import { browser } from '$app/env';
+	import { config } from '#lib/kratos/config.ts';
 	import {
 		isErrorIdSecurityCsrfViolation,
 		isErrorIdSecurityIdentityMismatch,
 		isErrorIdSessionInactive,
 		isErrorIdSessionRefreshRequired
-	} from '$lib/kratos/helpers';
+	} from '#lib/kratos/helpers.ts';
 
 	let {
 		data,

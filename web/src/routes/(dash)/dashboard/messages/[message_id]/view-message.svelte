@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import * as Table from '$lib/components/ui/table/index';
+	import * as Table from '#lib/components/ui/table/index.ts';
 	import { statusIcons, templateTypeIcons, typeIcons } from '../messages-data-grid/data';
 	import IconCheck from '@lucide/svelte/icons/check';
 	import IconX from '@lucide/svelte/icons/x';
@@ -9,7 +9,7 @@
 		CourierMessageTemplateType,
 		CourierMessageType,
 		MessageDispatchStatus
-	} from '$lib/gen/fluffly_openapi';
+	} from '#lib/gen/fluffly_openapi.ts';
 
 	let { data }: PageProps = $props();
 	const fmt = new Intl.DateTimeFormat(undefined, {

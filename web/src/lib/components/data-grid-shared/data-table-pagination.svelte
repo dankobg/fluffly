@@ -1,20 +1,18 @@
-<script lang="ts" module>
-	type TData = unknown;
-</script>
-
-<script lang="ts" generics="TData">
+<script lang="ts">
 	import IconChevronRight from '@lucide/svelte/icons/chevron-right';
 	import IconChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import IconChevronsRight from '@lucide/svelte/icons/chevrons-right';
 	import IconChevronsLeft from '@lucide/svelte/icons/chevrons-left';
-	import type { Table } from '@tanstack/table-core';
-	import * as Select from '$lib/components/ui/select/index';
-	import { Button } from '$lib/components/ui/button/index';
+	import * as Select from '#lib/components/ui/select/index.ts';
+	import { Button } from '#lib/components/ui/button/index.ts';
+	import { useTableContext } from './app-table';
 
-	let { table }: { table: Table<TData> } = $props();
+	const table = useTableContext();
+
+	const pagination = $derived(table.atoms.pagination.get());
 </script>
 
-<div class="flex items-center justify-between px-2">
+<div class="relative flex items-center justify-between px-2">
 	<div class="flex-1 text-sm text-muted-foreground">
 		{table.getFilteredSelectedRowModel().rows.length} of
 		{table.getFilteredRowModel().rows.length} row(s) selected.
@@ -25,13 +23,13 @@
 			<Select.Root
 				allowDeselect={false}
 				type="single"
-				value={`${table.getState().pagination.pageSize}`}
+				value={`${pagination.pageSize}`}
 				onValueChange={value => {
 					table.setPageSize(Number(value));
 				}}
 			>
 				<Select.Trigger class="h-8 w-[70px]">
-					{String(table.getState().pagination.pageSize)}
+					{String(pagination.pageSize)}
 				</Select.Trigger>
 				<Select.Content side="top">
 					{#each [10, 20, 30, 50, 100] as pageSize (pageSize)}
@@ -42,8 +40,8 @@
 				</Select.Content>
 			</Select.Root>
 		</div>
-		<div class="flex w-fit items-center justify-center text-sm font-medium">
-			Page {table.getState().pagination.pageIndex + 1} of
+		<div class="flex w-[100px] items-center justify-center text-sm font-medium">
+			Page {pagination.pageIndex + 1} of
 			{table.getPageCount()}
 		</div>
 		<div class="flex items-center space-x-2">
