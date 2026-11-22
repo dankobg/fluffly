@@ -132,9 +132,12 @@
 			>
 				Deactivate
 			</Button>
-			<Button disabled={!data.sessionResult?.data.active} onclick={() => onExtendSessionClick(data.sessionResult?.data)}
-				>Extend</Button
+			<Button
+				disabled={!data.sessionResult?.data.active}
+				onclick={() => onExtendSessionClick(data.sessionResult?.data)}
 			>
+				Extend
+			</Button>
 		</div>
 	</section>
 
@@ -153,10 +156,9 @@
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Authenticated time</span>
-			<time class="font-medium"
-				>{data.sessionResult?.data.authenticated_at &&
-					fmt.format(new Date(data.sessionResult?.data.authenticated_at))}</time
-			>
+			<time class="font-medium">
+				{data.sessionResult?.data.authenticated_at && fmt.format(new Date(data.sessionResult?.data.authenticated_at))}
+			</time>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Authenticator assurance level</span>
@@ -164,15 +166,15 @@
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Expires time</span>
-			<time class="font-medium"
-				>{data.sessionResult?.data.expires_at && fmt.format(new Date(data.sessionResult?.data.expires_at))}</time
-			>
+			<time class="font-medium">
+				{data.sessionResult?.data.expires_at && fmt.format(new Date(data.sessionResult?.data.expires_at))}
+			</time>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Issued time</span>
-			<time class="font-medium"
-				>{data.sessionResult?.data.issued_at && fmt.format(new Date(data.sessionResult?.data.issued_at))}</time
-			>
+			<time class="font-medium">
+				{data.sessionResult?.data.issued_at && fmt.format(new Date(data.sessionResult?.data.issued_at))}
+			</time>
 		</div>
 	</div>
 
@@ -247,8 +249,9 @@
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">First name</span>
-				<span class="font-medium">{(data.sessionResult?.data.identity.traits as CustomTraits)['first_name'] ?? ''}</span
-				>
+				<span class="font-medium">
+					{(data.sessionResult?.data.identity.traits as CustomTraits)['first_name'] ?? ''}
+				</span>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Last name</span>
@@ -256,8 +259,9 @@
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Avatar URL</span>
-				<span class="font-medium">{(data.sessionResult?.data.identity.traits as CustomTraits)['avatar_url'] ?? ''}</span
-				>
+				<span class="font-medium">
+					{(data.sessionResult?.data.identity.traits as CustomTraits)['avatar_url'] ?? ''}
+				</span>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Schema ID</span>
@@ -269,30 +273,31 @@
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">State</span>
-				<span class="flex gap-2 font-medium"
-					>{data.sessionResult?.data.identity.state} <IdentityStateIcon class={identityStateIconClasses} /></span
-				>
+				<span class="flex gap-2 font-medium">
+					{data.sessionResult?.data.identity.state}
+					<IdentityStateIcon class={identityStateIconClasses} />
+				</span>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">State changed time</span>
-				<time class="font-medium"
-					>{data.sessionResult?.data.identity.state_changed_at &&
-						fmt.format(new Date(data.sessionResult?.data.identity.state_changed_at))}</time
-				>
+				<time class="font-medium">
+					{data.sessionResult?.data.identity.state_changed_at &&
+						fmt.format(new Date(data.sessionResult?.data.identity.state_changed_at))}
+				</time>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Created time</span>
-				<time class="font-medium"
-					>{data.sessionResult?.data.identity.created_at &&
-						fmt.format(new Date(data.sessionResult?.data.identity.created_at))}</time
-				>
+				<time class="font-medium">
+					{data.sessionResult?.data.identity.created_at &&
+						fmt.format(new Date(data.sessionResult?.data.identity.created_at))}
+				</time>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Updated time</span>
-				<time class="font-medium"
-					>{data.sessionResult?.data.identity.updated_at &&
-						fmt.format(new Date(data.sessionResult?.data.identity.updated_at))}</time
-				>
+				<time class="font-medium">
+					{data.sessionResult?.data.identity.updated_at &&
+						fmt.format(new Date(data.sessionResult?.data.identity.updated_at))}
+				</time>
 			</div>
 		</div>
 

@@ -193,9 +193,9 @@
 <Card.Root class="max-w-6xl">
 	<Card.Header>
 		<Card.Title>Update identity</Card.Title>
-		<Card.Description
-			>Update identity details for {(data?.identityResult?.data?.traits as CustomTraits)?.['email']}</Card.Description
-		>
+		<Card.Description>
+			Update identity details for {(data?.identityResult?.data?.traits as CustomTraits)?.['email']}
+		</Card.Description>
 	</Card.Header>
 
 	<Card.Content>

@@ -42,8 +42,10 @@
 				<a
 					href={item.url}
 					class="text-lg text-muted-foreground transition-all hover:text-primary"
-					class:text-primary={page.url.pathname === item.url}>{item.title}</a
+					class:text-primary={page.url.pathname === item.url}
 				>
+					{item.title}
+				</a>
 			{/each}
 		</div>
 

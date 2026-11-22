@@ -105,28 +105,28 @@
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">State</span>
-			<span class="flex gap-2 font-medium"
-				>{data.identityResult?.data.state} <StateIcon class={stateIconClasses} /></span
-			>
+			<span class="flex gap-2 font-medium">
+				{data.identityResult?.data.state}
+				<StateIcon class={stateIconClasses} />
+			</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">State changed time</span>
-			<time class="font-medium"
-				>{data.identityResult?.data.state_changed_at &&
-					fmt.format(new Date(data.identityResult?.data.state_changed_at))}</time
-			>
+			<time class="font-medium">
+				{data.identityResult?.data.state_changed_at && fmt.format(new Date(data.identityResult?.data.state_changed_at))}
+			</time>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Created time</span>
-			<time class="font-medium"
-				>{data.identityResult?.data.created_at && fmt.format(new Date(data.identityResult?.data.created_at))}</time
-			>
+			<time class="font-medium">
+				{data.identityResult?.data.created_at && fmt.format(new Date(data.identityResult?.data.created_at))}
+			</time>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Updated time</span>
-			<time class="font-medium"
-				>{data.identityResult?.data.updated_at && fmt.format(new Date(data.identityResult?.data.updated_at))}</time
-			>
+			<time class="font-medium">
+				{data.identityResult?.data.updated_at && fmt.format(new Date(data.identityResult?.data.updated_at))}
+			</time>
 		</div>
 	</div>
 

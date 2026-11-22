@@ -233,10 +233,9 @@
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Latitude/Longitude</span>
-				<span class="font-medium"
-					>{data.organizationResult?.data.contact.address.lat}, {data.organizationResult?.data.contact.address
-						.lon}</span
-				>
+				<span class="font-medium">
+					{data.organizationResult?.data.contact.address.lat}, {data.organizationResult?.data.contact.address.lon}
+				</span>
 			</div>
 			<div class="flex flex-col justify-center">
 				<span class="text-muted-foreground">Note</span>

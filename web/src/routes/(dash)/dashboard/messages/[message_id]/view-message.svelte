@@ -88,9 +88,10 @@
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Status</span>
-			<span class="flex gap-2 font-medium"
-				>{data.messageResult?.data.status} <StatusIcon class={statusIconClasses} /></span
-			>
+			<span class="flex gap-2 font-medium">
+				{data.messageResult?.data.status}
+				<StatusIcon class={statusIconClasses} />
+			</span>
 		</div>
 		<div class="flex flex-col justify-center">
 			<span class="text-muted-foreground">Channel</span>
