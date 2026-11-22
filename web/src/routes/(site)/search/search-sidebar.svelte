@@ -606,8 +606,8 @@
 					<Collapsible.Root class="group/collapsible w-full space-y-2">
 						<div class="flex items-center justify-between space-x-4">
 							<h4 class="text-sm font-semibold">Age</h4>
-							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}>
-								<IconChevronDown class="ms-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'icon', class: 'size-8 p-0' })}>
+								<IconChevronDown class="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
 								<span class="sr-only">Toggle age filters</span>
 							</Collapsible.Trigger>
 						</div>
@@ -643,8 +643,8 @@
 					<Collapsible.Root class="group/collapsible w-full space-y-2">
 						<div class="flex items-center justify-between space-x-4">
 							<h4 class="text-sm font-semibold">Size</h4>
-							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}>
-								<IconChevronDown class="ms-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'icon', class: 'size-8 p-0' })}>
+								<IconChevronDown class="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
 								<span class="sr-only">Toggle size filters</span>
 							</Collapsible.Trigger>
 						</div>
@@ -679,8 +679,8 @@
 					<Collapsible.Root class="group/collapsible w-full space-y-2">
 						<div class="flex items-center justify-between space-x-4">
 							<h4 class="text-sm font-semibold">Gender</h4>
-							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}>
-								<IconChevronDown class="ms-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+							<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'icon', class: 'size-8 p-0' })}>
+								<IconChevronDown class="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
 								<span class="sr-only">Toggle gender filters</span>
 							</Collapsible.Trigger>
 						</div>
@@ -840,9 +840,11 @@
 									<Collapsible.Root class="group/collapsible w-full space-y-2">
 										<div class="flex items-center justify-between space-x-4">
 											<h4 class="text-sm font-semibold">{dynamicFilter.val.title}</h4>
-											<Collapsible.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm', class: 'w-9 p-0' })}>
+											<Collapsible.Trigger
+												class={buttonVariants({ variant: 'ghost', size: 'icon', class: 'size-8 p-0' })}
+											>
 												<IconChevronDown
-													class="ms-auto transition-transform group-data-[state=open]/collapsible:rotate-180"
+													class="size-4 transition-transform group-data-[state=open]/collapsible:rotate-180"
 												/>
 												<span class="sr-only">Toggle {dynamicFilter.key} filters</span>
 											</Collapsible.Trigger>
