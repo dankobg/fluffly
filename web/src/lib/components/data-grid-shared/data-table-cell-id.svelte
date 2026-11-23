@@ -4,7 +4,7 @@
 	let { value, href }: { value?: string | number; href?: string } = $props();
 </script>
 
-<div class="flex w-[320px] items-center gap-2">
+<div class="flex items-center gap-2">
 	{#if href}
 		<Button variant="ghost" size="icon" {href}>
 			<IconEye class="text-sky-400" />
